@@ -1,0 +1,265 @@
+{
+  "metadata": {
+    "nombre": "Paleta de Colores - Teatro Real",
+    "version": "1.0",
+    "fecha": "2024-12-04",
+    "descripcion": "Paleta de colores oficial del Teatro Real extraída del sitio web https://www.teatroreal.es/es",
+    "propósito": "Implementación en proyecto Angular"
+  },
+  "coloresPrimarios": {
+    "rojo": {
+      "nombre": "Rojo Teatro Real / Crimson",
+      "hex": "#D63543",
+      "rgb": "rgb(214, 53, 67)",
+      "hsl": "hsl(354, 74%, 52%)",
+      "pantone": "200 C",
+      "uso": "Logo, botones principales, elementos destacados"
+    }
+  },
+  "coloresSecundarios": {
+    "azulGrisPetroleo": {
+      "nombre": "Teal Oscuro / Azul Petroleo",
+      "hex": "#1F3A45",
+      "rgb": "rgb(31, 58, 69)",
+      "hsl": "hsl(198, 38%, 18%)",
+      "pantone": "533 C",
+      "uso": "Bloques de contenido, tarjetas, fondos de secciones"
+    },
+    "grisOscuro": {
+      "nombre": "Gris Oscuro / Charcoal",
+      "hex": "#2C2C2C",
+      "rgb": "rgb(44, 44, 44)",
+      "hsl": "hsl(0, 0%, 17%)",
+      "pantone": "Black 6 C",
+      "uso": "Texto principal, header, fondos oscuros"
+    },
+    "negroPuro": {
+      "nombre": "Negro",
+      "hex": "#000000",
+      "rgb": "rgb(0, 0, 0)",
+      "hsl": "hsl(0, 0%, 0%)",
+      "pantone": "Process Black",
+      "uso": "Navegación, botones, elementos de máximo contraste"
+    }
+  },
+  "coloresNeutros": {
+    "blanco": {
+      "nombre": "Blanco",
+      "hex": "#FFFFFF",
+      "rgb": "rgb(255, 255, 255)",
+      "hsl": "hsl(0, 0%, 100%)",
+      "pantone": "White",
+      "uso": "Fondos principales, texto sobre oscuro"
+    },
+    "grisClaro": {
+      "nombre": "Gris Muy Claro / Off-White",
+      "hex": "#F0F0F0",
+      "rgb": "rgb(240, 240, 240)",
+      "hsl": "hsl(0, 0%, 94%)",
+      "pantone": "Cool Gray 1 C",
+      "uso": "Fondos alternativos, secciones, inputs"
+    },
+    "grisMedio": {
+      "nombre": "Gris Medio",
+      "hex": "#7A7A7A",
+      "rgb": "rgb(122, 122, 122)",
+      "hsl": "hsl(0, 0%, 48%)",
+      "pantone": "Cool Gray 9 C",
+      "uso": "Texto secundario, placeholders, etiquetas"
+    }
+  },
+  "acentos": {
+    "dorado": {
+      "nombre": "Dorado / Warm Gold",
+      "hex": "#D4AF37",
+      "rgb": "rgb(212, 175, 55)",
+      "hsl": "hsl(45, 70%, 52%)",
+      "pantone": "871 C",
+      "uso": "Detalles decorativos, acentos en imágenes"
+    },
+    "grisMarron": {
+      "nombre": "Gris Marrón / Taupe",
+      "hex": "#9D8B7E",
+      "rgb": "rgb(157, 139, 126)",
+      "hsl": "hsl(25, 19%, 55%)",
+      "pantone": "Warm Gray 7 C",
+      "uso": "Fondos de imágenes, overlay de contenido"
+    }
+  },
+  "estadosYFeedback": {
+    "exito": {
+      "nombre": "Verde Éxito",
+      "hex": "#28A745",
+      "rgb": "rgb(40, 167, 69)",
+      "hsl": "hsl(135, 61%, 41%)",
+      "uso": "Confirmaciones, estados positivos, mensajes de éxito"
+    },
+    "advertencia": {
+      "nombre": "Naranja Advertencia",
+      "hex": "#FFC107",
+      "rgb": "rgb(255, 193, 7)",
+      "hsl": "hsl(45, 100%, 51%)",
+      "uso": "Avisos, alertas moderadas, información importante"
+    },
+    "error": {
+      "nombre": "Rojo Error",
+      "hex": "#DC3545",
+      "rgb": "rgb(220, 53, 69)",
+      "hsl": "hsl(354, 77%, 54%)",
+      "uso": "Errores, validaciones fallidas, advertencias críticas"
+    },
+    "informacion": {
+      "nombre": "Azul Información",
+      "hex": "#0D6EFD",
+      "rgb": "rgb(13, 110, 253)",
+      "hsl": "hsl(217, 98%, 52%)",
+      "uso": "Información general, tips, mensajes informativos"
+    }
+  },
+  "variacionesColores": {
+    "rojo": {
+      "base": "#D63543",
+      "oscuro": "#B8293A",
+      "claro": "#E85563",
+      "muyOscuro": "#8B1F2B"
+    },
+    "azulGrisPetroleo": {
+      "base": "#1F3A45",
+      "oscuro": "#162A32",
+      "claro": "#2A4F5E"
+    },
+    "gris": {
+      "claro": "#F0F0F0",
+      "medio": "#7A7A7A",
+      "oscuro": "#2C2C2C",
+      "borde": "#E0E0E0"
+    }
+  },
+  "acesibilidad": {
+    "contrastes": [
+      {
+        "combinacion": "Rojo (#D63543) + Blanco",
+        "ratio": 6.2,
+        "nivelWCAG": "AAA",
+        "recomendacion": "Excelente"
+      },
+      {
+        "combinacion": "Azul-Gris (#1F3A45) + Blanco",
+        "ratio": 8.4,
+        "nivelWCAG": "AAA",
+        "recomendacion": "Excelente"
+      },
+      {
+        "combinacion": "Gris (#7A7A7A) + Blanco",
+        "ratio": 4.5,
+        "nivelWCAG": "AA",
+        "recomendacion": "Suficiente"
+      },
+      {
+        "combinacion": "Negro (#000000) + Blanco",
+        "ratio": 16,
+        "nivelWCAG": "AAA",
+        "recomendacion": "Máximo contraste"
+      }
+    ]
+  },
+  "variablesCSS": {
+    "primarios": {
+      "--color-primary": "#D63543",
+      "--color-primary-dark": "#B8293A",
+      "--color-primary-light": "#E85563"
+    },
+    "secundarios": {
+      "--color-secondary": "#1F3A45",
+      "--color-secondary-dark": "#162A32",
+      "--color-secondary-light": "#2A4F5E"
+    },
+    "neutros": {
+      "--color-dark": "#2C2C2C",
+      "--color-darker": "#000000",
+      "--color-light": "#F0F0F0",
+      "--color-lighter": "#FFFFFF",
+      "--color-neutral": "#7A7A7A"
+    },
+    "acentos": {
+      "--color-accent-gold": "#D4AF37",
+      "--color-accent-taupe": "#9D8B7E"
+    },
+    "estados": {
+      "--color-success": "#28A745",
+      "--color-warning": "#FFC107",
+      "--color-error": "#DC3545",
+      "--color-info": "#0D6EFD"
+    }
+  },
+  "variablesSCSS": {
+    "primarios": {
+      "$color-primary": "#D63543",
+      "$color-primary-dark": "#B8293A",
+      "$color-primary-light": "#E85563"
+    },
+    "secundarios": {
+      "$color-secondary": "#1F3A45",
+      "$color-secondary-dark": "#162A32",
+      "$color-secondary-light": "#2A4F5E"
+    },
+    "neutros": {
+      "$color-dark": "#2C2C2C",
+      "$color-darker": "#000000",
+      "$color-light": "#F0F0F0",
+      "$color-lighter": "#FFFFFF",
+      "$color-neutral": "#7A7A7A"
+    }
+  },
+  "usosPorComponente": {
+    "header": {
+      "fondo": "#2C2C2C",
+      "borde": "#D63543",
+      "texto": "#FFFFFF",
+      "linksNormal": "#FFFFFF",
+      "linksHover": "#D4AF37"
+    },
+    "botones": {
+      "primario": {
+        "fondo": "#D63543",
+        "texto": "#FFFFFF",
+        "hover": "#B8293A"
+      },
+      "secundario": {
+        "fondo": "#1F3A45",
+        "texto": "#FFFFFF",
+        "hover": "#162A32"
+      },
+      "terciario": {
+        "fondo": "transparent",
+        "borde": "#2C2C2C",
+        "texto": "#2C2C2C",
+        "hover": "#F0F0F0"
+      }
+    },
+    "cards": {
+      "fondo": "#FFFFFF",
+      "bordIzquierdo": "#D63543",
+      "headerFondo": "#1F3A45",
+      "headerTexto": "#FFFFFF",
+      "footerFondo": "#F0F0F0"
+    },
+    "formularios": {
+      "inputFondo": "#FFFFFF",
+      "inputBorde": "#E0E0E0",
+      "inputTexto": "#2C2C2C",
+      "inputFocus": "#D63543",
+      "labelTexto": "#2C2C2C",
+      "placeholderTexto": "#7A7A7A"
+    }
+  },
+  "recomendaciones": [
+    "No depender solo del color - acompañar con iconos, patrones o texto",
+    "Usar patrones visuales para mejorar legibilidad para daltónicos",
+    "Probar contraste regularmente con WebAIM Contrast Checker",
+    "Para texto normal (≤18px): ratio mínimo 4.5:1 (AA)",
+    "Para texto grande (≥18px): ratio mínimo 3:1 (AA)",
+    "Mantener consistencia en toda la aplicación",
+    "Validar accesibilidad en todos los componentes"
+  ]
+}

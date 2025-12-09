@@ -1,0 +1,208 @@
+/* ============================================================================
+ * SISTEMA DE DISEÑO - TEATRO REAL
+ * Paleta de colores oficial basada en la identidad visual de Teatro Real
+ * Fecha: 4 de diciembre de 2025
+ * ============================================================================ */
+
+:root {
+  /* COLORES PRIMARIOS */
+  --color-primary: #D63543;
+  --color-primary-dark: #B8293A;
+  --color-primary-light: #E85563;
+  
+  /* COLORES SECUNDARIOS */
+  --color-secondary: #1F3A45;
+  --color-secondary-dark: #162A32;
+  --color-secondary-light: #2A4F5E;
+  
+  /* COLORES NEUTROS */
+  --color-dark: #2C2C2C;
+  --color-darker: #000000;
+  --color-light: #F0F0F0;
+  --color-lighter: #FFFFFF;
+  --color-neutral: #7A7A7A;
+  --color-border: #E0E0E0;
+  
+  /* ACENTOS */
+  --color-accent-gold: #D4AF37;
+  --color-accent-taupe: #9D8B7E;
+  
+  /* ESTADOS */
+  --color-success: #28A745;
+  --color-warning: #FFC107;
+  --color-error: #DC3545;
+  --color-info: #0D6EFD;
+  
+  /* TIPOGRAFÍA */
+  --font-family-base: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-size-base: 14px;
+  --line-height-base: 1.5;
+  
+  /* ESPACIADO */
+  --spacing-unit: 4px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-2xl: 24px;
+  
+  /* BORDES */
+  --border-radius-sm: 2px;
+  --border-radius-base: 4px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 8px;
+  --border-width: 1px;
+  
+  /* SOMBRAS */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-base: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.2);
+  
+  /* TRANSICIONES */
+  --transition-fast: 150ms;
+  --transition-base: 300ms;
+  --transition-slow: 500ms;
+}
+
+/* Base */
+html {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+}
+
+body {
+  color: var(--color-dark);
+  background-color: var(--color-lighter);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-dark);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+a {
+  color: var(--color-primary);
+  transition: color var(--transition-fast) ease-in-out;
+}
+
+a:hover {
+  color: var(--color-primary-dark);
+}
+
+/* Bootstrap Overrides */
+.btn-primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.btn-secondary {
+  background-color: var(--color-secondary);
+  border-color: var(--color-secondary);
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-secondary-dark);
+  border-color: var(--color-secondary-dark);
+}
+
+.btn-success {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.btn-warning {
+  background-color: var(--color-warning);
+  border-color: var(--color-warning);
+  color: var(--color-dark);
+}
+
+.btn-danger {
+  background-color: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.btn-info {
+  background-color: var(--color-info);
+  border-color: var(--color-info);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 0.2rem rgba(214, 53, 67, 0.25);
+}
+
+.card {
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.card-header {
+  background-color: var(--color-secondary);
+  border-bottom-color: var(--color-secondary-dark);
+  color: var(--color-lighter);
+}
+
+.table thead th {
+  background-color: var(--color-light);
+  color: var(--color-dark);
+  border-bottom-color: var(--color-border);
+}
+
+.table tbody tr:hover {
+  background-color: var(--color-light);
+}
+
+.badge.bg-primary {
+  background-color: var(--color-primary) !important;
+}
+
+.badge.bg-secondary {
+  background-color: var(--color-secondary) !important;
+}
+
+.badge.bg-success {
+  background-color: var(--color-success) !important;
+}
+
+.badge.bg-warning {
+  background-color: var(--color-warning) !important;
+  color: var(--color-dark) !important;
+}
+
+.badge.bg-danger {
+  background-color: var(--color-error) !important;
+}
+
+.badge.bg-info {
+  background-color: var(--color-info) !important;
+}
+
+.text-primary { color: var(--color-primary); }
+.text-secondary { color: var(--color-secondary); }
+.text-success { color: var(--color-success); }
+.text-warning { color: var(--color-warning); }
+.text-danger { color: var(--color-error); }
+.text-info { color: var(--color-info); }
+.text-muted { color: var(--color-neutral); }
+
+.bg-primary { background-color: var(--color-primary); }
+.bg-secondary { background-color: var(--color-secondary); }
+.bg-success { background-color: var(--color-success); }
+.bg-warning { background-color: var(--color-warning); }
+.bg-danger { background-color: var(--color-error); }
+.bg-info { background-color: var(--color-info); }
+.bg-light { background-color: var(--color-light); }
+.bg-dark { background-color: var(--color-dark); }
+
+.border { border-color: var(--color-border); }
+.border-primary { border-color: var(--color-primary); }
+.border-secondary { border-color: var(--color-secondary); }
