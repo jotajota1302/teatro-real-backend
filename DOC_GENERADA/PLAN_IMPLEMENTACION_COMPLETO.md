@@ -1,14 +1,19 @@
 # Teatro Real - Plan de Implementación Completo
-## Fullstack: Angular 18 + Spring Boot 3 + PostgreSQL
+## Fullstack: Angular 18 + Spring Boot 2.7 + PostgreSQL
 
 ---
 **Proyecto:** Gestión Interna del Teatro Real
 **Fecha:** 2025-12-11
+**Última actualización:** 2025-12-11
 **Stack Tecnológico:**
-- **Frontend:** Angular 18 + Angular Material + TailwindCSS
-- **Backend:** Spring Boot 3.2 + Java 21
-- **Base de datos:** PostgreSQL 16
-- **Autenticación:** OAuth 2.0 con Google
+- **Frontend:** Angular 18.2 + Angular Material 18 + TailwindCSS 3.4
+- **Backend:** Spring Boot 2.7.18 + Java 8
+- **Base de datos:** PostgreSQL 16 (H2 para desarrollo)
+- **Autenticación:** OAuth 2.0 con Google (fase posterior)
+- **Documentación API:** SpringDoc OpenAPI 1.7.0
+
+> **Nota:** Se ha optado por Java 8 + Spring Boot 2.7.18 por compatibilidad.
+> Migración a Java 21 + Spring Boot 3.x planificada para fase posterior.
 
 ---
 
@@ -27,7 +32,7 @@
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                         FRONTEND                                 │
-│                    Angular 18 + Material                         │
+│                   Angular 18.2 + Material 18                     │
 │  ┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────────────────┐ │
 │  │  Auth   │  │  TEMPO  │  │  TOPS   │  │       Admin         │ │
 │  │ Module  │  │ Module  │  │ Module  │  │      Module         │ │
@@ -40,7 +45,7 @@
                                │
 ┌──────────────────────────────┴──────────────────────────────────┐
 │                          BACKEND                                 │
-│                    Spring Boot 3.2                               │
+│                  Spring Boot 2.7.18 + Java 8                     │
 │  ┌─────────────────────────────────────────────────────────────┐│
 │  │                    REST Controllers                          ││
 │  │  /api/auth  │  /api/actividades  │  /api/guiones  │  /api/* ││
@@ -421,12 +426,13 @@ teatro-real-frontend/           # Repo 2
 ## 13. Checklist de Inicio
 
 ### Antes de Sprint 0
-- [ ] Acceso a repositorio Git
-- [ ] Credenciales Google Cloud (OAuth)
-- [ ] PostgreSQL instalado o Docker disponible
-- [ ] Node.js 20+ instalado
-- [ ] Java 21 instalado
-- [ ] IDE configurado (VS Code / IntelliJ)
+- [x] Acceso a repositorio Git (GitHub)
+- [ ] Credenciales Google Cloud (OAuth) - fase posterior
+- [x] H2 Database para desarrollo (incluido)
+- [ ] PostgreSQL para producción
+- [x] Node.js 18+ instalado
+- [x] Java 8 (JDK 1.8) instalado
+- [x] IDE configurado (VS Code)
 
 ### Datos de Prueba
 - [ ] Excel TEMPO 2025-2026 disponible
@@ -441,33 +447,39 @@ teatro-real-frontend/           # Repo 2
 
 ### Backend
 ```bash
-# Desarrollo
-cd backend
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+# Desarrollo (Windows)
+cd teatro-real-backend
+mvnw.cmd spring-boot:run
+
+# Desarrollo (Linux/Mac)
+cd teatro-real-backend
+./mvnw spring-boot:run
 
 # Tests
-./mvnw test
+mvnw.cmd test
 
 # Build
-./mvnw clean package -DskipTests
+mvnw.cmd clean package -DskipTests
 
-# Docker
-docker build -t teatro-real-backend .
+# El backend arranca en http://localhost:8080
+# Swagger UI en http://localhost:8080/swagger-ui.html
 ```
 
 ### Frontend
 ```bash
 # Desarrollo
-cd frontend
+cd teatro-real-frontend
 npm install
 npm start  # http://localhost:4200
 
 # Tests
 npm test
-npm run e2e
 
-# Build
-npm run build:prod
+# Build producción
+npm run build
+
+# Watch mode (desarrollo)
+npm run watch
 ```
 
 ### Docker Compose (desarrollo local)
@@ -491,8 +503,13 @@ docker-compose down
 | Frontend Angular | http://localhost:4200 |
 | Backend API | http://localhost:8080/api |
 | Swagger UI | http://localhost:8080/swagger-ui.html |
-| PostgreSQL | localhost:5432 |
-| pgAdmin | http://localhost:5050 |
+| H2 Console (dev) | http://localhost:8080/h2-console |
+| PostgreSQL (prod) | localhost:5432 |
+
+### Credenciales H2 (Desarrollo)
+- **JDBC URL:** jdbc:h2:mem:teatroreal
+- **Usuario:** sa
+- **Password:** (vacío)
 
 ---
 
@@ -530,7 +547,24 @@ Una funcionalidad está **completa** cuando:
 
 ---
 
+---
+
+## 18. Roadmap de Migración Futura
+
+### Fase 1 (Actual): Java 8 + Spring Boot 2.7.18
+- Desarrollo completo de funcionalidades
+- Estabilización y testing
+- Despliegue en producción
+
+### Fase 2 (Futura): Migración a Java 17/21 + Spring Boot 3.x
+- Actualizar Java de 8 a 17 (mínimo para Spring Boot 3)
+- Migrar dependencias javax.* a jakarta.*
+- Actualizar springdoc-openapi a versión 2.x
+- Testing completo post-migración
+
+---
+
 *Plan de Implementación Completo - Teatro Real*
-*Angular 18 + Spring Boot 3 + PostgreSQL*
+*Angular 18.2 + Spring Boot 2.7.18 + Java 8*
 *Fecha: 2025-12-11*
 *Estimación Total: 555 horas (~7 semanas con equipo de 2)*

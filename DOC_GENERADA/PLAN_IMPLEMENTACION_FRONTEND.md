@@ -1,9 +1,13 @@
 # Teatro Real - Plan de Implementación Frontend
-## Angular 18 + Angular Material + TailwindCSS
+## Angular 18.2 + Angular Material 18 + TailwindCSS 3.4
 
 ---
-**Stack:** Angular 18 | TypeScript | Angular Material | TailwindCSS | RxJS
+**Stack:** Angular 18.2 | TypeScript 5.5 | Angular Material 18 | TailwindCSS 3.4 | RxJS 7.8
 **Fecha:** 2025-12-11
+**Última actualización:** 2025-12-11
+
+> **Estado actual:** Proyecto Angular creado con standalone components y TailwindCSS configurado.
+> Angular Material pendiente de instalación.
 
 ---
 
@@ -177,57 +181,59 @@ teatro-real-frontend/
 ```json
 {
   "name": "teatro-real-frontend",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "build:prod": "ng build --configuration production",
-    "test": "ng test",
-    "lint": "ng lint",
-    "e2e": "ng e2e"
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
   },
+  "private": true,
   "dependencies": {
-    "@angular/animations": "^18.0.0",
-    "@angular/cdk": "^18.0.0",
-    "@angular/common": "^18.0.0",
-    "@angular/compiler": "^18.0.0",
-    "@angular/core": "^18.0.0",
-    "@angular/forms": "^18.0.0",
-    "@angular/material": "^18.0.0",
-    "@angular/platform-browser": "^18.0.0",
-    "@angular/platform-browser-dynamic": "^18.0.0",
-    "@angular/router": "^18.0.0",
+    "@angular/animations": "^18.2.0",
+    "@angular/common": "^18.2.0",
+    "@angular/compiler": "^18.2.0",
+    "@angular/core": "^18.2.0",
+    "@angular/forms": "^18.2.0",
+    "@angular/platform-browser": "^18.2.0",
+    "@angular/platform-browser-dynamic": "^18.2.0",
+    "@angular/router": "^18.2.0",
     "rxjs": "~7.8.0",
-    "tslib": "^2.6.0",
-    "zone.js": "~0.14.0",
-
-    "@fullcalendar/angular": "^6.1.0",
-    "@fullcalendar/core": "^6.1.0",
-    "@fullcalendar/daygrid": "^6.1.0",
-    "@fullcalendar/timegrid": "^6.1.0",
-    "@fullcalendar/interaction": "^6.1.0",
-
-    "@angular/cdk/drag-drop": "^18.0.0",
-    "date-fns": "^3.0.0",
-    "file-saver": "^2.0.5"
+    "tslib": "^2.3.0",
+    "zone.js": "~0.14.10"
   },
   "devDependencies": {
-    "@angular/cli": "^18.0.0",
-    "@angular/compiler-cli": "^18.0.0",
-    "@angular-devkit/build-angular": "^18.0.0",
-    "@types/file-saver": "^2.0.7",
-    "tailwindcss": "^3.4.0",
-    "autoprefixer": "^10.4.0",
-    "postcss": "^8.4.0",
-    "typescript": "~5.4.0",
+    "@angular-devkit/build-angular": "^18.2.21",
+    "@angular/cli": "^18.2.21",
+    "@angular/compiler-cli": "^18.2.0",
+    "@types/jasmine": "~5.1.0",
+    "autoprefixer": "^10.4.22",
+    "jasmine-core": "~5.2.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
-    "jasmine-core": "~5.1.0"
+    "karma-jasmine-html-reporter": "~2.1.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.19",
+    "typescript": "~5.5.2"
   }
 }
+```
+
+### 1.3 Dependencias a Añadir (cuando se necesiten)
+
+```bash
+# Angular Material (próximo paso)
+ng add @angular/material
+
+# FullCalendar (para módulo TEMPO)
+npm install @fullcalendar/angular @fullcalendar/core @fullcalendar/daygrid @fullcalendar/timegrid @fullcalendar/interaction
+
+# Utilidades adicionales
+npm install date-fns file-saver
+npm install -D @types/file-saver
 ```
 
 ---
@@ -1420,30 +1426,52 @@ export class EditorComponent implements OnInit, OnDestroy {
 ## 9. Comandos de Desarrollo
 
 ```bash
-# Crear proyecto
-ng new teatro-real-frontend --standalone --routing --style=scss
+# El proyecto ya está creado, estos son los comandos para desarrollo:
 
-# Añadir Angular Material
-ng add @angular/material
+# Instalar dependencias (primera vez o después de git clone)
+cd teatro-real-frontend
+npm install
 
-# Añadir TailwindCSS
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init
-
-# Instalar dependencias adicionales
-npm install @fullcalendar/angular @fullcalendar/core @fullcalendar/daygrid @fullcalendar/timegrid @fullcalendar/interaction
-npm install date-fns file-saver
-npm install -D @types/file-saver
-
-# Desarrollo
-ng serve
+# Desarrollo (arranca en http://localhost:4200)
+npm start
 
 # Build producción
-ng build --configuration production
+npm run build
+
+# Build con watch (desarrollo continuo)
+npm run watch
 
 # Tests
-ng test
-ng e2e
+npm test
+```
+
+### Comandos para añadir dependencias futuras:
+
+```bash
+# Angular Material (ejecutar cuando se necesite)
+ng add @angular/material
+
+# FullCalendar (para módulo TEMPO)
+npm install @fullcalendar/angular @fullcalendar/core @fullcalendar/daygrid @fullcalendar/timegrid @fullcalendar/interaction
+
+# Utilidades adicionales
+npm install date-fns file-saver
+npm install -D @types/file-saver
+```
+
+### Estructura de archivos actual:
+```
+teatro-real-frontend/
+├── angular.json          # Configuración Angular CLI
+├── package.json          # Dependencias npm
+├── tailwind.config.js    # Configuración TailwindCSS
+├── tsconfig.json         # Configuración TypeScript
+├── src/
+│   ├── main.ts           # Entry point
+│   ├── index.html        # HTML principal
+│   ├── styles.scss       # Estilos globales (con Tailwind)
+│   └── app/              # Código de la aplicación
+└── public/               # Assets estáticos
 ```
 
 ---
@@ -1475,6 +1503,28 @@ ng e2e
 
 ---
 
+---
+
+## 11. Estado Actual del Proyecto
+
+### Completado:
+- [x] Proyecto Angular 18.2 creado
+- [x] Standalone components configurados
+- [x] TailwindCSS 3.4 instalado y configurado
+- [x] SCSS como preprocesador de estilos
+- [x] Estructura base de carpetas
+
+### Pendiente (próximos pasos):
+- [ ] Instalar Angular Material 18
+- [ ] Crear estructura de carpetas (core, shared, features, layout)
+- [ ] Configurar environments (dev, prod)
+- [ ] Implementar AuthService con signals
+- [ ] Crear layout principal (sidebar, header)
+- [ ] Implementar módulo TEMPO (calendario)
+- [ ] Implementar módulo TOPS (editor guiones)
+
+---
+
 *Plan de Implementación Frontend - Teatro Real*
-*Angular 18 + Angular Material + TailwindCSS*
+*Angular 18.2 + Angular Material 18 + TailwindCSS 3.4*
 *Fecha: 2025-12-11*

@@ -1,9 +1,13 @@
 # Teatro Real - Plan de Implementación Backend
-## Spring Boot 3.x + PostgreSQL
+## Spring Boot 2.7.18 + Java 8 + PostgreSQL
 
 ---
-**Stack:** Spring Boot 3.2+ | Java 21 | PostgreSQL 16 | Maven
+**Stack:** Spring Boot 2.7.18 | Java 8 | PostgreSQL 16 (H2 dev) | Maven
 **Fecha:** 2025-12-11
+**Última actualización:** 2025-12-11
+
+> **Nota:** Se utiliza Java 8 + Spring Boot 2.7.18 por compatibilidad.
+> Migración a Java 17+ y Spring Boot 3.x planificada para fase posterior.
 
 ---
 
@@ -111,95 +115,129 @@ teatro-real-backend/
 ### 1.2 Dependencias Principales (pom.xml)
 
 ```xml
-<dependencies>
-    <!-- Spring Boot Starters -->
-    <dependency>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+    <parent>
         <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-data-jpa</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-security</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-oauth2-client</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-validation</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-websocket</artifactId>
-    </dependency>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.18</version>
+    </parent>
 
-    <!-- Database -->
-    <dependency>
-        <groupId>org.postgresql</groupId>
-        <artifactId>postgresql</artifactId>
-        <scope>runtime</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.flywaydb</groupId>
-        <artifactId>flyway-core</artifactId>
-    </dependency>
+    <properties>
+        <java.version>1.8</java.version>
+        <springdoc.version>1.7.0</springdoc.version>
+    </properties>
 
-    <!-- Google APIs -->
-    <dependency>
-        <groupId>com.google.api-client</groupId>
-        <artifactId>google-api-client</artifactId>
-        <version>2.2.0</version>
-    </dependency>
-    <dependency>
-        <groupId>com.google.apis</groupId>
-        <artifactId>google-api-services-calendar</artifactId>
-        <version>v3-rev20231123-2.0.0</version>
-    </dependency>
+    <dependencies>
+        <!-- Spring Boot Starters (Core) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
 
-    <!-- Document Generation -->
-    <dependency>
-        <groupId>org.apache.poi</groupId>
-        <artifactId>poi-ooxml</artifactId>
-        <version>5.2.5</version>
-    </dependency>
+        <!-- Security (añadir cuando se implemente auth) -->
+        <!--
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
+        </dependency>
+        -->
 
-    <!-- Utils -->
-    <dependency>
-        <groupId>org.mapstruct</groupId>
-        <artifactId>mapstruct</artifactId>
-        <version>1.5.5.Final</version>
-    </dependency>
-    <dependency>
-        <groupId>org.projectlombok</groupId>
-        <artifactId>lombok</artifactId>
-        <optional>true</optional>
-    </dependency>
+        <!-- WebSocket (añadir cuando se implemente tiempo real) -->
+        <!--
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+        -->
 
-    <!-- API Documentation -->
-    <dependency>
-        <groupId>org.springdoc</groupId>
-        <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-        <version>2.3.0</version>
-    </dependency>
+        <!-- Database -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
-    <!-- Testing -->
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-test</artifactId>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.testcontainers</groupId>
-        <artifactId>postgresql</artifactId>
-        <scope>test</scope>
-    </dependency>
-</dependencies>
+        <!-- Google APIs (añadir cuando se implemente integración) -->
+        <!--
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-calendar</artifactId>
+            <version>v3-rev20231123-2.0.0</version>
+        </dependency>
+        -->
+
+        <!-- Document Generation (añadir cuando se implemente export) -->
+        <!--
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.2.5</version>
+        </dependency>
+        -->
+
+        <!-- Utils -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- API Documentation - Spring Boot 2.7.x compatible -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>${springdoc.version}</version>
+        </dependency>
+
+        <!-- DevTools -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Testing -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
 ```
+
+> **Importante para Spring Boot 2.7.x:**
+> - Usar `springdoc-openapi-ui` (NO `springdoc-openapi-starter-webmvc-ui` que es para Spring Boot 3)
+> - Las anotaciones usan `javax.*` (NO `jakarta.*`)
+> - Swagger UI disponible en `/swagger-ui.html` o `/swagger-ui/index.html`
 
 ---
 
@@ -209,12 +247,20 @@ teatro-real-backend/
 
 ```java
 // Usuario.java
+// NOTA: En Java 8, usar String para IDs UUID o generarlos manualmente
 @Entity
 @Table(name = "usuarios")
 public class Usuario {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @Column(length = 36)
+    private String id;  // UUID como String (Java 8 compatible)
+
+    @PrePersist
+    public void generateId() {
+        if (id == null) {
+            id = java.util.UUID.randomUUID().toString();
+        }
+    }
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -238,10 +284,13 @@ public class Usuario {
     private LocalDateTime ultimoAcceso;
 
     @CreationTimestamp
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    // En Java 8 usamos LocalDateTime que está disponible desde Java 8
 }
 
 // Rol.java
@@ -1174,27 +1223,63 @@ public class SecurityConfig {
 ## 9. Comandos de Desarrollo
 
 ```bash
-# Iniciar PostgreSQL con Docker
-docker-compose up -d postgres
+# Ejecutar aplicación (Windows)
+cd teatro-real-backend
+mvnw.cmd spring-boot:run
 
-# Ejecutar migraciones
-./mvnw flyway:migrate
-
-# Ejecutar aplicación
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+# Ejecutar aplicación (Linux/Mac)
+./mvnw spring-boot:run
 
 # Ejecutar tests
-./mvnw test
-
-# Generar documentación API
-# Disponible en http://localhost:8080/swagger-ui.html
+mvnw.cmd test
 
 # Build para producción
-./mvnw clean package -DskipTests
+mvnw.cmd clean package -DskipTests
+
+# El jar generado estará en target/teatro-real-backend-1.0.0-SNAPSHOT.jar
+java -jar target/teatro-real-backend-1.0.0-SNAPSHOT.jar
+```
+
+### URLs de Desarrollo
+| Servicio | URL |
+|----------|-----|
+| API REST | http://localhost:8080/api |
+| Swagger UI | http://localhost:8080/swagger-ui.html |
+| OpenAPI JSON | http://localhost:8080/v3/api-docs |
+| H2 Console | http://localhost:8080/h2-console |
+| Actuator Health | http://localhost:8080/actuator/health |
+
+### Credenciales H2 (Desarrollo)
+```
+JDBC URL: jdbc:h2:mem:teatroreal
+Usuario: sa
+Password: (vacío)
 ```
 
 ---
 
+---
+
+## 10. Diferencias con Spring Boot 3.x (para futura migración)
+
+| Aspecto | Spring Boot 2.7.x (Actual) | Spring Boot 3.x (Futuro) |
+|---------|---------------------------|--------------------------|
+| Java mínimo | Java 8 | Java 17 |
+| Paquetes | `javax.*` | `jakarta.*` |
+| SpringDoc | `springdoc-openapi-ui` 1.x | `springdoc-openapi-starter-webmvc-ui` 2.x |
+| URL Swagger | `/swagger-ui.html` | `/swagger-ui/index.html` |
+| Hibernate | 5.x | 6.x |
+| Spring Security | 5.x | 6.x |
+
+### Pasos para migrar a Spring Boot 3:
+1. Actualizar Java a 17+
+2. Cambiar `javax.*` → `jakarta.*` en imports
+3. Actualizar `springdoc-openapi` a versión 2.x
+4. Revisar configuración de Security
+5. Actualizar dependencias de terceros
+
+---
+
 *Plan de Implementación Backend - Teatro Real*
-*Spring Boot 3.x + PostgreSQL*
+*Spring Boot 2.7.18 + Java 8 + PostgreSQL*
 *Fecha: 2025-12-11*
