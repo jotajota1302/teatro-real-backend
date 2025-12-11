@@ -24,31 +24,41 @@ teatro-real/
 │   ├── PLAN_IMPLEMENTACION_FRONTEND.md
 │   └── SINTESIS_REQUISITOS_FINAL.md
 ├── DOC_INICIAL/                # Documentación de requisitos original
-├── teatro-real-frontend/       # Frontend Angular 19
-└── teatro-real-backend/        # Backend Java 8 + Spring Boot 2.7
+├── teatro-real-frontend/       # Frontend Angular 18.2
+└── teatro-real-backend/        # Backend Java 8 + Spring Boot 2.7.18
 ```
 
 ## Tecnologías
 
 ### Frontend
-- **Angular 19** con Standalone Components
-- **Tailwind CSS** con paleta de colores corporativa
-- **TypeScript 5.6+**
-- **Signals** para gestión de estado reactivo
+| Tecnología | Versión | Descripción |
+|------------|---------|-------------|
+| Angular | 18.2 | Framework principal con Standalone Components |
+| TypeScript | 5.5 | Lenguaje de programación |
+| TailwindCSS | 3.4 | Framework CSS utility-first |
+| RxJS | 7.8 | Programación reactiva |
+| Signals | - | Gestión de estado reactivo (built-in Angular 18) |
 
 ### Backend
-- **Java 8**
-- **Spring Boot 2.7.18**
-- **H2** (desarrollo) / **PostgreSQL** (producción)
-- **SpringDoc OpenAPI 1.7** para documentación
+| Tecnología | Versión | Descripción |
+|------------|---------|-------------|
+| Java | 8 | Lenguaje de programación |
+| Spring Boot | 2.7.18 | Framework principal |
+| Spring Data JPA | - | Acceso a datos |
+| H2 Database | - | Base de datos en memoria (desarrollo) |
+| PostgreSQL | 16 | Base de datos (producción) |
+| SpringDoc OpenAPI | 1.7 | Documentación API (Swagger UI) |
+| Lombok | - | Reducción de boilerplate |
+
+> **Nota:** Migración a Java 17+ y Spring Boot 3.x planificada para fase posterior.
 
 ## Requisitos Previos
 
-- Node.js 18+
-- Java 8+
-- PostgreSQL 15+ (producción) o H2 embebido (desarrollo)
+- Node.js 18+ (recomendado 20 LTS)
+- Java 8 (JDK 1.8)
+- PostgreSQL 16 (solo producción)
 
-## Instalación
+## Instalación y Ejecución
 
 ### Frontend (Angular)
 
@@ -58,16 +68,44 @@ npm install
 npm start
 ```
 
-La aplicación estará disponible en `http://localhost:4200`
+| URL | Descripción |
+|-----|-------------|
+| http://localhost:4200 | Aplicación Angular |
 
-### Backend (Java)
+### Backend (Spring Boot)
 
 ```bash
+# Windows
+cd teatro-real-backend
+mvnw.cmd spring-boot:run
+
+# Linux/Mac
 cd teatro-real-backend
 ./mvnw spring-boot:run
 ```
 
-La API estará disponible en `http://localhost:8080`
+| URL | Descripción |
+|-----|-------------|
+| http://localhost:8080/api | API REST |
+| http://localhost:8080/swagger-ui.html | Documentación Swagger |
+| http://localhost:8080/h2-console | Consola H2 (desarrollo) |
+
+### Credenciales H2 (Desarrollo)
+```
+JDBC URL: jdbc:h2:mem:teatroreal
+Usuario: sa
+Password: (vacío)
+```
+
+## Documentación
+
+| Documento | Descripción |
+|-----------|-------------|
+| [Plan Completo](DOC_GENERADA/PLAN_IMPLEMENTACION_COMPLETO.md) | Visión general del proyecto y sprints |
+| [Plan Backend](DOC_GENERADA/PLAN_IMPLEMENTACION_BACKEND.md) | Arquitectura y APIs del backend |
+| [Plan Frontend](DOC_GENERADA/PLAN_IMPLEMENTACION_FRONTEND.md) | Componentes y servicios Angular |
+| [Guía de Estilos](DOC_GENERADA/GUIA_ESTILOS_TEATRO.md) | Paleta de colores y tipografía |
+| [Síntesis Requisitos](DOC_GENERADA/SINTESIS_REQUISITOS_FINAL.md) | Requisitos funcionales |
 
 ## Equipo
 
