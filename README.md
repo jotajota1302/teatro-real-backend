@@ -17,15 +17,13 @@ Este proyecto implementa una plataforma digital que integra los sistemas **TEMPO
 
 ```
 teatro-real/
-├── AGENTES/                    # Prompts de agentes IA especializados
-├── DOC_GENERADA/               # Documentación técnica generada
-│   ├── GUIA_ESTILOS_TEATRO.md
-│   ├── PLAN_IMPLEMENTACION_BACKEND.md
-│   ├── PLAN_IMPLEMENTACION_FRONTEND.md
-│   └── SINTESIS_REQUISITOS_FINAL.md
-├── DOC_INICIAL/                # Documentación de requisitos original
 ├── teatro-real-frontend/       # Frontend Angular 18.2
-└── teatro-real-backend/        # Backend Java 8 + Spring Boot 2.7.18
+├── teatro-real-backend/        # Backend Java 8 + Spring Boot 2.7.18
+├── DOC_GENERADA/               # Documentación técnica generada
+├── DOC_INICIAL/                # Documentación de requisitos original
+├── PROMPT_FRAMEWORK/           # Templates para solicitar desarrollos
+├── PROMPTS/                    # Prompts generados con las templates
+└── AGENTES/                    # Prompts de agentes IA especializados
 ```
 
 ## Tecnologías
@@ -99,6 +97,7 @@ Password: (vacío)
 
 ## Documentación
 
+### Planes de Implementación
 | Documento | Descripción |
 |-----------|-------------|
 | [Plan Completo](DOC_GENERADA/PLAN_IMPLEMENTACION_COMPLETO.md) | Visión general del proyecto y sprints |
@@ -106,6 +105,14 @@ Password: (vacío)
 | [Plan Frontend](DOC_GENERADA/PLAN_IMPLEMENTACION_FRONTEND.md) | Componentes y servicios Angular |
 | [Guía de Estilos](DOC_GENERADA/GUIA_ESTILOS_TEATRO.md) | Paleta de colores y tipografía |
 | [Síntesis Requisitos](DOC_GENERADA/SINTESIS_REQUISITOS_FINAL.md) | Requisitos funcionales |
+
+### Framework de Prompts
+| Template | Descripción |
+|----------|-------------|
+| [PROMPT_BACKEND](PROMPT_FRAMEWORK/PROMPT_BACKEND.md) | Template para desarrollo de APIs Spring Boot |
+| [PROMPT_FRONTEND](PROMPT_FRAMEWORK/PROMPT_FRONTEND.md) | Template para componentes Angular |
+| [PROMPT_FEATURE](PROMPT_FRAMEWORK/PROMPT_FEATURE.md) | Template para features fullstack |
+| [PROMPT_BUGFIX](PROMPT_FRAMEWORK/PROMPT_BUGFIX.md) | Template para reportar y corregir bugs |
 
 ## Equipo
 
