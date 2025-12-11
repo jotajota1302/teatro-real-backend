@@ -24,36 +24,36 @@ teatro-real/
 │   ├── PLAN_IMPLEMENTACION_FRONTEND.md
 │   └── SINTESIS_REQUISITOS_FINAL.md
 ├── DOC_INICIAL/                # Documentación de requisitos original
-├── teatro-real-angular/        # Frontend Angular 18
-└── teatro-real-backend/        # Backend Java Spring Boot
+├── teatro-real-frontend/       # Frontend Angular 19
+└── teatro-real-backend/        # Backend Java 8 + Spring Boot 2.7
 ```
 
 ## Tecnologías
 
 ### Frontend
-- **Angular 18** con Standalone Components
+- **Angular 19** con Standalone Components
 - **Tailwind CSS** con paleta de colores corporativa
-- **TypeScript 5.4+**
+- **TypeScript 5.6+**
 - **Signals** para gestión de estado reactivo
 
 ### Backend
-- **Java 21**
-- **Spring Boot 3.x**
-- **PostgreSQL** / **Supabase**
-- **Spring Security** con JWT
+- **Java 8**
+- **Spring Boot 2.7.18**
+- **H2** (desarrollo) / **PostgreSQL** (producción)
+- **SpringDoc OpenAPI 1.7** para documentación
 
 ## Requisitos Previos
 
 - Node.js 18+
-- Java 21+
-- PostgreSQL 15+ o cuenta en Supabase
+- Java 8+
+- PostgreSQL 15+ (producción) o H2 embebido (desarrollo)
 
 ## Instalación
 
 ### Frontend (Angular)
 
 ```bash
-cd teatro-real-angular
+cd teatro-real-frontend
 npm install
 npm start
 ```
