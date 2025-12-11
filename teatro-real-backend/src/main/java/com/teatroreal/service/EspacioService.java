@@ -3,7 +3,7 @@ package com.teatroreal.service;
 import com.teatroreal.dto.EspacioDTO;
 import com.teatroreal.entity.Espacio;
 import com.teatroreal.repository.EspacioRepository;
-import jakarta.persistence.EntityNotFoundException;
+import javax.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

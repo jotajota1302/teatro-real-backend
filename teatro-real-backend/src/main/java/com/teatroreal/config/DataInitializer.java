@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -23,7 +24,7 @@ public class DataInitializer {
             if (espacioRepository.count() == 0) {
                 log.info("Inicializando datos de ejemplo...");
 
-                List<Espacio> espacios = List.of(
+                List<Espacio> espacios = Arrays.asList(
                         Espacio.builder()
                                 .nombre("Escenario Principal")
                                 .tipo("Escenario")
