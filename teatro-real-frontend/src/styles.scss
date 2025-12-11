@@ -1,3 +1,87 @@
+/* Angular Material - Tema custom Teatro Real */
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$teatro-primary: mat.m2-define-palette((
+  50: #fce4e8,
+  100: #f7bcc5,
+  200: #f1909f,
+  300: #eb6379,
+  400: #e7415c,
+  500: #CF102D,
+  600: #c90e29,
+  700: #c20c23,
+  800: #bc091d,
+  900: #b00512,
+  A100: #ffe0e3,
+  A200: #ffadb3,
+  A400: #ff7a84,
+  A700: #ff606c,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: white,
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: rgba(black, 0.87),
+    A400: white,
+    A700: white,
+  )
+));
+
+$teatro-accent: mat.m2-define-palette((
+  50: #e8e8e8,
+  100: #c5c5c5,
+  200: #9e9e9e,
+  300: #777777,
+  400: #595959,
+  500: #3c3c3c,
+  600: #363636,
+  700: #2e2e2e,
+  800: #272727,
+  900: #1a1a1a,
+  A100: #ef7171,
+  A200: #ea4444,
+  A400: #f50000,
+  A700: #dc0000,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: white,
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: white,
+    A400: white,
+    A700: white,
+  )
+));
+
+$teatro-theme: mat.m2-define-dark-theme((
+  color: (
+    primary: $teatro-primary,
+    accent: $teatro-accent,
+  ),
+  typography: mat.m2-define-typography-config(
+    $font-family: 'Montserrat, sans-serif',
+  ),
+  density: 0,
+));
+
+@include mat.all-component-themes($teatro-theme);
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
