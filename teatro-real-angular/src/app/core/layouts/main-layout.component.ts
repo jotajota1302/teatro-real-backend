@@ -23,19 +23,20 @@ import { LayoutService } from '../services/layout.service';
 
       <!-- Main content area -->
       <div
-        class="min-h-screen flex flex-col transition-all duration-300"
-        [class.ml-72]="layoutService.sidenavOpen()">
+        class="min-h-screen flex flex-col transition-all duration-300 p-2 sm:p-4 xl:ml-80">
 
         <!-- Navbar -->
         <app-navbar />
 
         <!-- Page content -->
-        <main class="flex-1 p-4 lg:p-6">
+        <main class="flex-1">
           <router-outlet />
         </main>
 
         <!-- Footer -->
-        <app-footer />
+        <div class="mt-auto pt-4 text-tr-gray-300">
+          <app-footer />
+        </div>
       </div>
     </div>
   `,

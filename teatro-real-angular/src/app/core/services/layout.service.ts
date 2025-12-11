@@ -5,15 +5,12 @@ import { Injectable, signal, computed } from '@angular/core';
 })
 export class LayoutService {
   // Signals para estado reactivo
-  private _sidenavOpen = signal(false); // Empieza cerrado, se abre con el botón
+  private _sidenavOpen = signal(true); // Abierto por defecto
   private _darkMode = signal(true);
 
   // Computeds públicos (solo lectura)
   sidenavOpen = this._sidenavOpen.asReadonly();
   darkMode = this._darkMode.asReadonly();
-
-  // El sidenav siempre es colapsable (se puede ocultar/mostrar)
-  sidenavCollapsible = signal(true);
 
   // Computed para clases de tema
   themeClasses = computed(() => ({
@@ -21,13 +18,6 @@ export class LayoutService {
     text: this._darkMode() ? 'text-white' : 'text-tr-gray-900',
     textMuted: this._darkMode() ? 'text-tr-gray-400' : 'text-tr-gray-600'
   }));
-
-  constructor() {
-    // En desktop (xl) abrir el sidenav por defecto
-    if (typeof window !== 'undefined' && window.innerWidth >= 1280) {
-      this._sidenavOpen.set(true);
-    }
-  }
 
   toggleSidenav(): void {
     this._sidenavOpen.update(open => !open);
