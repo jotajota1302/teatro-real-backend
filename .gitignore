@@ -36,3 +36,4 @@ npm-debug.log*
 # Carpetas que no queremos subir
 TEMPLATE-ANGULAR/
 teatro-real-app/
+teatro-real-angular/
