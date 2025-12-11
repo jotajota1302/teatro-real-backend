@@ -1,10 +1,10 @@
 # Teatro Real - Backend API
 
-API REST para el Sistema de Gestión Interna del Teatro Real, desarrollada con Java 21 y Spring Boot 3.x.
+API REST para el Sistema de Gestión Interna del Teatro Real, desarrollada con Java 17 y Spring Boot 3.x.
 
 ## Tecnologías
 
-- **Java 21** (LTS)
+- **Java 17** (LTS)
 - **Spring Boot 3.3.x**
 - **Spring Data JPA** - Persistencia
 - **Spring Security** - Autenticación y autorización con JWT
@@ -65,7 +65,7 @@ teatro-real-backend/
 
 ## Requisitos Previos
 
-- Java 21+
+- Java 17+
 - Maven 3.9+
 - PostgreSQL 15+ o cuenta en Supabase
 
