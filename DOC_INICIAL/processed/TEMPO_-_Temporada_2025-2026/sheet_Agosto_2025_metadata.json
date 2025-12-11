@@ -1,0 +1,154 @@
+{
+  "num_rows": 171,
+  "num_columns": 12,
+  "columns": [
+    {
+      "name": "FECHA",
+      "normalized": "fecha",
+      "inferred_type": "datetime",
+      "num_null": 103,
+      "num_unique": 36,
+      "sample_values": [
+        "SEMANA Nº33   PROVISIONAL",
+        "Lunes                               ",
+        11
+      ]
+    },
+    {
+      "name": "ESCENARIO",
+      "normalized": "escenario",
+      "inferred_type": "string",
+      "num_null": 143,
+      "num_unique": 14,
+      "sample_values": [
+        "ESCENARIO",
+        "ESCENARIO",
+        "08.00-08.30h"
+      ]
+    },
+    {
+      "name": "Unnamed: 2",
+      "normalized": "unnamed__2",
+      "inferred_type": "string",
+      "num_null": 145,
+      "num_unique": 7,
+      "sample_values": [
+        "Preparación Actividad",
+        "Montaje Luces OTELLO",
+        "PAUSA TECNICA"
+      ]
+    },
+    {
+      "name": "SALA GAYARRE",
+      "normalized": "sala_gayarre",
+      "inferred_type": "string",
+      "num_null": 169,
+      "num_unique": 1,
+      "sample_values": [
+        "SALA GAYARRE",
+        "SALA GAYARRE"
+      ]
+    },
+    {
+      "name": "Unnamed: 4",
+      "normalized": "unnamed__4",
+      "inferred_type": "float",
+      "num_null": 171,
+      "num_unique": 0,
+      "sample_values": []
+    },
+    {
+      "name": "S.E.P.E",
+      "normalized": "s_e_p_e",
+      "inferred_type": "string",
+      "num_null": 163,
+      "num_unique": 2,
+      "sample_values": [
+        "S.E.P.E",
+        "S.E.P.E",
+        "16.00-21.00h"
+      ]
+    },
+    {
+      "name": "Unnamed: 6",
+      "normalized": "unnamed__6",
+      "inferred_type": "string",
+      "num_null": 165,
+      "num_unique": 1,
+      "sample_values": [
+        "E.Piano OTELLO",
+        "E.Piano OTELLO",
+        "E.Piano OTELLO"
+      ]
+    },
+    {
+      "name": "SALA BALLET",
+      "normalized": "sala_ballet",
+      "inferred_type": "string",
+      "num_null": 163,
+      "num_unique": 2,
+      "sample_values": [
+        "SALA BALLET",
+        "SALA BALLET",
+        "RESERVADA OTELLO"
+      ]
+    },
+    {
+      "name": "Unnamed: 8",
+      "normalized": "unnamed__8",
+      "inferred_type": "float",
+      "num_null": 171,
+      "num_unique": 0,
+      "sample_values": []
+    },
+    {
+      "name": "SALA DE ORQUESTA                                       SALA DE CORO",
+      "normalized": "sala_de_orquesta_______________________________________sala_de_coro",
+      "inferred_type": "string",
+      "num_null": 111,
+      "num_unique": 7,
+      "sample_values": [
+        "SALA DE ORQUESTA",
+        "RESERVADA INFRAESTRUCTURAS",
+        "SALA DE CORO"
+      ]
+    },
+    {
+      "name": "Unnamed: 10",
+      "normalized": "unnamed__10",
+      "inferred_type": "string",
+      "num_null": 163,
+      "num_unique": 1,
+      "sample_values": [
+        "E. Musical Coro",
+        "E. Musical Coro",
+        "E. Musical Coro"
+      ]
+    },
+    {
+      "name": "OTRAS SALAS",
+      "normalized": "otras_salas",
+      "inferred_type": "string",
+      "num_null": 169,
+      "num_unique": 1,
+      "sample_values": [
+        "OTRAS SALAS",
+        "OTRAS SALAS"
+      ]
+    }
+  ],
+  "detected_tempo_columns": {
+    "fecha": "FECHA",
+    "hora_inicio": null,
+    "hora_fin": null,
+    "espacio": "SALA GAYARRE",
+    "tipo_actividad": null,
+    "titulo": "Unnamed: 2",
+    "color": null
+  },
+  "proposed_minimal_mapping": {
+    "titulo": "Unnamed: 2",
+    "fecha": "FECHA",
+    "espacio": "SALA GAYARRE"
+  }
+}

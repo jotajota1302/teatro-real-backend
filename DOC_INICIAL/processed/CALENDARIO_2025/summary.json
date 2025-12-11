@@ -1,0 +1,12 @@
+{
+  "file": "DOC_INICIAL\\CALENDARIO 2025.xlsx",
+  "sheets": [
+    {
+      "sheet_name": "DICIEMBRE",
+      "csv": "DOC_INICIAL\\processed\\CALENDARIO_2025\\sheet_DICIEMBRE.csv",
+      "metadata": "DOC_INICIAL\\processed\\CALENDARIO_2025\\sheet_DICIEMBRE_metadata.json",
+      "rows": 39,
+      "columns": 22
+    }
+  ]
+}
