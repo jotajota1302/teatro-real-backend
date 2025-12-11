@@ -1,93 +1,78 @@
-# teatro-real
+# Teatro Real - Sistema de Gestión Interna
 
+Sistema integral de gestión interna para el Teatro Real de Madrid, desarrollado para optimizar la coordinación de producciones, espacios, logística y recursos técnicos.
 
+## Descripción
 
-## Getting started
+Este proyecto implementa una plataforma digital que integra los sistemas **TEMPO** (gestión de espacios y calendario) y **TOPS** (gestión de producciones y guiones técnicos) del Teatro Real, proporcionando:
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+- **Gestión de Calendario**: Planificación y visualización de actividades (funciones, ensayos, montajes, eventos)
+- **Gestión de Espacios**: Control de ocupación de salas, escenarios y espacios técnicos
+- **Gestión de Producciones**: Seguimiento de óperas y espectáculos
+- **Guiones Técnicos**: Digitalización de guiones de regiduría con gestión de cues
+- **Logística**: Coordinación de cargas, descargas y transportes
+- **Cartelería Digital**: Gestión de contenidos para pantallas informativas
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+## Estructura del Proyecto
 
 ```
-cd existing_repo
-git remote add origin https://umane.emeal.nttdata.com/git/SPHVAL/MODERNIZACION/teatro-real.git
-git branch -M main
-git push -uf origin main
+teatro-real/
+├── AGENTES/                    # Prompts de agentes IA especializados
+├── DOC_GENERADA/               # Documentación técnica generada
+│   ├── GUIA_ESTILOS_TEATRO.md
+│   ├── PLAN_IMPLEMENTACION_BACKEND.md
+│   ├── PLAN_IMPLEMENTACION_FRONTEND.md
+│   └── SINTESIS_REQUISITOS_FINAL.md
+├── DOC_INICIAL/                # Documentación de requisitos original
+├── teatro-real-angular/        # Frontend Angular 18
+└── teatro-real-backend/        # Backend Java Spring Boot
 ```
 
-## Integrate with your tools
+## Tecnologías
 
-- [ ] [Set up project integrations](https://umane.emeal.nttdata.com/git/SPHVAL/MODERNIZACION/teatro-real/-/settings/integrations)
+### Frontend
+- **Angular 18** con Standalone Components
+- **Tailwind CSS** con paleta de colores corporativa
+- **TypeScript 5.4+**
+- **Signals** para gestión de estado reactivo
 
-## Collaborate with your team
+### Backend
+- **Java 21**
+- **Spring Boot 3.x**
+- **PostgreSQL** / **Supabase**
+- **Spring Security** con JWT
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+## Requisitos Previos
 
-## Test and Deploy
+- Node.js 18+
+- Java 21+
+- PostgreSQL 15+ o cuenta en Supabase
 
-Use the built-in continuous integration in GitLab.
+## Instalación
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+### Frontend (Angular)
 
-***
+```bash
+cd teatro-real-angular
+npm install
+npm start
+```
 
-# Editing this README
+La aplicación estará disponible en `http://localhost:4200`
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### Backend (Java)
 
-## Suggestions for a good README
+```bash
+cd teatro-real-backend
+./mvnw spring-boot:run
+```
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+La API estará disponible en `http://localhost:8080`
 
-## Name
-Choose a self-explaining name for your project.
+## Equipo
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+Proyecto desarrollado por NTT DATA para el Teatro Real de Madrid.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+## Licencia
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Proyecto privado - Todos los derechos reservados.
