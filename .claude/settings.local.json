@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init:*)",
+      "Bash(git config:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git remote add origin https://jotajota1302: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@github.com/jotajota1302/teatro.git)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(npm install)",
+      "Bash(npm run dev:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(curl:*)",
+      "Bash(rm:*)",
+      "Bash(powershell -Command \"Expand-Archive -Path ''.\\Copia de Guion Regiduria CARMEN.docx'' -DestinationPath ''.\\carmen_extracted'' -Force\")",
+      "Bash(powershell -Command \"Copy-Item ''.\\Copia de Guion Regiduria CARMEN.docx'' ''.\\carmen_temp.zip''; Expand-Archive -Path ''.\\carmen_temp.zip'' -DestinationPath ''.\\carmen_extracted'' -Force; Get-ChildItem -Recurse carmen_extracted\")",
+      "Bash(powershell -Command \"Get-Content document.xml -TotalCount 100\")",
+      "Bash(dir:*)",
+      "WebFetch(domain:teatro-sandy.vercel.app)",
+      "Bash(vercel --version:*)",
+      "Bash(vercel link:*)",
+      "Bash(vercel login)",
+      "Bash(vercel env:*)",
+      "Bash(vercel --prod)",
+      "Bash(printf:*)",
+      "Bash(git pull:*)",
+      "Bash(git checkout:*)",
+      "Bash(cat:*)",
+      "Bash(vercel alias set:*)",
+      "Bash(git filter-branch:*)",
+      "Bash(vercel)",
+      "Bash(mkdir:*)",
+      "Bash(vercel ls:*)",
+      "Bash(vercel inspect:*)",
+      "Bash(vercel promote:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
