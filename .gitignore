@@ -30,6 +30,9 @@ npm-debug.log*
 # Angular cache
 .angular/
 
+# Claude
+.claude/
+
 # Carpetas que no queremos subir
 TEMPLATE-ANGULAR/
 teatro-real-app/
