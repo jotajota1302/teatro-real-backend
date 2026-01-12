@@ -1,6 +1,6 @@
 # Teatro Real - Plan de Implementación Backend
 ## Spring Boot 2.7.18 + Java 8 + PostgreSQL
- 
+  
 ---
 **Stack:** Spring Boot 2.7.18 | Java 8 | PostgreSQL 16 (H2 dev) | Maven
 **Fecha:** 2025-12-11

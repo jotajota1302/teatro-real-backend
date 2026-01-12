@@ -1,5 +1,5 @@
 # Teatro Real - Estado de Desarrollo
-
+  
 ## Dashboard de Progreso
 
 | Módulo | Estado | Progreso | Última Actualización |

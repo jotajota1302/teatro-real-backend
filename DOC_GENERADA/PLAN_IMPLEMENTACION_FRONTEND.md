@@ -1,6 +1,6 @@
 # Teatro Real - Plan de Implementación Frontend
 ## Angular 18.2 + Angular Material 18 + TailwindCSS 3.4
- 
+  
 ---
 **Stack:** Angular 18.2 | TypeScript 5.5 | Angular Material 18 | TailwindCSS 3.4 | RxJS 7.8
 **Fecha:** 2025-12-11

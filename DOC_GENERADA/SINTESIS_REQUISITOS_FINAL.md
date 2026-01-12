@@ -1,6 +1,6 @@
 # Teatro Real - Síntesis Consolidada de Requisitos
 ## Documento Base para Implementación
- 
+  
 ---
 **Proyecto:** Gestión Interna del Teatro Real
 **Versión:** 1.0 CONSOLIDADA
