@@ -33,12 +33,14 @@ Desarrollar una **plataforma web unificada** con tres módulos principales:
 
 ### 1.3 Stack Tecnológico Sugerido
 
-- **Frontend:** SPA (React/Next.js)
-- **Backend:** API REST (Node.js/Python)
+> Nota: El stack se ha alineado con el proyecto real en este repositorio.
+
+- **Frontend:** Angular (SPA, última LTS estable)
+- **Backend:** Java + Spring Boot (API REST)
 - **Base de datos:** PostgreSQL
-- **Almacenamiento:** S3-compatible para documentos/imágenes
-- **Hosting:** Google Cloud (preferente por infraestructura actual del Teatro)
-- **Autenticación:** OAuth 2.0 con Google
+- **Almacenamiento de documentos/imágenes:** Solución compatible con Google Cloud (Cloud Storage o almacenamiento de ficheros accesible desde la intranet para el Drive interno)
+- **Hosting:** Google Cloud (preferente por infraestructura actual del Teatro; posibilidad de componentes on-premise si el Teatro lo requiere)
+- **Autenticación:** OAuth 2.0 con Google (Gmail corporativo)
 
 ---
 
