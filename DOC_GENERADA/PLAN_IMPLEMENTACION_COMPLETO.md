@@ -1,6 +1,6 @@
 # Teatro Real - Plan de Implementación Completo
 ## Fullstack: Angular 18 + Spring Boot 2.7 + PostgreSQL
-
+ 
 ---
 **Proyecto:** Gestión Interna del Teatro Real
 **Fecha:** 2025-12-11

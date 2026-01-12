@@ -1,5 +1,5 @@
 # Guía de Estilos - MVP Teatro Real
-
+ 
 ## Fuentes de Referencia
 
 Esta guía ha sido extraída del análisis de:
