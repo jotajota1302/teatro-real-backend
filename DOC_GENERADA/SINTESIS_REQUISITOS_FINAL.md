@@ -98,11 +98,12 @@ Desarrollar una **plataforma web unificada** con tres módulos principales:
 
 ### 3.1 Roles del Sistema
 
-| Rol | Descripción | Permisos | Cantidad Est. |
-|-----|-------------|----------|---------------|
-| **Administrador** | Configura sistema, gestiona usuarios | Superusuario (acceso total) | 1 máx |
-| **Colaborador** | Regidor/técnico - crea y edita contenido | CRUD actividades y guiones | 2-3 |
-| **Consulta** | Personal del teatro | Solo lectura, exportación | ~50 |
+| Rol            | Descripción                                                | Permisos principales                                 | Cantidad Est. |
+|----------------|------------------------------------------------------------|------------------------------------------------------|---------------|
+| **Administrador** | Acceso total. Configura el sistema, gestiona usuarios y permisos. | Superusuario (todos los módulos y configuración).    | 1 máx         |
+| **Gestor**        | Puede crear y editar actividades y Tops en los módulos donde tenga permisos asignados. | CRUD sobre actividades TEMPO y Tops según ámbito (permiso por módulo: TEMPO, TOPS o ambos). | 2-3           |
+| **Operador**      | Puede visualizar toda la información y editar solo su propio trabajo o actividades asignadas. | Lectura global, edición restringida a actividades/tareas propias. | Variable      |
+| **Visualizador**  | Solo lectura a efectos de auditoría y reportes.         | Consulta global, sin edición.                        | Variable      |
 
 ### 3.2 Perfiles de Usuario Detallados
 
@@ -166,8 +167,11 @@ Desarrollar una **plataforma web unificada** con tres módulos principales:
 | hora_inicio | time | Sí | Hora de inicio |
 | hora_fin | time | Sí | Hora de finalización |
 | departamento | FK | Sí | Departamento responsable |
-| documentacion | array[url] | No | Planos, dossier, partitura |
+| documentacion | array[url/file] | No | Adjuntos múltiples: planos, dossier, partitura, imágenes, vídeos y otros, con posibilidad de subirlos desde Google Drive corporativo o carpeta local del usuario, consultables y descargables desde la plataforma. |
 | notas | text | No | Observaciones adicionales |
+
+**Funcionalidades añadidas:**
+- Clonación/Copia de actividades: El sistema permite duplicar actividades existentes en uno o varios días, semanas o meses distintos, con edición rápida de metadatos antes de guardar la copia. Esto agiliza la creación de agendas recurrentes o similares (por ejemplo, montajes, ensayos repetidos, operativas logísticas periódicas).
 
 **Historia de Usuario:**
 ```
@@ -226,6 +230,13 @@ Y se envían notificaciones a los departamentos afectados
 | lugar_origen | string | Lugar de recogida/salida |
 | lugar_destino | string | Lugar de llegada/envío |
 | produccion | string | Nombre de la producción |
+
+**Estados de la Actividad (Almacén):**
+- Pendiente inicio: Estado por defecto al crear la actividad logística.
+- En tránsito: Activado manualmente por el usuario al iniciar el traslado.
+- Completado: Activado manualmente por el usuario al finalizar la entrega/recogida.
+
+El cambio de estado se realiza desde el sistema por acción del usuario y debe quedar registrado en la auditoría/historial de la actividad.
 
 **Ejemplo de datos reales:**
 - Moses und Pharaon: 3 camiones desde Marsella (Dic 2025)
@@ -443,9 +454,10 @@ Guion (Producción)
 
 **Funcionalidades:**
 - CRUD de usuarios
-- Asignación de roles: Administrador, Colaborador, Consulta
-- Autenticación: OAuth 2.0 con Google (Gmail)
-- Permisos por módulo (TEMPO, TOPS)
+- Asignación de roles: Administrador, Gestor, Operador y Visualizador
+- Permite definir y modificar permisos específicos por módulo (TEMPO, TOPS), de modo que un usuario puede tener acceso a uno, ambos o ninguno según configuración interna.
+- Autenticación: OAuth 2.0 mediante credenciales de Google (Gmail), incluido Single Sign-On.
+- Visualización de actividades y accesos según perfil.
 
 ---
 
