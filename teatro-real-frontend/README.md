@@ -1,67 +1,27 @@
-# Teatro Real - Frontend
+# TeatroRealFrontend
 
-Frontend del Sistema de Gestión Interna del Teatro Real, desarrollado con Angular 18 y Tailwind CSS.
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.21.
 
-## Tecnologías
+## Development server
 
-- **Angular 18** con Standalone Components
-- **Tailwind CSS** - Framework de estilos
-- **Angular Signals** - Estado reactivo
-- **TypeScript 5.5**
+Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
 
-## Requisitos
+## Code scaffolding
 
-- Node.js 18+
-- npm 9+
-
-## Instalación
-
-```bash
-cd teatro-real-frontend
-npm install
-```
-
-## Desarrollo
-
-```bash
-npm start
-# o
-ng serve
-```
-
-Navegar a `http://localhost:4200/`
+Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
 
 ## Build
 
-```bash
-ng build
-```
+Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
-Los artefactos de build se generan en `dist/teatro-real-frontend/`.
+## Running unit tests
 
-## Estructura
+Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
 
-```
-src/
-├── app/
-│   ├── core/
-│   │   ├── components/     # Sidenav, Navbar, Footer
-│   │   ├── layouts/        # MainLayout
-│   │   └── services/       # LayoutService
-│   └── features/
-│       ├── home/
-│       ├── calendario/
-│       ├── espacios/
-│       ├── producciones/
-│       ├── guiones/
-│       ├── logistica/
-│       └── carteleria/
-├── styles.scss
-└── main.ts
-```
+## Running end-to-end tests
 
-## Paleta de Colores
+Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
 
-- **Carmesí Teatro Real**: `#CF102D`
-- **Negro**: `#010101`
-- **Negro Carbón**: `#232323`
+## Further help
+
+To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

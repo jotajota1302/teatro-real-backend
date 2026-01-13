@@ -5,6 +5,13 @@ import { RouterOutlet } from '@angular/router';
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet],
-  template: `<router-outlet />`
+  template: `
+    <h1>Welcome to {{title}}!</h1>
+
+    <router-outlet />
+  `,
+  styles: [],
 })
-export class AppComponent {}
+export class AppComponent {
+  title = 'teatro-real-frontend';
+}

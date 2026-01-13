@@ -1,55 +1,68 @@
 import { Routes } from '@angular/router';
-import { MainLayoutComponent } from './core/layouts/main-layout.component';
+import { authGuard } from './core/auth/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
+import { modulePermissionGuard } from './core/guards/module-permission.guard';
+
+// NOTA: Cambia los imports de features/layout a la ruta real cuando existan los componentes.
+// De momento, esto es un ejemplo funcional-modelo, ajustar a la estructura final de carpetas y componentes.
 
 export const routes: Routes = [
   {
     path: '',
-    component: MainLayoutComponent,
+    redirectTo: 'dashboard',
+    pathMatch: 'full'
+  },
+  {
+    path: 'auth',
+    // Aquí debería ir el lazy load real a las rutas de auth.
+    loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES)
+  },
+  {
+    path: '',
+    // Aquí debería ir el main layout real
+    loadComponent: () => import('./layout/main-layout/main-layout.component')
+      .then(m => m.MainLayoutComponent),
+    canActivate: [authGuard],
     children: [
       {
-        path: '',
-        redirectTo: 'home',
-        pathMatch: 'full'
+        path: 'dashboard',
+        loadComponent: () => import('./features/dashboard/dashboard.component')
+          .then(m => m.DashboardComponent)
       },
       {
-        path: 'home',
-        loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent),
-        title: 'Vista Global - Teatro Real'
+        path: 'tempo',
+        loadChildren: () => import('./features/tempo/tempo.routes').then(m => m.TEMPO_ROUTES),
+        canActivate: [modulePermissionGuard],
+        data: { modulo: 'TEMPO' }
       },
       {
-        path: 'calendario',
-        loadComponent: () => import('./features/calendario/calendario.component').then(m => m.CalendarioComponent),
-        title: 'Calendario - Teatro Real'
+        path: 'tops',
+        loadChildren: () => import('./features/tops/tops.routes').then(m => m.TOPS_ROUTES),
+        canActivate: [modulePermissionGuard],
+        data: { modulo: 'TOPS' }
       },
       {
-        path: 'espacios',
-        loadComponent: () => import('./features/espacios/espacios.component').then(m => m.EspaciosComponent),
-        title: 'Espacios - Teatro Real'
-      },
-      {
-        path: 'producciones',
-        loadComponent: () => import('./features/producciones/producciones.component').then(m => m.ProduccionesComponent),
-        title: 'Producciones - Teatro Real'
-      },
-      {
-        path: 'guiones',
-        loadComponent: () => import('./features/guiones/guiones.component').then(m => m.GuionesComponent),
-        title: 'Guiones Técnicos - Teatro Real'
-      },
-      {
-        path: 'logistica',
-        loadComponent: () => import('./features/logistica/logistica.component').then(m => m.LogisticaComponent),
-        title: 'Logística - Teatro Real'
-      },
-      {
-        path: 'carteleria',
-        loadComponent: () => import('./features/carteleria/carteleria.component').then(m => m.CarteleriaComponent),
-        title: 'Cartelería - Teatro Real'
+        path: 'admin',
+        loadChildren: () => import('./features/admin/admin.routes').then(m => m.ADMIN_ROUTES),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN'] }
       }
     ]
   },
+  // Ejemplo: cartelería global
+  {
+    path: 'carteleria/global',
+    loadComponent: () => import('./features/carteleria/carteleria-global/carteleria-global.component')
+      .then(m => m.CarteleriaGlobalComponent)
+  },
+  // Ejemplo: cartelería por sala
+  {
+    path: 'carteleria/:espacioId',
+    loadComponent: () => import('./features/carteleria/carteleria-sala/carteleria-sala.component')
+      .then(m => m.CarteleriaSalaComponent)
+  },
   {
     path: '**',
-    redirectTo: 'home'
+    redirectTo: 'dashboard'
   }
 ];
