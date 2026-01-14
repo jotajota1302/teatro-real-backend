@@ -1,0 +1,39 @@
+# Dependencias
+node_modules/
+*/node_modules/
+
+# Build outputs
+dist/
+*/dist/
+build/
+*/build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Angular cache
+.angular/
+
+# Claude
+.claude/
+
+# Carpetas que no queremos subir
+TEMPLATE-ANGULAR/
+teatro-real-app/
+teatro-real-angular/

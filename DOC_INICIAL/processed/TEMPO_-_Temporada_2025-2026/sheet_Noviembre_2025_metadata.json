@@ -1,0 +1,173 @@
+{
+  "num_rows": 434,
+  "num_columns": 13,
+  "columns": [
+    {
+      "name": "FECHA",
+      "normalized": "fecha",
+      "inferred_type": "datetime",
+      "num_null": 344,
+      "num_unique": 41,
+      "sample_values": [
+        "SEMANA Nº45   PROVISIONAL",
+        "Lunes",
+        3
+      ]
+    },
+    {
+      "name": "ESCENARIO",
+      "normalized": "escenario",
+      "inferred_type": "string",
+      "num_null": 58,
+      "num_unique": 80,
+      "sample_values": [
+        "01.00-08.00h",
+        "08.00-08.30h",
+        "09.00-10.00h"
+      ]
+    },
+    {
+      "name": "Unnamed: 2",
+      "normalized": "unnamed__2",
+      "inferred_type": "string",
+      "num_null": 48,
+      "num_unique": 117,
+      "sample_values": [
+        "Cambio a EVENTO",
+        "Preparación Actividad",
+        "Afinación de pianos"
+      ]
+    },
+    {
+      "name": "SALA GAYARRE",
+      "normalized": "sala_gayarre",
+      "inferred_type": "string",
+      "num_null": 428,
+      "num_unique": 4,
+      "sample_values": [
+        "SALA GAYARRE",
+        "08.00-14.00h",
+        "SALA GAYARRE"
+      ]
+    },
+    {
+      "name": "Unnamed: 4",
+      "normalized": "unnamed__4",
+      "inferred_type": "string",
+      "num_null": 432,
+      "num_unique": 2,
+      "sample_values": [
+        "ACTO INAEM",
+        "Examen sección SASTRERÍA  "
+      ]
+    },
+    {
+      "name": "S.E.P.E",
+      "normalized": "s_e_p_e",
+      "inferred_type": "string",
+      "num_null": 386,
+      "num_unique": 4,
+      "sample_values": [
+        "11.00-14.00h",
+        "16.00-19.00h",
+        "11.00-14.00h"
+      ]
+    },
+    {
+      "name": "Unnamed: 6",
+      "normalized": "unnamed__6",
+      "inferred_type": "string",
+      "num_null": 394,
+      "num_unique": 1,
+      "sample_values": [
+        "E.Piano CARMEN",
+        "E.Piano CARMEN",
+        "E.Piano CARMEN"
+      ]
+    },
+    {
+      "name": "SALA BALLET",
+      "normalized": "sala_ballet",
+      "inferred_type": "string",
+      "num_null": 402,
+      "num_unique": 8,
+      "sample_values": [
+        "RESERVADA                                                                                               MANDARÍN / BARBAZUL",
+        "08.00-17.30h                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       RESERVADA                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      CARMEN",
+        "17.30-23.30h                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     RESERVADA                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 MANDARÍN / BARBAZUL"
+      ]
+    },
+    {
+      "name": "Unnamed: 8",
+      "normalized": "unnamed__8",
+      "inferred_type": "string",
+      "num_null": 433,
+      "num_unique": 1,
+      "sample_values": [
+        "CONFERENCIAS AUDIOVISUALES - ÓPERA EUROPA"
+      ]
+    },
+    {
+      "name": "SALA DE ORQUESTA                                       SALA DE CORO",
+      "normalized": "sala_de_orquesta_______________________________________sala_de_coro",
+      "inferred_type": "string",
+      "num_null": 326,
+      "num_unique": 18,
+      "sample_values": [
+        "SALA DE ORQUESTA",
+        "10:00-16:00h",
+        "16:00h"
+      ]
+    },
+    {
+      "name": "Unnamed: 10",
+      "normalized": "unnamed__10",
+      "inferred_type": "string",
+      "num_null": 383,
+      "num_unique": 25,
+      "sample_values": [
+        "PRELIMINARES AUDICION TENOR VIÑAS",
+        "MONTAJE PATRONATO",
+        "E. Musical Coro"
+      ]
+    },
+    {
+      "name": "OTRAS SALAS",
+      "normalized": "otras_salas",
+      "inferred_type": "string",
+      "num_null": 408,
+      "num_unique": 18,
+      "sample_values": [
+        "CINE - 1",
+        "15.00-17.30h",
+        "CINE - 1"
+      ]
+    },
+    {
+      "name": "Unnamed: 12",
+      "normalized": "unnamed__12",
+      "inferred_type": "string",
+      "num_null": 414,
+      "num_unique": 18,
+      "sample_values": [
+        "Universidad a Escena",
+        "Examen Mec. Escénica ",
+        "(RRHH)"
+      ]
+    }
+  ],
+  "detected_tempo_columns": {
+    "fecha": "FECHA",
+    "hora_inicio": null,
+    "hora_fin": null,
+    "espacio": "SALA GAYARRE",
+    "tipo_actividad": null,
+    "titulo": "Unnamed: 2",
+    "color": null
+  },
+  "proposed_minimal_mapping": {
+    "titulo": "Unnamed: 2",
+    "fecha": "FECHA",
+    "espacio": "SALA GAYARRE"
+  }
+}

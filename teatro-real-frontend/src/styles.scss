@@ -1,0 +1,202 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* -----------------------------------------------
+   Variables CSS Teatro Real
+-------------------------------------------------*/
+:root {
+  --color-primary: #CF102D;
+  --color-primary-dark: #A00D24;
+  --color-black: #010101;
+  --color-white: #FFFFFF;
+  --color-gray-900: #232323;
+  --color-gray-800: #333333;
+  --color-gray-600: #666666;
+  --color-gray-400: #999999;
+  --color-gray-100: #F5F5F5;
+  --font-family: 'Montserrat', sans-serif;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.10);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* -----------------------------------------------
+   Login Page Estilo Teatro Real
+-------------------------------------------------*/
+body, html {
+  font-family: var(--font-family);
+  background-color: var(--color-black);
+  color: var(--color-white);
+  min-height: 100vh;
+}
+
+.login-page {
+  min-height: 100vh;
+  background: var(--color-black);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.login-card {
+  background: var(--color-white);
+  color: var(--color-black);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  min-width: 350px;
+  max-width: 94vw;
+  padding: 2.5rem 2rem 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.login-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+.login-logo-svg {
+  width: 52px;
+  height: 52px;
+  margin-bottom: 0.35rem;
+  display: block;
+}
+.login-logo-text {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  font-size: 1.8rem;
+  color: var(--color-black);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.login-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-black);
+  margin-bottom: .25rem;
+}
+
+.login-desc {
+  font-size: 1rem;
+  color: var(--color-gray-600);
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-weight: 400;
+}
+
+.btn-primary-teatro {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family);
+  font-weight: 600;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 14px 0;
+  width: 100%;
+  margin-top: 0.5rem;
+  margin-bottom: 0.7rem;
+  transition: background-color 0.23s;
+  box-shadow: 0 1px 6px 0 rgba(0,0,0,0.12);
+}
+.btn-primary-teatro:hover, .btn-primary-teatro:focus {
+  background-color: var(--color-primary-dark);
+}
+
+.btn-google-teatro {
+  background: none;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family);
+  font-weight: 600;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  width: 100%;
+  padding: 12px 0;
+  margin-bottom: 0.3rem;
+  margin-top: 0.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.18s, color 0.18s;
+}
+.btn-google-teatro:hover, .btn-google-teatro:focus {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.login-form-label {
+  font-family: var(--font-family);
+  font-size: 15px;
+  color: var(--color-gray-800);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.login-form-input, .mat-mdc-input-element {
+  width: 100%;
+  padding: 14px 16px;
+  font-family: var(--font-family);
+  font-size: 16px;
+  background: #fff;
+  color: var(--color-black);
+  border: 1.4px solid #cccccc;
+  border-radius: var(--radius-sm);
+  transition: border-color 0.23s, box-shadow 0.23s;
+  box-shadow: none;
+}
+.login-form-input:focus, .mat-mdc-input-element:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(207, 16, 45, 0.08);
+}
+.login-form-input::placeholder {
+  color: var(--color-gray-600);
+}
+.login-form-error, .mat-mdc-form-field-error {
+  color: var(--color-error, #CF102D) !important;
+  font-size: 0.93rem;
+  margin-top: 2px;
+  font-weight: 500;
+}
+.login-form-error[role="alert"] {
+  color: var(--color-error, #CF102D) !important;
+}
+
+.login-form-actions {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    min-width: 0;
+    padding: 1.2rem 0.5rem 1.5rem 0.5rem;
+  }
+}
+
+/* Overwrite some Angular Material form field paddings for login */
+.mat-mdc-form-field-infix {
+  padding: 0 !important;
+}
+
+/* Quitar fondo del mat-card por defecto */
+.mat-mdc-card {
+  background: transparent !important;
+  box-shadow: none !important;
+}
