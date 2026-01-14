@@ -1,0 +1,96 @@
+{
+  "file": "DOC_INICIAL\\TEMPO - Temporada 2025-2026.xlsx",
+  "sheets": [
+    {
+      "sheet_name": "Portada 25-26",
+      "csv": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Portada_25-26.csv",
+      "metadata": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Portada_25-26_metadata.json",
+      "rows": 0,
+      "columns": 1
+    },
+    {
+      "sheet_name": "Agosto 2025",
+      "csv": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Agosto_2025.csv",
+      "metadata": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Agosto_2025_metadata.json",
+      "rows": 171,
+      "columns": 12
+    },
+    {
+      "sheet_name": "Septiembre 2025",
+      "csv": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Septiembre_2025.csv",
+      "metadata": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Septiembre_2025_metadata.json",
+      "rows": 437,
+      "columns": 13
+    },
+    {
+      "sheet_name": "Octubre 2025",
+      "csv": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Octubre_2025.csv",
+      "metadata": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Octubre_2025_metadata.json",
+      "rows": 567,
+      "columns": 13
+    },
+    {
+      "sheet_name": "Noviembre 2025",
+      "csv": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Noviembre_2025.csv",
+      "metadata": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Noviembre_2025_metadata.json",
+      "rows": 434,
+      "columns": 13
+    },
+    {
+      "sheet_name": "Diciembre 2025",
+      "csv": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Diciembre_2025.csv",
+      "metadata": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Diciembre_2025_metadata.json",
+      "rows": 407,
+      "columns": 13
+    },
+    {
+      "sheet_name": "Enero 2026",
+      "csv": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Enero_2026.csv",
+      "metadata": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Enero_2026_metadata.json",
+      "rows": 522,
+      "columns": 13
+    },
+    {
+      "sheet_name": "Febrero 2026",
+      "csv": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Febrero_2026.csv",
+      "metadata": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Febrero_2026_metadata.json",
+      "rows": 436,
+      "columns": 13
+    },
+    {
+      "sheet_name": "Marzo 2026",
+      "csv": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Marzo_2026.csv",
+      "metadata": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Marzo_2026_metadata.json",
+      "rows": 413,
+      "columns": 13
+    },
+    {
+      "sheet_name": "Abril 2026",
+      "csv": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Abril_2026.csv",
+      "metadata": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Abril_2026_metadata.json",
+      "rows": 495,
+      "columns": 13
+    },
+    {
+      "sheet_name": "Mayo 2026",
+      "csv": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Mayo_2026.csv",
+      "metadata": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Mayo_2026_metadata.json",
+      "rows": 431,
+      "columns": 13
+    },
+    {
+      "sheet_name": "Junio 2026",
+      "csv": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Junio_2026.csv",
+      "metadata": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Junio_2026_metadata.json",
+      "rows": 411,
+      "columns": 13
+    },
+    {
+      "sheet_name": "Julio 2026",
+      "csv": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Julio_2026.csv",
+      "metadata": "DOC_INICIAL\\processed\\TEMPO_-_Temporada_2025-2026\\sheet_Julio_2026_metadata.json",
+      "rows": 447,
+      "columns": 12
+    }
+  ]
+}
