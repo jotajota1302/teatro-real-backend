@@ -98,129 +98,65 @@
       **Notas:** Selector de temporada con dropdown.
 
 ### Jueves S1
-- [ ] **`NotificationService` (polling cada 30s)**  
+- [ ] **`NotificationService` (polling cada 30s, signals)**  
       **Horas:** 2h  
-      **Notas:** Implementar con signals y temporizador.
+      **Notas (detallado):**
+        - Implementar el servicio `NotificationService` en `src/app/core/services/notification.service.ts` con signals y polling por temporizador cada 30 segundos.
+        - Utilizar el patrón moderno Angular: signals privadas, computed para contador de no leídas.
+        - Métodos requeridos: `loadNotificaciones()`, `marcarLeida(id:number)`, `marcarTodasLeidas()`, polling automático en constructor.
+        - Endpoints esperados alineados a REST `/notificaciones`, `/notificaciones/{id}/read`, `/notificaciones/read-all`.
+        - Fuente de detalle, estructura y ejemplo de código: `DOC_GENERADA/PLAN_IMPLEMENTACION_FRONTEND_v2.md` sección 4.2.
+        - Criterios de aceptación:
+            - Polling automático.
+            - Actualización instantánea de signals/contadores.
+            - Código TypeScript sin errores.
+            - 100% reactivo via signals + computed, sin subjects.
+      ---
 - [ ] **Componente `NotificationBell` (header)**  
       **Horas:** 2h  
-      **Notas:** Icono con badge de número de notificaciones, dropdown de detalle.
+      **Notas (detallado):**
+        - Crear `NotificationBell` como componente standalone en `src/app/shared/components/notification-bell/notification-bell.component.ts`.
+        - Debe mostrar un icono de campana (`bell`), badge con contador de notificaciones no leídas, desplegable con listado de notificaciones con scroll, acción para marcar todas leídas, callback de navegación por tipo.
+        - Integrado visualmente según la guía y ejemplo de PLAN_IMPLEMENTACION_FRONTEND_v2.md sección 6.2.
+        - Accesible: atributos ARIA, focusables, roles y feedback screen-reader.
+        - Testing básico manual con mock si no hay backend listo.
+        - Inputs/props: sin props, accede a signals íntegramente vía `NotificationService`.
+        - Estructura del menú y feedback basado en el ejemplo de plan.
+      ---
 - [ ] **Actualizar `Header` con `NotificationBell` + `TemporadaSelector`**  
       **Horas:** 2h  
-      **Notas:** Integrar ambos componentes en la barra de navegación.
+      **Notas (detallado):**
+        - Incorporar los componentes `NotificationBell` y `TemporadaSelector` en el header principal (`src/app/layout/header/header.component.ts`).
+        - Garantizar distribución visual correcta (extremo derecho, sin romper la UX).
+        - ART: El Navbar debe estar alineado con la guía de estilos institucional (negro/carmesí), manejo de responsive.
+        - Ambos componentes deben ser accesibles y usables desde teclado.
+        - Criterios de aceptación: visualmente alineado con la web real y la guía, funcionalidad real/fake si backend no está disponible.
+        - Ver referencias y detalles de integración en PLAN_IMPLEMENTACION_FRONTEND_v2.md sección 6.2 y 6.1.
 
 ### Viernes S1
 - [ ] **Componentes shared: `StatusBadge`, `ColorPicker`**  
       **Horas:** 3h  
-      **Notas:** Componentes reutilizables (design system básico).
+      **Notas (detallado):**
+        - Implementar ambos componentes en `src/app/shared/components/`.
+        - **StatusBadge**: ver detalles exactos en `PLAN_IMPLEMENTACION_FRONTEND_v2.md` sección 6.4 y ejemplos. 
+            - Chip/Badge tipado para 3 estados almacén: `'PENDIENTE' | 'EN_TRANSITO' | 'COMPLETADO'`.
+            - Inputs: `estado: EstadoActividad` (union type).
+            - Estilos: fondo y texto según color institucional (`bg-orange-100`, `bg-blue-100`, `bg-green-100`, etc.).
+            - Uso: en listas y detalles donde se represente el estado de actividad almacén.
+            - Export standalone y testabilidad.
+        - **ColorPicker**: se debe crear un componente base de selector de color reutilizable (ver mención en plan, presente junto a `status-badge`, usado en mantenimiento de Tipos de Actividad, TOPS, admin colores...).
+            - Ubicación: `src/app/shared/components/color-picker/color-picker.component.ts`.
+            - Debe integrarse luego con formularios usando Angular Material y poder aceptar paletas institucionales.
+            - Referencia: plan sección 6.4, consultar Design System/ejemplo Material si procede.
+        - Ambos componentes deben tener ejemplos de uso y test básico.
+      ---
 - [ ] **Tests unitarios Auth frontend (Jasmine)**  
       **Horas:** 2h  
-      **Notas:** Tests de `AuthService` y flujo básico de autenticación.
-
----
-
-## Semana 2 – Módulo TEMPO Completo
-
-### Lunes S2
-- [ ] **Modelos TypeScript TEMPO (`actividad.model.ts` completo)**  
-      **Horas:** 2h  
-      **Notas:** Definir interfaces v2 alineadas con backend.
-- [ ] **`ActividadService` + `EspacioService` + `TipoActividadService`**  
-      **Horas:** 4h  
-      **Notas:** Servicios con métodos v2 para CRUD y filtros principales.
-
-### Martes S2
-- [ ] **Instalar y configurar FullCalendar**  
-      **Horas:** 2h  
-      **Notas:** Añadir dependencias npm, configurar módulo y tipos.
-- [ ] **`CalendarioComponent` base con FullCalendar**  
-      **Horas:** 4h  
-      **Notas:** Integrar eventos, vistas (semanal/mensual) y carga de datos desde API.
-
-### Miércoles S2
-- [ ] **Componente `WeeklyExcelView` (landing TEMPO)**  
-      **Horas:** 5h  
-      **Notas:** Tabla tipo Excel con vista semanal de actividades.
-- [ ] **Componente contenedor `TEMPO Landing`**  
-      **Horas:** 2h  
-      **Notas:** Layout con tabs: vista Excel / vista Calendario.
-
-### Jueves S2
-- [ ] **Dialog de Actividad (crear/editar) con campos v2**  
-      **Horas:** 4h  
-      **Notas:** `MatDialog` con formulario completo de actividad.
-- [ ] **`Actividad Status Control` (botones de transición de estados)**  
-      **Horas:** 2h  
-      **Notas:** Controles para cambios de estado de almacén.
-- [ ] **Dialog de clonado de Actividad (`Actividad Clone Dialog`)**  
-      **Horas:** 2h  
-      **Notas:** Selector de fecha destino y llamada al endpoint de clonación.
-
-### Viernes S2
-- [ ] **Admin: Lista + Form de `Espacios`**  
-      **Horas:** 3h  
-      **Notas:** Tabla (Material table) + formulario CRUD.
-- [ ] **Admin: Lista + Form de `TiposActividad`**  
-      **Horas:** 2h  
-      **Notas:** Incluir selector de color (color picker).
-- [ ] **Admin: Lista + Form de `Departamentos` (jefe, personal)**  
-      **Horas:** 3h  
-      **Notas:** Formularios con selects de usuarios (jefe y personal).
-
----
-
-## Semana 3 – TOPS + Integraciones + Cierre
-
-### Lunes S3
-- [ ] **Modelos TypeScript TOPS (`guion.model.ts` completo)**  
-      **Horas:** 2h  
-      **Notas:** Interfaces v2 para Guion, Acto, Escena, Elemento, etc.
-- [ ] **`GuionService` (con filtro por temporada y `misGuiones`)**  
-      **Horas:** 3h  
-      **Notas:** Incluir computed signals para filtros y listas derivadas.
-- [ ] **Componente `TOPS Landing` (2 listas)**  
-      **Horas:** 3h  
-      **Notas:** Listas: guiones por temporada y “Mis guiones”.
-
-### Martes S3
-- [ ] **Lista de Guiones con filtro por temporada**  
-      **Horas:** 2h  
-      **Notas:** Material table con filtros y paginación básica.
-- [ ] **Editor de Guion – estructura base**  
-      **Horas:** 4h  
-      **Notas:** Componente contenedor para la edición jerárquica del guion.
-- [ ] **Estilos del editor emulando Word**  
-      **Horas:** 2h  
-      **Notas:** CSS específico para simular aspecto de documento.
-
-### Miércoles S3
-- [ ] **Panel de Acto expandible (CDK accordion)**  
-      **Horas:** 2h  
-      **Notas:** Cada acto como panel expandible/colapsable.
-- [ ] **Panel de Escena con elementos**  
-      **Horas:** 3h  
-      **Notas:** Lista de elementos de guion en cada escena, preparada para drag & drop.
-- [ ] **Elemento de guion con colores configurables**  
-      **Horas:** 2h  
-      **Notas:** Item que usa los colores configurables (`ColorElementoService`).
-
-### Jueves S3
-- [ ] **Dialog TOP (crear/editar elemento de guion)**  
-      **Horas:** 3h  
-      **Notas:** Formulario completo para alta/edición de elemento.
-- [ ] **Drag & drop de elementos (CDK)**  
-      **Horas:** 3h  
-      **Notas:** Permitir reordenar elementos dentro de escenas.
-- [ ] **Componente de Cartelería Global**  
-      **Horas:** 3h  
-      **Notas:** Vista agregada de cartelería de todas las salas.
-
-### Viernes S3
-- [ ] **Vista “solo TOPs” + Vista por departamento**  
-      **Horas:** 3h  
-      **Notas:** Filtros para mostrar solo TOPs y segmentar por departamento.
-- [ ] **Admin: Temporadas (CRUD)**  
-      **Horas:** 2h  
-      **Notas:** Lista y formulario de mantenimiento de temporadas.
-- [ ] **Fixes y ajustes finales frontend**  
-      **Horas:** 2h  
-      **Notas:** Corrección de bugs detectados, pulido de UX/UI.
+      **Notas (detallado):**
+        - Realizar tests unitarios para el servicio de autenticación (`AuthService`) y su flujo principal: login/logout/guardar usuario/roles/permiso módulo.
+        - Herramienta: Jasmine (integración Angular estándar).
+        - Estructura típica: `src/app/core/auth/auth.service.spec.ts`.
+        - Cobertura: pathways principales y validaciones edge.
+        - Ver plan sección 4.1 y ejemplo de plan de testing básico frontend.
+        - Importante: los tests deberán ejecutarse correctamente en el entorno del repositorio con los mocks necesarios.
+      ---

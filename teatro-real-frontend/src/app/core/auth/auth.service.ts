@@ -80,29 +80,35 @@ export class AuthService {
     return permiso ? ['ESCRITURA', 'COMPLETO'].includes(permiso.nivelAcceso) : false;
   }
 
-  // --- Persistencia localStorage
+  // --- Persistencia localStorage protegida para SSR/Node
   private setAuth(token: string, usuario: Usuario): void {
-    localStorage.setItem('auth_token', token);
-    localStorage.setItem('auth_user', JSON.stringify(usuario));
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem('auth_token', token);
+      localStorage.setItem('auth_user', JSON.stringify(usuario));
+    }
     this.tokenSignal.set(token);
     this.currentUserSignal.set(usuario);
   }
 
   private clearAuth(): void {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+    }
     this.tokenSignal.set(null);
     this.currentUserSignal.set(null);
     this.permisosModuloSignal.set([]);
   }
 
   private loadStoredAuth(): void {
-    const token = localStorage.getItem('auth_token');
-    const userStr = localStorage.getItem('auth_user');
-    if (token && userStr) {
-      this.tokenSignal.set(token);
-      this.currentUserSignal.set(JSON.parse(userStr));
-      this.loadPermisosModulo();
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const token = localStorage.getItem('auth_token');
+      const userStr = localStorage.getItem('auth_user');
+      if (token && userStr) {
+        this.tokenSignal.set(token);
+        this.currentUserSignal.set(JSON.parse(userStr));
+        this.loadPermisosModulo();
+      }
     }
   }
 
