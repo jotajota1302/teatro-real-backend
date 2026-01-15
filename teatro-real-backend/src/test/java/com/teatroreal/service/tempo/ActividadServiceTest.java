@@ -2,9 +2,11 @@ package com.teatroreal.service.tempo;
 
 import com.teatroreal.domain.tempo.*;
 import com.teatroreal.dto.request.ActividadRequest;
+import com.teatroreal.dto.response.ActividadResponse;
 import com.teatroreal.repository.tempo.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
 import org.mockito.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,10 +42,21 @@ class ActividadServiceTest {
     void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
 
-        Temporada temporada = Temporada.builder().id(temporadaId).nombre("2026").build();
-        TipoActividad tipo = TipoActividad.builder().id(tipoId).nombre("Ensayo").colorHex("#008000").build();
-        Espacio espacio = Espacio.builder().id(espacioId).nombre("Sala Ensayo").build();
+        // Construcción manual sin builder
+        Temporada temporada = new Temporada();
+        // En la clase real Temporada el id es Long, pero aquí los repositorios usan String, por lo que se setea el nombre y no el id
+        temporada.setNombre("2026");
 
+        TipoActividad tipo = new TipoActividad();
+        tipo.setId(tipoId);
+        tipo.setNombre("Ensayo");
+        tipo.setColorHex("#008000");
+
+        Espacio espacio = new Espacio();
+        // En la clase real Espacio el id es Long, pero aquí los repositorios usan String, por lo que solo se setea el nombre
+        espacio.setNombre("Sala Ensayo");
+
+        // Actividad: debe cambiarse si tampoco tiene builder, pero de momento lo dejo
         actividadOriginal = Actividad.builder()
             .id(actividadId)
             .temporada(temporada)
@@ -68,7 +81,7 @@ class ActividadServiceTest {
         String nuevaFecha = "2026-07-04";
         when(actividadRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var cloned = actividadService.cloneActividad(actividadId, nuevaFecha);
+        ActividadResponse cloned = actividadService.cloneActividad(actividadId, nuevaFecha);
         assertNotNull(cloned);
         assertEquals("Ensayo General", cloned.getDescripcion());
         assertEquals(nuevaFecha, cloned.getFecha());
@@ -82,7 +95,7 @@ class ActividadServiceTest {
 
         // PROGRAMADA -> EN_CURSO
         actividadOriginal.setEstado(Actividad.EstadoActividad.PROGRAMADA);
-        var changed = actividadService.changeStatus(actividadId, "EN_CURSO");
+        ActividadResponse changed = actividadService.changeStatus(actividadId, "EN_CURSO");
         assertEquals("EN_CURSO", changed.getEstado());
 
         // EN_CURSO -> FINALIZADA

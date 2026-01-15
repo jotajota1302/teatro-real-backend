@@ -90,7 +90,7 @@ public class ActividadService {
             .orElseThrow(() -> new EntityNotFoundException("Espacio no encontrado"));
         Departamento departamento = null;
         if (req.getDepartamentoId() != null && !req.getDepartamentoId().isEmpty()) {
-            departamento = departamentoRepository.findById(req.getDepartamentoId())
+            departamento = departamentoRepository.findById(Long.valueOf(req.getDepartamentoId()))
                 .orElseThrow(() -> new EntityNotFoundException("Departamento no encontrado"));
         }
 
@@ -123,7 +123,7 @@ public class ActividadService {
             .orElseThrow(() -> new EntityNotFoundException("Espacio no encontrado"));
         Departamento departamento = null;
         if (req.getDepartamentoId() != null && !req.getDepartamentoId().isEmpty()) {
-            departamento = departamentoRepository.findById(req.getDepartamentoId())
+            departamento = departamentoRepository.findById(Long.valueOf(req.getDepartamentoId()))
                 .orElseThrow(() -> new EntityNotFoundException("Departamento no encontrado"));
         }
 
@@ -221,23 +221,23 @@ public class ActividadService {
             .notas(a.getNotas())
             .tipoActividad(
                 ActividadResponse.TipoActividadInfo.builder()
-                    .id(a.getTipoActividad().getId())
+                    .id(String.valueOf(a.getTipoActividad().getId()))
                     .nombre(a.getTipoActividad().getNombre())
                     .colorHex(a.getTipoActividad().getColorHex())
                     .build())
             .espacio(
                 ActividadResponse.EspacioInfo.builder()
-                    .id(a.getEspacio().getId())
+                    .id(String.valueOf(a.getEspacio().getId()))
                     .nombre(a.getEspacio().getNombre())
                     .build())
             .temporada(
                 ActividadResponse.TemporadaInfo.builder()
-                    .id(a.getTemporada().getId())
+                    .id(String.valueOf(a.getTemporada().getId()))
                     .nombre(a.getTemporada().getNombre())
                     .build())
             .departamento(a.getDepartamento() != null
                 ? ActividadResponse.DepartamentoInfo.builder()
-                    .id(a.getDepartamento().getId())
+                    .id(String.valueOf(a.getDepartamento().getId()))
                     .nombre(a.getDepartamento().getNombre())
                     .build()
                 : null)

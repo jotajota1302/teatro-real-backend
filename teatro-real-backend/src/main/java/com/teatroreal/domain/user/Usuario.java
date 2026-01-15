@@ -14,13 +14,6 @@ public class Usuario {
     @Column(length = 36)
     private String id;
 
-    @PrePersist
-    public void prePersist() {
-        if (id == null) {
-            id = java.util.UUID.randomUUID().toString();
-        }
-    }
-
     @Column(nullable = false, unique = true)
     private String email;
 
@@ -47,5 +40,82 @@ public class Usuario {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    // Getters and setters (omitidos por brevedad pero asumidos)
+    // Getter necesario para id (para evitar error en PermisoModuloResponse)
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Boolean getActivo() {
+        return activo;
+    }
+    public void setActivo(Boolean activo) {
+        this.activo = activo;
+    }
+
+    public Rol getRol() {
+        return rol;
+    }
+    public void setRol(Rol rol) {
+        this.rol = rol;
+    }
+
+    public Departamento getDepartamento() {
+        return departamento;
+    }
+    public void setDepartamento(Departamento departamento) {
+        this.departamento = departamento;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
+
+    public LocalDateTime getUltimoAcceso() {
+        return ultimoAcceso;
+    }
+    public void setUltimoAcceso(LocalDateTime ultimoAcceso) {
+        this.ultimoAcceso = ultimoAcceso;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (id == null) {
+            id = java.util.UUID.randomUUID().toString();
+        }
+    }
 }

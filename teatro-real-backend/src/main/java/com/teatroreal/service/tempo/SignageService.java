@@ -29,7 +29,7 @@ public class SignageService {
         LocalDate hoy = LocalDate.now();
 
         for (Espacio espacio : espacios) {
-            List<Actividad> proximas = actividadRepository.findByEspacioId(espacio.getId()).stream()
+            List<Actividad> proximas = actividadRepository.findByEspacioId(String.valueOf(espacio.getId())).stream()
                     .filter(a -> !a.getFecha().isBefore(hoy))
                     .sorted((a1, a2) -> a1.getFecha().compareTo(a2.getFecha()))
                     .collect(Collectors.toList());

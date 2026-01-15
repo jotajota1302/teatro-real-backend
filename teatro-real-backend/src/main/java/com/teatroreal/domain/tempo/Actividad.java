@@ -4,9 +4,10 @@ import com.teatroreal.domain.tempo.Espacio;
 import com.teatroreal.domain.tempo.TipoActividad;
 import com.teatroreal.domain.tempo.Temporada;
 import com.teatroreal.domain.tempo.Departamento;
-import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import lombok.Builder;
+import lombok.AllArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -20,11 +21,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "actividad")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
 public class Actividad implements Serializable {
 
     @Id
@@ -80,6 +78,8 @@ public class Actividad implements Serializable {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    public Actividad() {}
+
     @PrePersist
     public void prePersist() {
         if (this.id == null) {
@@ -92,5 +92,98 @@ public class Actividad implements Serializable {
         EN_CURSO,
         FINALIZADA,
         CANCELADA
+    }
+
+    // GETTERS Y SETTERS
+
+    public String getId() {
+        return id;
+    }
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Temporada getTemporada() {
+        return temporada;
+    }
+    public void setTemporada(Temporada temporada) {
+        this.temporada = temporada;
+    }
+
+    public TipoActividad getTipoActividad() {
+        return tipoActividad;
+    }
+    public void setTipoActividad(TipoActividad tipoActividad) {
+        this.tipoActividad = tipoActividad;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public EstadoActividad getEstado() {
+        return estado;
+    }
+    public void setEstado(EstadoActividad estado) {
+        this.estado = estado;
+    }
+
+    public LocalDate getFecha() {
+        return fecha;
+    }
+    public void setFecha(LocalDate fecha) {
+        this.fecha = fecha;
+    }
+
+    public LocalTime getHoraInicio() {
+        return horaInicio;
+    }
+    public void setHoraInicio(LocalTime horaInicio) {
+        this.horaInicio = horaInicio;
+    }
+
+    public LocalTime getHoraFin() {
+        return horaFin;
+    }
+    public void setHoraFin(LocalTime horaFin) {
+        this.horaFin = horaFin;
+    }
+
+    public Espacio getEspacio() {
+        return espacio;
+    }
+    public void setEspacio(Espacio espacio) {
+        this.espacio = espacio;
+    }
+
+    public Departamento getDepartamento() {
+        return departamento;
+    }
+    public void setDepartamento(Departamento departamento) {
+        this.departamento = departamento;
+    }
+
+    public String getNotas() {
+        return notas;
+    }
+    public void setNotas(String notas) {
+        this.notas = notas;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

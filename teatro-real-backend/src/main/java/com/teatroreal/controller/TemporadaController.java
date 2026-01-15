@@ -1,7 +1,7 @@
 package com.teatroreal.controller;
 
 import com.teatroreal.domain.tempo.Temporada;
-import com.teatroreal.service.TemporadaService;
+import com.teatroreal.service.tempo.TemporadaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

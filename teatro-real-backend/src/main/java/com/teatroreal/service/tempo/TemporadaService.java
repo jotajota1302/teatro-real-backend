@@ -1,4 +1,4 @@
-package com.teatroreal.service;
+package com.teatroreal.service.tempo;
 
 import com.teatroreal.domain.tempo.Temporada;
 import com.teatroreal.repository.TemporadaRepository;
@@ -19,7 +19,7 @@ public class TemporadaService {
     }
 
     public Temporada findById(Long id) {
-        return temporadaRepository.findById(id).orElseThrow();
+        return temporadaRepository.findById(id).orElseThrow(() -> new RuntimeException("Temporada no encontrada"));
     }
 
     public Temporada create(Temporada t) {
@@ -27,7 +27,7 @@ public class TemporadaService {
     }
 
     public Temporada update(Long id, Temporada t) {
-        Temporada existing = temporadaRepository.findById(id).orElseThrow();
+        Temporada existing = temporadaRepository.findById(id).orElseThrow(() -> new RuntimeException("Temporada no encontrada"));
         existing.setNombre(t.getNombre());
         existing.setFechaInicio(t.getFechaInicio());
         existing.setFechaFin(t.getFechaFin());
@@ -46,6 +46,6 @@ public class TemporadaService {
             t.setActiva(t.getId().equals(id));
             temporadaRepository.save(t);
         }
-        return temporadaRepository.findById(id).orElseThrow();
+        return temporadaRepository.findById(id).orElseThrow(() -> new RuntimeException("Temporada no encontrada"));
     }
 }
