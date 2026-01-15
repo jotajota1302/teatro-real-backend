@@ -1,4 +1,4 @@
-package com.teatroreal;
+package com.teatroreal.service.user;
 
 import com.teatroreal.service.UsuarioService;
 import com.teatroreal.domain.user.Usuario;

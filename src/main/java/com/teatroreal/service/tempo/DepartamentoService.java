@@ -1,4 +1,4 @@
-package com.teatroreal.service;
+package com.teatroreal.service.tempo;
 
 import com.teatroreal.domain.tempo.Departamento;
 import com.teatroreal.domain.user.Usuario;
@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.NoSuchElementException;
 
 @Service
 public class DepartamentoService {
@@ -24,7 +25,7 @@ public class DepartamentoService {
     }
 
     public Departamento findById(Long id) {
-        return departamentoRepository.findById(id).orElseThrow();
+        return departamentoRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Departamento no encontrado"));
     }
 
     public Departamento create(Departamento d) {
@@ -33,7 +34,7 @@ public class DepartamentoService {
     }
 
     public Departamento update(Long id, Departamento d) {
-        Departamento existing = departamentoRepository.findById(id).orElseThrow();
+        Departamento existing = departamentoRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Departamento no encontrado"));
         existing.setNombre(d.getNombre());
         existing.setCodigo(d.getCodigo());
         existing.setDescripcion(d.getDescripcion());
@@ -50,7 +51,7 @@ public class DepartamentoService {
 
     // Asigna jefe y personal a un departamento
     public Departamento setJefeYPersonal(Long departamentoId, String jefeId, Set<String> personalIds) {
-        Departamento d = departamentoRepository.findById(departamentoId).orElseThrow();
+        Departamento d = departamentoRepository.findById(departamentoId).orElseThrow(() -> new NoSuchElementException("Departamento no encontrado"));
         if (jefeId != null) {
             Usuario jefe = usuarioRepository.findById(jefeId).orElse(null);
             d.setJefe(jefe);

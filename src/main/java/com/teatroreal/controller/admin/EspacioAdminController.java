@@ -55,7 +55,7 @@ public class EspacioAdminController {
     public ResponseEntity<Espacio> update(@PathVariable String id, @Valid @RequestBody Espacio espacio) {
         if (!espacioRepository.existsById(id))
             throw new EntityNotFoundException("Espacio no encontrado");
-        espacio.setId(id);
+        espacio.setId(Long.valueOf(id));
         Espacio updated = espacioRepository.save(espacio);
         return ResponseEntity.ok(updated);
     }

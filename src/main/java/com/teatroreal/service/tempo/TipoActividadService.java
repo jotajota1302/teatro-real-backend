@@ -36,11 +36,10 @@ public class TipoActividadService {
         if (tipoActividadRepository.existsByNombre(request.getNombre())) {
             throw new IllegalArgumentException("Ya existe un Tipo de Actividad con ese nombre");
         }
-        TipoActividad tipoActividad = TipoActividad.builder()
-                .nombre(request.getNombre())
-                .colorHex(request.getColorHex())
-                .descripcion(request.getDescripcion())
-                .build();
+        TipoActividad tipoActividad = new TipoActividad();
+        tipoActividad.setNombre(request.getNombre());
+        tipoActividad.setColorHex(request.getColorHex());
+        tipoActividad.setDescripcion(request.getDescripcion());
         tipoActividad = tipoActividadRepository.save(tipoActividad);
         return toResponse(tipoActividad);
     }

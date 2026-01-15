@@ -10,37 +10,40 @@ import java.util.List;
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
 
-    public UsuarioService(UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
+    public UsuarioService(UsuarioRepository usuarioRepository) { 
+        this.usuarioRepository = usuarioRepository; 
     }
 
-    public List<Usuario> findAll() {
-        return usuarioRepository.findAll();
+    public void delete(String id) {
+        Usuario existente = usuarioRepository.findById(id)
+            .orElseThrow(() -> new javax.persistence.EntityNotFoundException("Usuario no encontrado"));
+        usuarioRepository.deleteById(id);
     }
 
-    public Usuario findById(String id) {
-        return usuarioRepository.findById(id).orElseThrow();
+    public List<Usuario> findAll() { 
+        return usuarioRepository.findAll(); 
     }
-
+    public Usuario findById(String id) { 
+        return usuarioRepository.findById(id)
+            .orElseThrow(() -> new javax.persistence.EntityNotFoundException("Usuario no encontrado")); 
+    }
     public Usuario create(Usuario usuario) {
         return usuarioRepository.save(usuario);
     }
 
     public Usuario update(String id, Usuario usuario) {
-        Usuario existing = usuarioRepository.findById(id).orElseThrow();
+        Usuario existente = usuarioRepository.findById(id)
+            .orElseThrow(() -> new javax.persistence.EntityNotFoundException("Usuario no encontrado"));
 
-        existing.setNombre(usuario.getNombre());
-        existing.setEmail(usuario.getEmail());
-        existing.setActivo(usuario.isActivo());
-        existing.setRol(usuario.getRol());
-        existing.setDepartamento(usuario.getDepartamento());
-        existing.setAvatarUrl(usuario.getAvatarUrl());
-        existing.setUltimoAcceso(usuario.getUltimoAcceso());
+        existente.setNombre(usuario.getNombre());
+        existente.setEmail(usuario.getEmail());
+        existente.setAvatarUrl(usuario.getAvatarUrl());
+        existente.setRol(usuario.getRol());
+        existente.setDepartamento(usuario.getDepartamento());
+        existente.setActivo(usuario.getActivo());
+        existente.setUltimoAcceso(usuario.getUltimoAcceso());
+        // No modificamos id, createdAt, updatedAt directamente
 
-        return usuarioRepository.save(existing);
-    }
-
-    public void delete(String id) {
-        usuarioRepository.deleteById(id);
+        return usuarioRepository.save(existente);
     }
 }
