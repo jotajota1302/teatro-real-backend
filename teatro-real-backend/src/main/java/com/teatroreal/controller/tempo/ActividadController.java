@@ -1,18 +1,17 @@
 package com.teatroreal.controller.tempo;
 
-import com.teatroreal.domain.tempo.Actividad;
-import com.teatroreal.domain.tempo.EstadoActividad;
+import com.teatroreal.dto.request.ActividadRequest;
+import com.teatroreal.dto.response.ActividadResponse;
 import com.teatroreal.service.tempo.ActividadService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import lombok.Data;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-import java.time.LocalDate;
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -20,90 +19,96 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ActividadController {
 
-    private final ActividadService service;
+    private final ActividadService actividadService;
 
-    @Operation(summary = "Listar todas las actividades")
-    @ApiResponse(responseCode = "200", description = "Listado correcto")
+    @Operation(summary = "Obtener todas las actividades")
+    @ApiResponse(responseCode = "200", description = "Actividades listadas")
     @GetMapping
-    public ResponseEntity<List<Actividad>> findAll(
-            @RequestParam(required = false) Long espacioId,
-            @RequestParam(required = false) Long tipoActividadId,
-            @RequestParam(required = false) String temporada,
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha
+    public ResponseEntity<List<ActividadResponse>> getAll() {
+        return ResponseEntity.ok(actividadService.getAll());
+    }
+
+    @Operation(summary = "Obtener actividades filtradas por espacio, tipo, temporada o fechas")
+    @ApiResponse(responseCode = "200", description = "Actividades filtradas listadas")
+    @GetMapping("/search")
+    public ResponseEntity<List<ActividadResponse>> search(
+            @RequestParam(required = false) String espacioId,
+            @RequestParam(required = false) String tipoActividadId,
+            @RequestParam(required = false) String temporadaId,
+            @RequestParam(required = false) String fechaInicio,
+            @RequestParam(required = false) String fechaFin
     ) {
-        // Filtro combinado SÓLO si algún filtro viene, sino todo
-        if (espacioId != null || tipoActividadId != null || temporada != null || fecha != null) {
-            return ResponseEntity.ok(service.findByCriteria(espacioId, tipoActividadId, temporada, fecha));
-        } else {
-            return ResponseEntity.ok(service.findAll());
-        }
+        return ResponseEntity.ok(
+            actividadService.search(espacioId, tipoActividadId, temporadaId, fechaInicio, fechaFin)
+        );
     }
 
-    @Operation(summary = "Buscar actividad por id")
-    @ApiResponse(responseCode = "200", description = "Encontrada")
+    @Operation(summary = "Obtener una actividad por ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Actividad encontrada"),
+        @ApiResponse(responseCode = "404", description = "No encontrada")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<Actividad> findById(@PathVariable String id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<ActividadResponse> getById(@PathVariable String id) {
+        return ResponseEntity.ok(actividadService.getById(id));
     }
 
-    @Operation(summary = "Crear actividad")
-    @ApiResponse(responseCode = "201", description = "Creada")
+    @Operation(summary = "Crear una nueva actividad")
+    @ApiResponse(responseCode = "201", description = "Actividad creada")
     @PostMapping
-    public ResponseEntity<Actividad> create(@Valid @RequestBody Actividad actividad) {
-        Actividad created = service.save(actividad);
+    public ResponseEntity<ActividadResponse> create(@Valid @RequestBody ActividadRequest request) {
+        ActividadResponse created = actividadService.create(request);
         return ResponseEntity.status(201).body(created);
     }
 
-    @Operation(summary = "Actualizar actividad")
-    @ApiResponse(responseCode = "200", description = "Actualizada")
+    @Operation(summary = "Actualizar una actividad existente")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Actividad actualizada"),
+        @ApiResponse(responseCode = "404", description = "No encontrada")
+    })
     @PutMapping("/{id}")
-    public ResponseEntity<Actividad> update(@PathVariable String id, @Valid @RequestBody Actividad actividad) {
-        actividad.setId(id);
-        Actividad updated = service.save(actividad);
+    public ResponseEntity<ActividadResponse> update(@PathVariable String id, @Valid @RequestBody ActividadRequest request) {
+        ActividadResponse updated = actividadService.update(id, request);
         return ResponseEntity.ok(updated);
     }
 
-    @Operation(summary = "Eliminar actividad")
-    @ApiResponse(responseCode = "204", description = "Eliminada")
+    @Operation(summary = "Eliminar una actividad")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Eliminada correctamente"),
+        @ApiResponse(responseCode = "404", description = "No encontrada")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
-        service.delete(id);
+        actividadService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
-    // Nuevo endpoint: clonar
-    @Operation(summary = "Clonar actividad en otra fecha")
-    @ApiResponse(responseCode = "201", description = "Clonada")
+    @Operation(summary = "Clonar una actividad a nueva fecha")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Actividad clonada"),
+        @ApiResponse(responseCode = "404", description = "No encontrada")
+    })
     @PostMapping("/{id}/clone")
-    public ResponseEntity<Actividad> clone(
+    public ResponseEntity<ActividadResponse> cloneActividad(
             @PathVariable String id,
-            @RequestBody CloneActividadRequest request
+            @RequestParam String fecha // Formato ISO-8601 yyyy-MM-dd
     ) {
-        Actividad clonada = service.clonarActividad(id, request.getFecha());
-        return ResponseEntity.status(201).body(clonada);
+        ActividadResponse cloned = actividadService.cloneActividad(id, fecha);
+        return ResponseEntity.status(201).body(cloned);
     }
 
-    // Nuevo endpoint: actualizar estado almacén
-    @Operation(summary = "Actualizar estado almacén de una actividad")
-    @ApiResponse(responseCode = "200", description = "Estado actualizado")
+    @Operation(summary = "Cambiar el estado de una actividad (máquina de estados)")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Estado actualizado"),
+        @ApiResponse(responseCode = "404", description = "No encontrada"),
+        @ApiResponse(responseCode = "400", description = "Transición de estado inválida")
+    })
     @PutMapping("/{id}/status")
-    public ResponseEntity<Actividad> updateStatus(
+    public ResponseEntity<ActividadResponse> changeStatus(
             @PathVariable String id,
-            @RequestBody UpdateEstadoRequest request
+            @RequestParam String nuevoEstado
     ) {
-        Actividad updated = service.actualizarEstado(id, request.getEstado());
-        return ResponseEntity.ok(updated);
-    }
-
-    // DTOs internos
-    @Data
-    public static class CloneActividadRequest {
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-        private LocalDate fecha;
-    }
-    @Data
-    public static class UpdateEstadoRequest {
-        private EstadoActividad estado;
+        ActividadResponse changed = actividadService.changeStatus(id, nuevoEstado);
+        return ResponseEntity.ok(changed);
     }
 }

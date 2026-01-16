@@ -1,14 +1,16 @@
--- MIGRACIÓN V3: Datos semilla para espacios y tipos de actividad
-
-INSERT INTO tipos_actividad (nombre, color_hex) VALUES
-('Función', '#0000FF'),
-('Ensayo', '#008000'),
-('Montaje', '#FA8072'),
-('Evento', '#FF1493');
-
-INSERT INTO espacios (nombre, tipo, color, capacidad, ubicacion, activo, orden)
+-- Migración V3: Datos semilla para Espacio y TipoActividad (TEMPO)
+-- Espacios (salas y almacenes)
+INSERT INTO espacio (id, nombre, tipo, capacidad, ubicacion, activo, orden)
 VALUES
-('Sala Principal', 'SALA', '#1a1a2e', 1724, 'Planta 0', true, 1),
-('Sala Gayarre', 'SALA', '#e94560', 400, 'Planta 1', true, 2),
-('Almacén A', 'ALMACEN', '#c9a227', 100, 'Subsuelo', true, 3),
-('Almacén B', 'ALMACEN', '#16213e', 80, 'Subsuelo', true, 4);
+  ('a1be98be-ecf1-42c2-b2c0-esp-sala-1', 'Sala Principal', 'SALA', 1750, 'Planta 1', TRUE, 1),
+  ('a1be98be-ecf1-42c2-b2c0-esp-ensayo', 'Sala de Ensayo', 'SALA', 150, 'Edificio Anexo', TRUE, 2),
+  ('a1be98be-ecf1-42c2-b2c0-esp-almacen-1', 'Almacén Escenografía', 'ALMACEN', 80, 'Sótano -1', TRUE, 3),
+  ('a1be98be-ecf1-42c2-b2c0-esp-almacen-2', 'Almacén Vestuario', 'ALMACEN', 40, 'Planta 2', TRUE, 4);
+
+-- Tipos de Actividad
+INSERT INTO tipo_actividad (id, nombre, color_hex, descripcion)
+VALUES
+  ('tcaf9050-11e7-4d3b-ta-funcion', 'Función', '#0000FF', 'Actividad de función principal'),
+  ('tcaf9050-11e7-4d3b-ta-ensayo', 'Ensayo', '#008000', 'Actividad de ensayo de compañía'),
+  ('tcaf9050-11e7-4d3b-ta-montaje', 'Montaje', '#FA8072', 'Montaje técnico'),
+  ('tcaf9050-11e7-4d3b-ta-evento', 'Evento', '#FF1493', 'Otro evento especial');

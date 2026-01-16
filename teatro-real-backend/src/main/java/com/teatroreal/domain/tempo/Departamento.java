@@ -2,7 +2,7 @@ package com.teatroreal.domain.tempo;
 
 import com.teatroreal.domain.user.Usuario;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,5 +37,69 @@ public class Departamento {
     )
     private Set<Usuario> personal = new HashSet<>();
 
-    // Getters and setters (omitidos por brevedad pero asumidos)
+    // --- GETTERS Y SETTERS COMPLETOS ---
+
+    public Long getId() {
+        return this.id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getCodigo() {
+        return this.codigo;
+    }
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
+    }
+
+    public String getNombre() {
+        return this.nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getDescripcion() {
+        return this.descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
+    public Usuario getJefe() {
+        return this.jefe;
+    }
+
+    public void setJefe(Usuario jefe) {
+        this.jefe = jefe;
+    }
+
+    public String getAmbito() {
+        return this.ambito;
+    }
+
+    public void setAmbito(String ambito) {
+        this.ambito = ambito;
+    }
+
+    public String getColorHex() {
+        return this.colorHex;
+    }
+
+    public void setColorHex(String colorHex) {
+        this.colorHex = colorHex;
+    }
+
+    public Set<Usuario> getPersonal() {
+        return personal;
+    }
+
+    public void setPersonal(Set<Usuario> personal) {
+        this.personal = personal;
+    }
 }

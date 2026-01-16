@@ -1,6 +1,6 @@
 package com.teatroreal.domain.user;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Set;
 
 @Entity

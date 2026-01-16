@@ -1,16 +1,16 @@
 package com.teatroreal.controller.admin;
 
 import com.teatroreal.domain.tempo.Espacio;
-import com.teatroreal.service.DepartamentoService;
-import com.teatroreal.service.TemporadaService;
-import com.teatroreal.service.tempo.EspacioService;
+import com.teatroreal.repository.tempo.EspacioRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -18,44 +18,58 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EspacioAdminController {
 
-    private final EspacioService espacioService;
+    private final EspacioRepository espacioRepository;
 
-    @Operation(summary = "Listar todos los espacios (admin)")
-    @ApiResponse(responseCode = "200", description = "Listado correcto")
+    @Operation(summary = "Listar todos los espacios")
+    @ApiResponse(responseCode = "200", description = "Espacios listados")
     @GetMapping
-    public ResponseEntity<List<Espacio>> findAll() {
-        return ResponseEntity.ok(espacioService.findAll());
+    public ResponseEntity<List<Espacio>> getAll() {
+        return ResponseEntity.ok(espacioRepository.findAll());
     }
 
-    @Operation(summary = "Obtener espacio por id (admin)")
-    @ApiResponse(responseCode = "200", description = "Encontrado")
+    @Operation(summary = "Obtener un espacio por ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Espacio encontrado"),
+        @ApiResponse(responseCode = "404", description = "No encontrado")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<Espacio> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(espacioService.findById(id));
+    public ResponseEntity<Espacio> getById(@PathVariable String id) {
+        return ResponseEntity.ok(espacioRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Espacio no encontrado")));
     }
 
-    @Operation(summary = "Crear espacio (admin)")
-    @ApiResponse(responseCode = "201", description = "Creado")
+    @Operation(summary = "Crear nuevo espacio")
+    @ApiResponse(responseCode = "201", description = "Espacio creado")
     @PostMapping
     public ResponseEntity<Espacio> create(@Valid @RequestBody Espacio espacio) {
-        Espacio created = espacioService.save(espacio);
-        return ResponseEntity.status(201).body(created);
+        Espacio saved = espacioRepository.save(espacio);
+        return ResponseEntity.status(201).body(saved);
     }
 
-    @Operation(summary = "Actualizar espacio (admin)")
-    @ApiResponse(responseCode = "200", description = "Actualizado")
+    @Operation(summary = "Actualizar espacio")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Espacio actualizado"),
+        @ApiResponse(responseCode = "404", description = "No encontrado")
+    })
     @PutMapping("/{id}")
-    public ResponseEntity<Espacio> update(@PathVariable Long id, @Valid @RequestBody Espacio espacio) {
-        espacio.setId(id);
-        Espacio updated = espacioService.save(espacio);
+    public ResponseEntity<Espacio> update(@PathVariable String id, @Valid @RequestBody Espacio espacio) {
+        if (!espacioRepository.existsById(id))
+            throw new EntityNotFoundException("Espacio no encontrado");
+        espacio.setId(Long.valueOf(id));
+        Espacio updated = espacioRepository.save(espacio);
         return ResponseEntity.ok(updated);
     }
 
-    @Operation(summary = "Eliminar espacio (admin)")
-    @ApiResponse(responseCode = "204", description = "Eliminado")
+    @Operation(summary = "Eliminar espacio")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Eliminado correctamente"),
+        @ApiResponse(responseCode = "404", description = "No encontrado")
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        espacioService.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable String id) {
+        Espacio espacio = espacioRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Espacio no encontrado"));
+        espacioRepository.delete(espacio);
         return ResponseEntity.noContent().build();
     }
 }
