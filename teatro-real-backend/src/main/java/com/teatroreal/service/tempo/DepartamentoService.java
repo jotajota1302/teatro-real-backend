@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.NoSuchElementException;
 
-@Service
+@Service("departamentoServiceTempo")
 public class DepartamentoService {
     private final DepartamentoRepository departamentoRepository;
     private final UsuarioRepository usuarioRepository;

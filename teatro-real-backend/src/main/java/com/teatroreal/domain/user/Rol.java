@@ -1,7 +1,6 @@
 package com.teatroreal.domain.user;
 
-import javax.persistence.*;
-import java.util.Set;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "roles")
@@ -10,27 +9,15 @@ public class Rol {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true)
-    private RolNombre nombre;
+    private String nombre;
 
-    private String descripcion;
+    // Otros campos y relaciones, añadir si es necesario
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "rol_permisos", joinColumns = @JoinColumn(name = "rol_id"))
-    @Column(name = "permiso")
-    private Set<String> permisos;
-
+    // Getters y setters
     public Long getId() { return id; }
-    public RolNombre getNombre() { return nombre; }
-    public void setNombre(RolNombre nombre) { this.nombre = nombre; }
-    public String getDescripcion() { return descripcion; }
-    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
-    public Set<String> getPermisos() { return permisos; }
-    public void setPermisos(Set<String> permisos) { this.permisos = permisos; }
-}
+    public void setId(Long id) { this.id = id; }
 
-// Enum for roles
-enum RolNombre {
-    ADMIN, GESTOR, OPERADOR, VISUALIZADOR
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 }

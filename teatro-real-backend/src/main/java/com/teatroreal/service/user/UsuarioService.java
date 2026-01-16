@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
+@Service("usuarioServiceUser")
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
 
