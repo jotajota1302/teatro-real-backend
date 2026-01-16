@@ -10,7 +10,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.mockito.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;

@@ -2,7 +2,7 @@ package com.teatroreal.domain.tempo;
 
 import com.teatroreal.domain.user.Usuario;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
