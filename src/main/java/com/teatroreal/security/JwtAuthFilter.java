@@ -6,7 +6,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import jakarta.servlet.FilterChain;
@@ -16,7 +15,6 @@ import jakarta.servlet.ServletException;
 import java.io.IOException;
 import java.util.Collections;
 
-@Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Autowired
