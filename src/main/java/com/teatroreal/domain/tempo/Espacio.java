@@ -1,6 +1,6 @@
 package com.teatroreal.domain.tempo;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "espacios")

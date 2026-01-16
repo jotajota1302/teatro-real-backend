@@ -2,7 +2,7 @@ package com.teatroreal.service.tempo;
 
 import com.teatroreal.domain.tempo.Departamento;
 import com.teatroreal.domain.user.Usuario;
-import com.teatroreal.repository.DepartamentoRepository;
+import com.teatroreal.repository.tempo.DepartamentoRepository;
 import com.teatroreal.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 

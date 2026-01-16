@@ -1,13 +1,11 @@
 package com.teatroreal.service;
 
 import com.teatroreal.domain.tempo.Departamento;
-import com.teatroreal.repository.DepartamentoRepository;
-import org.springframework.stereotype.Service;
+import com.teatroreal.repository.tempo.DepartamentoRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-@Service
 public class DepartamentoService {
     private final DepartamentoRepository departamentoRepository;
     public DepartamentoService(DepartamentoRepository departamentoRepository) { this.departamentoRepository = departamentoRepository; }
