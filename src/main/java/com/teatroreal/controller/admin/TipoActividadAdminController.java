@@ -1,59 +1,75 @@
 package com.teatroreal.controller.admin;
 
 import com.teatroreal.domain.tempo.TipoActividad;
-import com.teatroreal.service.tempo.TipoActividadService;
+import com.teatroreal.repository.tempo.TipoActividadRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/admin/tipos-actividad")
+@RequestMapping("/api/admin/tipo-actividades")
 @RequiredArgsConstructor
 public class TipoActividadAdminController {
 
-    private final TipoActividadService tipoActividadService;
+    private final TipoActividadRepository tipoActividadRepository;
 
-    @Operation(summary = "Listar todos los tipos de actividad (admin)")
-    @ApiResponse(responseCode = "200", description = "Listado correcto")
+    @Operation(summary = "Listar todos los tipos de actividad")
+    @ApiResponse(responseCode = "200", description = "Tipos de actividad listados")
     @GetMapping
-    public ResponseEntity<List<TipoActividad>> findAll() {
-        return ResponseEntity.ok(tipoActividadService.findAll());
+    public ResponseEntity<List<TipoActividad>> getAll() {
+        return ResponseEntity.ok(tipoActividadRepository.findAll());
     }
 
-    @Operation(summary = "Obtener tipo de actividad por id (admin)")
-    @ApiResponse(responseCode = "200", description = "Encontrado")
+    @Operation(summary = "Obtener tipo de actividad por ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Tipo de actividad encontrado"),
+        @ApiResponse(responseCode = "404", description = "No encontrado")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<TipoActividad> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(tipoActividadService.findById(id));
+    public ResponseEntity<TipoActividad> getById(@PathVariable String id) {
+        return ResponseEntity.ok(tipoActividadRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("TipoActividad no encontrado")));
     }
 
-    @Operation(summary = "Crear tipo de actividad (admin)")
-    @ApiResponse(responseCode = "201", description = "Creado")
+    @Operation(summary = "Crear tipo de actividad")
+    @ApiResponse(responseCode = "201", description = "Tipo de actividad creado")
     @PostMapping
     public ResponseEntity<TipoActividad> create(@Valid @RequestBody TipoActividad tipoActividad) {
-        TipoActividad created = tipoActividadService.save(tipoActividad);
-        return ResponseEntity.status(201).body(created);
+        TipoActividad saved = tipoActividadRepository.save(tipoActividad);
+        return ResponseEntity.status(201).body(saved);
     }
 
-    @Operation(summary = "Actualizar tipo de actividad (admin)")
-    @ApiResponse(responseCode = "200", description = "Actualizado")
+    @Operation(summary = "Actualizar tipo de actividad")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Tipo de actividad actualizado"),
+        @ApiResponse(responseCode = "404", description = "No encontrado")
+    })
     @PutMapping("/{id}")
-    public ResponseEntity<TipoActividad> update(@PathVariable Long id, @Valid @RequestBody TipoActividad tipoActividad) {
+    public ResponseEntity<TipoActividad> update(@PathVariable String id, @Valid @RequestBody TipoActividad tipoActividad) {
+        if (!tipoActividadRepository.existsById(id))
+            throw new EntityNotFoundException("TipoActividad no encontrado");
         tipoActividad.setId(id);
-        TipoActividad updated = tipoActividadService.save(tipoActividad);
+        TipoActividad updated = tipoActividadRepository.save(tipoActividad);
         return ResponseEntity.ok(updated);
     }
 
-    @Operation(summary = "Eliminar tipo de actividad (admin)")
-    @ApiResponse(responseCode = "204", description = "Eliminado")
+    @Operation(summary = "Eliminar tipo de actividad")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Eliminado correctamente"),
+        @ApiResponse(responseCode = "404", description = "No encontrado")
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        tipoActividadService.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable String id) {
+        TipoActividad ta = tipoActividadRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("TipoActividad no encontrado"));
+        tipoActividadRepository.delete(ta);
         return ResponseEntity.noContent().build();
     }
 }

@@ -2,11 +2,9 @@ package com.teatroreal.service;
 
 import com.teatroreal.domain.user.Usuario;
 import com.teatroreal.repository.UsuarioRepository;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
 
@@ -19,7 +17,8 @@ public class UsuarioService {
     }
 
     public Usuario findById(String id) {
-        return usuarioRepository.findById(id).orElseThrow();
+        return usuarioRepository.findById(id)
+            .orElseThrow(() -> new java.util.NoSuchElementException("Usuario no encontrado con id: " + id));
     }
 
     public Usuario create(Usuario usuario) {
@@ -27,11 +26,12 @@ public class UsuarioService {
     }
 
     public Usuario update(String id, Usuario usuario) {
-        Usuario existing = usuarioRepository.findById(id).orElseThrow();
+        Usuario existing = usuarioRepository.findById(id)
+            .orElseThrow(() -> new java.util.NoSuchElementException("Usuario no encontrado con id: " + id));
 
         existing.setNombre(usuario.getNombre());
         existing.setEmail(usuario.getEmail());
-        existing.setActivo(usuario.isActivo());
+        existing.setActivo(usuario.getActivo());
         existing.setRol(usuario.getRol());
         existing.setDepartamento(usuario.getDepartamento());
         existing.setAvatarUrl(usuario.getAvatarUrl());

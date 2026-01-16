@@ -1,14 +1,17 @@
 package com.teatroreal.controller.tempo;
 
-import com.teatroreal.domain.tempo.TipoActividad;
+import com.teatroreal.dto.request.TipoActividadRequest;
+import com.teatroreal.dto.response.TipoActividadResponse;
 import com.teatroreal.service.tempo.TipoActividadService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -16,44 +19,52 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TipoActividadController {
 
-    private final TipoActividadService service;
+    private final TipoActividadService tipoActividadService;
 
-    @Operation(summary = "Listar todos los tipos de actividad")
-    @ApiResponse(responseCode = "200", description = "Listado exitoso")
+    @Operation(summary = "Obtener todos los tipos de actividad")
+    @ApiResponse(responseCode = "200", description = "Tipos de actividad listados")
     @GetMapping
-    public ResponseEntity<List<TipoActividad>> findAll() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<List<TipoActividadResponse>> getAll() {
+        return ResponseEntity.ok(tipoActividadService.getAll());
     }
 
-    @Operation(summary = "Buscar tipo de actividad por id")
-    @ApiResponse(responseCode = "200", description = "Encontrado")
+    @Operation(summary = "Obtener un tipo de actividad por ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Tipo de actividad encontrado"),
+        @ApiResponse(responseCode = "404", description = "No encontrado")
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<TipoActividad> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<TipoActividadResponse> getById(@PathVariable String id) {
+        return ResponseEntity.ok(tipoActividadService.getById(id));
     }
 
-    @Operation(summary = "Crear tipo de actividad")
-    @ApiResponse(responseCode = "201", description = "Creado")
+    @Operation(summary = "Crear un nuevo tipo de actividad")
+    @ApiResponse(responseCode = "201", description = "Tipo de actividad creado")
     @PostMapping
-    public ResponseEntity<TipoActividad> create(@Valid @RequestBody TipoActividad tipoActividad) {
-        TipoActividad created = service.save(tipoActividad);
+    public ResponseEntity<TipoActividadResponse> create(@Valid @RequestBody TipoActividadRequest request) {
+        TipoActividadResponse created = tipoActividadService.create(request);
         return ResponseEntity.status(201).body(created);
     }
 
-    @Operation(summary = "Actualizar tipo de actividad")
-    @ApiResponse(responseCode = "200", description = "Actualizado")
+    @Operation(summary = "Actualizar un tipo de actividad existente")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Tipo de actividad actualizado"),
+        @ApiResponse(responseCode = "404", description = "No encontrado")
+    })
     @PutMapping("/{id}")
-    public ResponseEntity<TipoActividad> update(@PathVariable Long id, @Valid @RequestBody TipoActividad tipoActividad) {
-        tipoActividad.setId(id);
-        TipoActividad updated = service.save(tipoActividad);
+    public ResponseEntity<TipoActividadResponse> update(@PathVariable String id, @Valid @RequestBody TipoActividadRequest request) {
+        TipoActividadResponse updated = tipoActividadService.update(id, request);
         return ResponseEntity.ok(updated);
     }
 
-    @Operation(summary = "Eliminar tipo de actividad")
-    @ApiResponse(responseCode = "204", description = "Eliminado")
+    @Operation(summary = "Eliminar un tipo de actividad")
+    @ApiResponses({
+        @ApiResponse(responseCode = "204", description = "Eliminado correctamente"),
+        @ApiResponse(responseCode = "404", description = "No encontrado")
+    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        service.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable String id) {
+        tipoActividadService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }
