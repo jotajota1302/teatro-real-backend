@@ -1,42 +1,28 @@
 package com.teatroreal.domain.user;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
-@Table(name = "permisos_modulo",
-    uniqueConstraints = {@UniqueConstraint(columnNames = {"usuario_id", "modulo"})}
-)
+@Table(name = "permiso_modulo")
 public class PermisoModulo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", nullable = false)
-    private Usuario usuario;
-
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Modulo modulo; // TEMPO, TOPS, ADMIN
+    private String modulo;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private NivelAcceso nivelAcceso; // LECTURA, ESCRITURA, COMPLETO, NINGUNO
+    private String permiso;
 
-    public enum Modulo { TEMPO, TOPS, ADMIN }
-    public enum NivelAcceso { LECTURA, ESCRITURA, COMPLETO, NINGUNO }
+    // Relaciones, si las hubiera, añadir aquí
 
-    // Getters y setters necesarios para DTO y JPA
-
+    // Getters y setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public Usuario getUsuario() { return usuario; }
-    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
+    public String getModulo() { return modulo; }
+    public void setModulo(String modulo) { this.modulo = modulo; }
 
-    public Modulo getModulo() { return modulo; }
-    public void setModulo(Modulo modulo) { this.modulo = modulo; }
-
-    public NivelAcceso getNivelAcceso() { return nivelAcceso; }
-    public void setNivelAcceso(NivelAcceso nivelAcceso) { this.nivelAcceso = nivelAcceso; }
+    public String getPermiso() { return permiso; }
+    public void setPermiso(String permiso) { this.permiso = permiso; }
 }

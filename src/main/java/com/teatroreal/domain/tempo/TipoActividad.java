@@ -1,71 +1,22 @@
 package com.teatroreal.domain.tempo;
 
-import org.hibernate.annotations.GenericGenerator;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-import java.io.Serializable;
-import java.util.UUID;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "tipo_actividad")
-public class TipoActividad implements Serializable {
-
+public class TipoActividad {
     @Id
-    @Column(length = 36)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @NotBlank
-    @Size(max = 100)
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(nullable = false)
     private String nombre;
 
-    @NotBlank
-    @Size(max = 7)
-    @Column(nullable = false, length = 7)
-    private String colorHex;
+    // Otros campos, getters y setters según necesidades
 
-    @Size(max = 250)
-    @Column(length = 250)
-    private String descripcion;
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public TipoActividad() {}
-
-    @PrePersist
-    public void prePersist() {
-        if (this.id == null) {
-            this.id = UUID.randomUUID().toString();
-        }
-    }
-
-    // GETTERS Y SETTERS
-
-    public String getId() {
-        return id;
-    }
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getColorHex() {
-        return colorHex;
-    }
-    public void setColorHex(String colorHex) {
-        this.colorHex = colorHex;
-    }
-
-    public String getDescripcion() {
-        return descripcion;
-    }
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 }
