@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository("temporadaRepositoryTempo")
-public interface TemporadaRepository extends JpaRepository<Temporada, String> {
+public interface TemporadaRepository extends JpaRepository<Temporada, Long> {
 }
