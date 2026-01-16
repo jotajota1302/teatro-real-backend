@@ -1,7 +1,11 @@
 package com.teatroreal.controller;
 
 import com.teatroreal.domain.user.Usuario;
+<<<<<<< HEAD
 import com.teatroreal.service.UsuarioService;
+=======
+import com.teatroreal.service.user.UsuarioService;
+>>>>>>> 5f5ad938ebc041f2e716139a5623612b8f844e98
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
