@@ -1,7 +1,7 @@
 package com.teatroreal.service.tempo;
 
 import com.teatroreal.domain.tempo.Temporada;
-import com.teatroreal.repository.TemporadaRepository;
+import com.teatroreal.repository.tempo.TemporadaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,7 +18,7 @@ public class TemporadaService {
         return temporadaRepository.findAll();
     }
 
-    public Temporada findById(Long id) {
+    public Temporada findById(String id) {
         return temporadaRepository.findById(id).orElseThrow(() -> new RuntimeException("Temporada no encontrada"));
     }
 
@@ -26,7 +26,7 @@ public class TemporadaService {
         return temporadaRepository.save(t);
     }
 
-    public Temporada update(Long id, Temporada t) {
+    public Temporada update(String id, Temporada t) {
         Temporada existing = temporadaRepository.findById(id).orElseThrow(() -> new RuntimeException("Temporada no encontrada"));
         existing.setNombre(t.getNombre());
         existing.setFechaInicio(t.getFechaInicio());
@@ -35,12 +35,12 @@ public class TemporadaService {
         return temporadaRepository.save(existing);
     }
 
-    public void delete(Long id) {
+    public void delete(String id) {
         temporadaRepository.deleteById(id);
     }
 
     // Activar temporada (marca solo una como activa)
-    public Temporada activar(Long id) {
+    public Temporada activar(String id) {
         List<Temporada> temporadas = temporadaRepository.findAll();
         for (Temporada t : temporadas) {
             t.setActiva(t.getId().equals(id));
