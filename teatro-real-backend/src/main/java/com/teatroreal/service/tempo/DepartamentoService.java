@@ -2,11 +2,7 @@ package com.teatroreal.service.tempo;
 
 import com.teatroreal.domain.tempo.Departamento;
 import com.teatroreal.domain.user.Usuario;
-<<<<<<< HEAD
-import com.teatroreal.repository.DepartamentoRepository;
-=======
 import com.teatroreal.repository.tempo.DepartamentoRepository;
->>>>>>> 5f5ad938ebc041f2e716139a5623612b8f844e98
 import com.teatroreal.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.NoSuchElementException;
 
-<<<<<<< HEAD
-@Service
-=======
 @Service("departamentoServiceTempo")
->>>>>>> 5f5ad938ebc041f2e716139a5623612b8f844e98
 public class DepartamentoService {
     private final DepartamentoRepository departamentoRepository;
     private final UsuarioRepository usuarioRepository;

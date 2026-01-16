@@ -6,11 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-<<<<<<< HEAD
-@Service
-=======
 @Service("usuarioServiceUser")
->>>>>>> 5f5ad938ebc041f2e716139a5623612b8f844e98
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
 

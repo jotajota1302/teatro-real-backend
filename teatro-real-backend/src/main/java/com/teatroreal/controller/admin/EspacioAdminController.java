@@ -9,13 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-<<<<<<< HEAD
-import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
-=======
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
->>>>>>> 5f5ad938ebc041f2e716139a5623612b8f844e98
 import java.util.List;
 
 @RestController
@@ -38,11 +33,7 @@ public class EspacioAdminController {
         @ApiResponse(responseCode = "404", description = "No encontrado")
     })
     @GetMapping("/{id}")
-<<<<<<< HEAD
-    public ResponseEntity<Espacio> getById(@PathVariable String id) {
-=======
     public ResponseEntity<Espacio> getById(@PathVariable Long id) {
->>>>>>> 5f5ad938ebc041f2e716139a5623612b8f844e98
         return ResponseEntity.ok(espacioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Espacio no encontrado")));
     }
@@ -61,17 +52,10 @@ public class EspacioAdminController {
         @ApiResponse(responseCode = "404", description = "No encontrado")
     })
     @PutMapping("/{id}")
-<<<<<<< HEAD
-    public ResponseEntity<Espacio> update(@PathVariable String id, @Valid @RequestBody Espacio espacio) {
-        if (!espacioRepository.existsById(id))
-            throw new EntityNotFoundException("Espacio no encontrado");
-        espacio.setId(Long.valueOf(id));
-=======
     public ResponseEntity<Espacio> update(@PathVariable Long id, @Valid @RequestBody Espacio espacio) {
         if (!espacioRepository.existsById(id))
             throw new EntityNotFoundException("Espacio no encontrado");
         espacio.setId(id);
->>>>>>> 5f5ad938ebc041f2e716139a5623612b8f844e98
         Espacio updated = espacioRepository.save(espacio);
         return ResponseEntity.ok(updated);
     }
@@ -82,11 +66,7 @@ public class EspacioAdminController {
         @ApiResponse(responseCode = "404", description = "No encontrado")
     })
     @DeleteMapping("/{id}")
-<<<<<<< HEAD
-    public ResponseEntity<Void> delete(@PathVariable String id) {
-=======
     public ResponseEntity<Void> delete(@PathVariable Long id) {
->>>>>>> 5f5ad938ebc041f2e716139a5623612b8f844e98
         Espacio espacio = espacioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Espacio no encontrado"));
         espacioRepository.delete(espacio);

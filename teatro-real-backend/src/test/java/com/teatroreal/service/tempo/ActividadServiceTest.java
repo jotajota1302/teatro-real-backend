@@ -10,11 +10,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.mockito.*;
 import org.springframework.web.multipart.MultipartFile;
 
-<<<<<<< HEAD
-import javax.persistence.EntityNotFoundException;
-=======
 import jakarta.persistence.EntityNotFoundException;
->>>>>>> 5f5ad938ebc041f2e716139a5623612b8f844e98
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
@@ -75,15 +71,9 @@ class ActividadServiceTest {
             .build();
 
         when(actividadRepository.findById(actividadId)).thenReturn(Optional.of(actividadOriginal));
-<<<<<<< HEAD
-        when(temporadaRepository.findById(temporadaId)).thenReturn(Optional.of(temporada));
-        when(tipoActividadRepository.findById(tipoId)).thenReturn(Optional.of(tipo));
-        when(espacioRepository.findById(espacioId)).thenReturn(Optional.of(espacio));
-=======
         when(temporadaRepository.findById(1L)).thenReturn(Optional.of(temporada));
         when(tipoActividadRepository.findById(tipoId)).thenReturn(Optional.of(tipo));
         when(espacioRepository.findById(1L)).thenReturn(Optional.of(espacio));
->>>>>>> 5f5ad938ebc041f2e716139a5623612b8f844e98
     }
 
     @Test

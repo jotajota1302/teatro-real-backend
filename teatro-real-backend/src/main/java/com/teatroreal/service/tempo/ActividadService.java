@@ -13,11 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-<<<<<<< HEAD
-import javax.persistence.EntityNotFoundException;
-=======
 import jakarta.persistence.EntityNotFoundException;
->>>>>>> 5f5ad938ebc041f2e716139a5623612b8f844e98
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
@@ -86,19 +82,11 @@ public class ActividadService {
 
     public ActividadResponse create(ActividadRequest req) {
         // Validar entidades relacionadas
-<<<<<<< HEAD
-        Temporada temporada = temporadaRepository.findById(req.getTemporadaId())
-            .orElseThrow(() -> new EntityNotFoundException("Temporada no encontrada"));
-        TipoActividad tipo = tipoActividadRepository.findById(req.getTipoActividadId())
-            .orElseThrow(() -> new EntityNotFoundException("TipoActividad no encontrado"));
-        Espacio espacio = espacioRepository.findById(req.getEspacioId())
-=======
         Temporada temporada = temporadaRepository.findById(Long.valueOf(req.getTemporadaId()))
             .orElseThrow(() -> new EntityNotFoundException("Temporada no encontrada"));
         TipoActividad tipo = tipoActividadRepository.findById(req.getTipoActividadId())
             .orElseThrow(() -> new EntityNotFoundException("TipoActividad no encontrado"));
         Espacio espacio = espacioRepository.findById(Long.valueOf(req.getEspacioId()))
->>>>>>> 5f5ad938ebc041f2e716139a5623612b8f844e98
             .orElseThrow(() -> new EntityNotFoundException("Espacio no encontrado"));
         Departamento departamento = null;
         if (req.getDepartamentoId() != null && !req.getDepartamentoId().isEmpty()) {
@@ -127,19 +115,11 @@ public class ActividadService {
         Actividad actividad = actividadRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Actividad no encontrada"));
 
-<<<<<<< HEAD
-        Temporada temporada = temporadaRepository.findById(req.getTemporadaId())
-            .orElseThrow(() -> new EntityNotFoundException("Temporada no encontrada"));
-        TipoActividad tipo = tipoActividadRepository.findById(req.getTipoActividadId())
-            .orElseThrow(() -> new EntityNotFoundException("TipoActividad no encontrado"));
-        Espacio espacio = espacioRepository.findById(req.getEspacioId())
-=======
         Temporada temporada = temporadaRepository.findById(Long.valueOf(req.getTemporadaId()))
             .orElseThrow(() -> new EntityNotFoundException("Temporada no encontrada"));
         TipoActividad tipo = tipoActividadRepository.findById(req.getTipoActividadId())
             .orElseThrow(() -> new EntityNotFoundException("TipoActividad no encontrado"));
         Espacio espacio = espacioRepository.findById(Long.valueOf(req.getEspacioId()))
->>>>>>> 5f5ad938ebc041f2e716139a5623612b8f844e98
             .orElseThrow(() -> new EntityNotFoundException("Espacio no encontrado"));
         Departamento departamento = null;
         if (req.getDepartamentoId() != null && !req.getDepartamentoId().isEmpty()) {
