@@ -1,0 +1,4 @@
+com\teatroreal\UsuarioServiceTest.class
+com\teatroreal\controller\auth\AuthControllerTest.class
+com\teatroreal\service\tempo\ActividadServiceTest.class
+com\teatroreal\service\user\UsuarioServiceTest.class
