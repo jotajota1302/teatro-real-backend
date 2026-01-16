@@ -9,13 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-<<<<<<< HEAD
-import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
-=======
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
->>>>>>> 5f5ad938ebc041f2e716139a5623612b8f844e98
 import java.util.List;
 
 @RestController
