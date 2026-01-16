@@ -71,9 +71,9 @@ class ActividadServiceTest {
             .build();
 
         when(actividadRepository.findById(actividadId)).thenReturn(Optional.of(actividadOriginal));
-        when(temporadaRepository.findById(temporadaId)).thenReturn(Optional.of(temporada));
+        when(temporadaRepository.findById(1L)).thenReturn(Optional.of(temporada));
         when(tipoActividadRepository.findById(tipoId)).thenReturn(Optional.of(tipo));
-        when(espacioRepository.findById(espacioId)).thenReturn(Optional.of(espacio));
+        when(espacioRepository.findById(1L)).thenReturn(Optional.of(espacio));
     }
 
     @Test

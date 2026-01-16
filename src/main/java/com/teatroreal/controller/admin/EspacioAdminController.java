@@ -33,7 +33,7 @@ public class EspacioAdminController {
         @ApiResponse(responseCode = "404", description = "No encontrado")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Espacio> getById(@PathVariable String id) {
+    public ResponseEntity<Espacio> getById(@PathVariable Long id) {
         return ResponseEntity.ok(espacioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Espacio no encontrado")));
     }
@@ -52,10 +52,10 @@ public class EspacioAdminController {
         @ApiResponse(responseCode = "404", description = "No encontrado")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<Espacio> update(@PathVariable String id, @Valid @RequestBody Espacio espacio) {
+    public ResponseEntity<Espacio> update(@PathVariable Long id, @Valid @RequestBody Espacio espacio) {
         if (!espacioRepository.existsById(id))
             throw new EntityNotFoundException("Espacio no encontrado");
-        espacio.setId(Long.valueOf(id));
+        espacio.setId(id);
         Espacio updated = espacioRepository.save(espacio);
         return ResponseEntity.ok(updated);
     }
@@ -66,7 +66,7 @@ public class EspacioAdminController {
         @ApiResponse(responseCode = "404", description = "No encontrado")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable String id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         Espacio espacio = espacioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Espacio no encontrado"));
         espacioRepository.delete(espacio);

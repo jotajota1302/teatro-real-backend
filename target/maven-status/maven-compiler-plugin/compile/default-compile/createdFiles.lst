@@ -31,7 +31,6 @@ com\teatroreal\domain\tempo\ActividadDocumento.class
 com\teatroreal\dto\response\ActividadResponse$TemporadaInfo.class
 com\teatroreal\TeatroRealBackendApplication.class
 com\teatroreal\dto\response\ActividadResponse$EspacioInfo.class
-com\teatroreal\domain\user\PermisoModulo$NivelAcceso.class
 com\teatroreal\service\tempo\ActividadDocumentoService.class
 com\teatroreal\controller\PermisoModuloController.class
 com\teatroreal\domain\tempo\Actividad$EstadoActividad.class
@@ -53,7 +52,6 @@ com\teatroreal\dto\response\ActividadResponse$TipoActividadInfo.class
 com\teatroreal\service\tempo\TemporadaService.class
 com\teatroreal\controller\admin\EspacioAdminController.class
 com\teatroreal\dto\response\PermisoModuloResponse.class
-com\teatroreal\domain\user\PermisoModulo$Modulo.class
 com\teatroreal\controller\admin\TipoActividadAdminController.class
 com\teatroreal\dto\request\AuthRequest.class
 com\teatroreal\service\RolService.class
