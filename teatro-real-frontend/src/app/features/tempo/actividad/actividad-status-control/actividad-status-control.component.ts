@@ -3,7 +3,7 @@ import { Component, input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
+import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
 import { ActividadService } from '../../services/actividad.service';
 
 type EstadoActividad = 'PENDIENTE' | 'EN_TRANSITO' | 'COMPLETADO';

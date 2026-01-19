@@ -75,10 +75,13 @@ export class DepartamentoListComponent {
   departamentos = signal<Departamento[]>([
     {
       id: 1, codigo: 'PROD', nombre: 'Producción', ambito: 'TEATRO', colorHex: '#67c23a',
-      jefe: { id: 'u1', email: '', nombre: 'Laura Soto' },
+      jefe: { 
+        id: 'u1', email: '', nombre: 'Laura Soto', 
+        rol: { id: 1, nombre: 'JEFE', descripcion: 'Jefe del departamento', permisos: [] } 
+      },
       personal: [
-        { id: 'u3', email: '', nombre: 'Nuria Pérez' },
-        { id: 'u4', email: '', nombre: 'Javi Díaz' }
+        { id: 'u3', email: '', nombre: 'Nuria Pérez', rol: { id: 2, nombre: 'PERSONAL', descripcion: 'Miembro del departamento', permisos: [] } },
+        { id: 'u4', email: '', nombre: 'Javi Díaz', rol: { id: 2, nombre: 'PERSONAL', descripcion: 'Miembro del departamento', permisos: [] } }
       ]
     }
   ]);

@@ -158,6 +158,16 @@ export interface CalendarioFilter {
 }
 
 /**
+ * Rol de usuario para tipado en DepartamentoFormComponent y otros lugares.
+ */
+export interface Rol {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  permisos: any[];
+}
+
+/**
  * Usuario básico (importar de auth.models si aplica, aquí solo para tipado mínimo)
  */
 export interface Usuario {
@@ -165,4 +175,5 @@ export interface Usuario {
   nombre: string;
   email: string;
   avatarUrl?: string;
+  rol: Rol;
 }

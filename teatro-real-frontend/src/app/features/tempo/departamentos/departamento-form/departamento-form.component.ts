@@ -81,10 +81,10 @@ export class DepartamentoFormComponent {
   form: FormGroup;
   esEdicion: boolean = false;
   usuarios: Usuario[] = [
-    { id: 'u1', email: '', nombre: 'Laura Soto', rol: { id: 1, nombre: 'GESTOR', descripcion:'', permisos: [] }, activo: true },
-    { id: 'u2', email: '', nombre: 'Marcos Vela', rol: { id: 2, nombre: 'OPERADOR', descripcion:'', permisos: [] }, activo: true },
-    { id: 'u3', email: '', nombre: 'Nuria Pérez', rol: { id: 2, nombre: 'GESTOR', descripcion: '', permisos: [] }, activo: true },
-    { id: 'u4', email: '', nombre: 'Javi Díaz', rol: { id: 3, nombre: 'OPERADOR', descripcion: '', permisos: [] }, activo: true },
+    { id: 'u1', email: '', nombre: 'Laura Soto', rol: { id: 1, nombre: 'GESTOR', descripcion:'', permisos: [] } },
+    { id: 'u2', email: '', nombre: 'Marcos Vela', rol: { id: 2, nombre: 'OPERADOR', descripcion:'', permisos: [] } },
+    { id: 'u3', email: '', nombre: 'Nuria Pérez', rol: { id: 2, nombre: 'GESTOR', descripcion: '', permisos: [] } },
+    { id: 'u4', email: '', nombre: 'Javi Díaz', rol: { id: 3, nombre: 'OPERADOR', descripcion: '', permisos: [] } },
   ];
   // private departamentoService = inject(DepartamentoService);
   private dialogRef = inject(MatDialogRef<DepartamentoFormComponent>);
