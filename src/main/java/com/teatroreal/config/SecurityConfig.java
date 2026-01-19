@@ -8,6 +8,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import java.util.Arrays;
 
@@ -17,19 +18,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf().disable()
-            .cors().and()
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            .authorizeHttpRequests()
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> {})
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/api/auth/**",
-                    "/swagger-ui/**",
-                    "/swagger-ui.html",
-                    "/v3/api-docs/**",
-                    "/webjars/**"
+                    new AntPathRequestMatcher("/api/auth/**"),
+                    new AntPathRequestMatcher("/swagger-ui/**"),
+                    new AntPathRequestMatcher("/swagger-ui.html"),
+                    new AntPathRequestMatcher("/v3/api-docs/**"),
+                    new AntPathRequestMatcher("/webjars/**")
                 ).permitAll()
-                .anyRequest().authenticated();
+                .anyRequest().authenticated()
+            );
         // Aquí se añadiría el filtro JWT correspondiente:
         // .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
