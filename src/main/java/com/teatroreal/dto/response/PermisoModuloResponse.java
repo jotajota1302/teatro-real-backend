@@ -9,11 +9,12 @@ public class PermisoModuloResponse {
     public static PermisoModuloResponse from(com.teatroreal.domain.user.PermisoModulo entity) {
         PermisoModuloResponse dto = new PermisoModuloResponse();
         dto.id = entity.getId();
-        // No existe el método getUsuario() en PermisoModulo, así que se asigna null.
-        dto.usuarioId = null;
-        dto.modulo = entity.getModulo();
-        // No hay campo nivelAcceso en el modelo PermisoModulo
-        dto.nivelAcceso = null;
+        if (entity.getUsuario() != null) {
+            // Si hay error de compilación aquí, verifica que Usuario tenga un método getId()
+            dto.usuarioId = entity.getUsuario().getId();
+        }
+        dto.modulo = entity.getModulo() != null ? entity.getModulo().name() : null;
+        dto.nivelAcceso = entity.getNivelAcceso() != null ? entity.getNivelAcceso().name() : null;
         return dto;
     }
 }

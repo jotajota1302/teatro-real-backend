@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.util.UUID;
 
 @Entity
-@Table(name = "tipo_actividad")
+@Table(name = "tipos_actividad")
 public class TipoActividad implements Serializable {
 
     @Id
@@ -29,6 +29,9 @@ public class TipoActividad implements Serializable {
     @Size(max = 250)
     @Column(length = 250)
     private String descripcion;
+
+    @Column(nullable = false)
+    private Boolean activo = true;
 
     public TipoActividad() {}
 
@@ -67,5 +70,12 @@ public class TipoActividad implements Serializable {
     }
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
+    }
+
+    public Boolean getActivo() {
+        return activo;
+    }
+    public void setActivo(Boolean activo) {
+        this.activo = activo;
     }
 }

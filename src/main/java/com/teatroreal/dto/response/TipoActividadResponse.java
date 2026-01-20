@@ -12,4 +12,5 @@ public class TipoActividadResponse {
     private String nombre;
     private String colorHex;
     private String descripcion;
+    private Boolean activo;
 }
