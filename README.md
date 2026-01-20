@@ -1,123 +1,27 @@
-# Teatro Real - Sistema de Gestión Interna
+# TeatroRealFrontend
 
-Sistema integral de gestión interna para el Teatro Real de Madrid, desarrollado para optimizar la coordinación de producciones, espacios, logística y recursos técnicos.
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.21.
 
-## Descripción
+## Development server
 
-Este proyecto implementa una plataforma digital que integra los sistemas **TEMPO** (gestión de espacios y calendario) y **TOPS** (gestión de producciones y guiones técnicos) del Teatro Real, proporcionando:
+Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
 
-- **Gestión de Calendario**: Planificación y visualización de actividades (funciones, ensayos, montajes, eventos)
-- **Gestión de Espacios**: Control de ocupación de salas, escenarios y espacios técnicos
-- **Gestión de Producciones**: Seguimiento de óperas y espectáculos
-- **Guiones Técnicos**: Digitalización de guiones de regiduría con gestión de cues
-- **Logística**: Coordinación de cargas, descargas y transportes
-- **Cartelería Digital**: Gestión de contenidos para pantallas informativas
+## Code scaffolding
 
-## Estructura del Proyecto
+Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
 
-```
-teatro-real/
-├── teatro-real-frontend/       # Frontend Angular 18.2
-├── teatro-real-backend/        # Backend Java 8 + Spring Boot 2.7.18
-├── DOC_GENERADA/               # Documentación técnica generada
-├── DOC_INICIAL/                # Documentación de requisitos original
-├── PROMPT_FRAMEWORK/           # Templates para solicitar desarrollos
-├── PROMPTS/                    # Prompts generados con las templates
-└── AGENTES/                    # Prompts de agentes IA especializados
-```
+## Build
 
-## Tecnologías
+Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
 
-### Frontend
-| Tecnología | Versión | Descripción |
-|------------|---------|-------------|
-| Angular | 18.2 | Framework principal con Standalone Components |
-| TypeScript | 5.5 | Lenguaje de programación |
-| TailwindCSS | 3.4 | Framework CSS utility-first |
-| RxJS | 7.8 | Programación reactiva |
-| Signals | - | Gestión de estado reactivo (built-in Angular 18) |
+## Running unit tests
 
-### Backend
-| Tecnología | Versión | Descripción |
-|------------|---------|-------------|
-| Java | 8 | Lenguaje de programación |
-| Spring Boot | 2.7.18 | Framework principal |
-| Spring Data JPA | - | Acceso a datos |
-| H2 Database | - | Base de datos en memoria (desarrollo) |
-| PostgreSQL | 16 | Base de datos (producción) |
-| SpringDoc OpenAPI | 1.7 | Documentación API (Swagger UI) |
-| Lombok | - | Reducción de boilerplate |
+Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
 
-> **Nota:** Migración a Java 17+ y Spring Boot 3.x planificada para fase posterior.
+## Running end-to-end tests
 
-## Requisitos Previos
+Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
 
-- Node.js 18+ (recomendado 20 LTS)
-- Java 8 (JDK 1.8)
-- PostgreSQL 16 (solo producción)
+## Further help
 
-## Instalación y Ejecución
-
-### Frontend (Angular)
-
-```bash
-cd teatro-real-frontend
-npm install
-npm start
-```
-
-| URL | Descripción |
-|-----|-------------|
-| http://localhost:4200 | Aplicación Angular |
-
-### Backend (Spring Boot)
-
-```bash
-# Windows
-cd teatro-real-backend
-mvnw.cmd spring-boot:run
-
-# Linux/Mac
-cd teatro-real-backend
-./mvnw spring-boot:run
-```
-
-| URL | Descripción |
-|-----|-------------|
-| http://localhost:8080/api | API REST |
-| http://localhost:8080/swagger-ui.html | Documentación Swagger |
-| http://localhost:8080/h2-console | Consola H2 (desarrollo) |
-
-### Credenciales H2 (Desarrollo)
-```
-JDBC URL: jdbc:h2:mem:teatroreal
-Usuario: sa
-Password: (vacío)
-```
-
-## Documentación
-
-### Planes de Implementación
-| Documento | Descripción |
-|-----------|-------------|
-| [Plan Completo](DOC_GENERADA/PLAN_IMPLEMENTACION_COMPLETO.md) | Visión general del proyecto y sprints |
-| [Plan Backend](DOC_GENERADA/PLAN_IMPLEMENTACION_BACKEND.md) | Arquitectura y APIs del backend |
-| [Plan Frontend](DOC_GENERADA/PLAN_IMPLEMENTACION_FRONTEND.md) | Componentes y servicios Angular |
-| [Guía de Estilos](DOC_GENERADA/GUIA_ESTILOS_TEATRO.md) | Paleta de colores y tipografía |
-| [Síntesis Requisitos](DOC_GENERADA/SINTESIS_REQUISITOS_FINAL.md) | Requisitos funcionales |
-
-### Framework de Prompts
-| Template | Descripción |
-|----------|-------------|
-| [PROMPT_BACKEND](PROMPT_FRAMEWORK/PROMPT_BACKEND.md) | Template para desarrollo de APIs Spring Boot |
-| [PROMPT_FRONTEND](PROMPT_FRAMEWORK/PROMPT_FRONTEND.md) | Template para componentes Angular |
-| [PROMPT_FEATURE](PROMPT_FRAMEWORK/PROMPT_FEATURE.md) | Template para features fullstack |
-| [PROMPT_BUGFIX](PROMPT_FRAMEWORK/PROMPT_BUGFIX.md) | Template para reportar y corregir bugs |
-
-## Equipo
-
-Proyecto desarrollado por NTT DATA para el Teatro Real de Madrid.
-
-## Licencia
-
-Proyecto privado - Todos los derechos reservados.
+To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
