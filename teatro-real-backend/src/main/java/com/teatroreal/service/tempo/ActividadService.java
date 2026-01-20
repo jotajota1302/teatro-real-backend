@@ -1,14 +1,14 @@
 package com.teatroreal.service.tempo;
 
 import com.teatroreal.domain.tempo.*;
+import com.teatroreal.domain.user.Usuario;
 import com.teatroreal.dto.request.ActividadRequest;
 import com.teatroreal.dto.response.ActividadResponse;
-import com.teatroreal.dto.response.ActividadResponse.*;
 import com.teatroreal.repository.tempo.ActividadRepository;
 import com.teatroreal.repository.tempo.TipoActividadRepository;
 import com.teatroreal.repository.tempo.EspacioRepository;
-import com.teatroreal.repository.tempo.TemporadaRepository;
 import com.teatroreal.repository.tempo.DepartamentoRepository;
+import com.teatroreal.repository.tempo.TemporadaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +27,8 @@ public class ActividadService {
     private final ActividadRepository actividadRepository;
     private final TipoActividadRepository tipoActividadRepository;
     private final EspacioRepository espacioRepository;
-    private final TemporadaRepository temporadaRepository;
     private final DepartamentoRepository departamentoRepository;
+    private final TemporadaRepository temporadaRepository;
 
     public List<ActividadResponse> getAll() {
         return actividadRepository.findAll()
@@ -37,11 +37,10 @@ public class ActividadService {
             .collect(Collectors.toList());
     }
 
-    // NUEVO: filtros por query params combinables
     public List<ActividadResponse> search(
             String espacioId,
             String tipoActividadId,
-            String temporadaId,
+            String temporada,
             String fechaInicio,
             String fechaFin
     ) {
@@ -49,17 +48,17 @@ public class ActividadService {
 
         if (espacioId != null && !espacioId.isEmpty()) {
             result = result.stream()
-                    .filter(a -> a.getEspacio().getId().equals(espacioId))
+                    .filter(a -> a.getEspacio() != null && Objects.equals(a.getEspacio().getId(), espacioId))
                     .collect(Collectors.toList());
         }
         if (tipoActividadId != null && !tipoActividadId.isEmpty()) {
             result = result.stream()
-                    .filter(a -> a.getTipoActividad().getId().equals(tipoActividadId))
+                    .filter(a -> a.getTipoActividad() != null && Objects.equals(a.getTipoActividad().getId(), tipoActividadId))
                     .collect(Collectors.toList());
         }
-        if (temporadaId != null && !temporadaId.isEmpty()) {
+        if (temporada != null && !temporada.isEmpty()) {
             result = result.stream()
-                    .filter(a -> a.getTemporada().getId().equals(temporadaId))
+                    .filter(a -> temporada.equals(a.getTemporada() != null ? a.getTemporada().getId().toString() : null))
                     .collect(Collectors.toList());
         }
         if ((fechaInicio != null && !fechaInicio.isEmpty()) || (fechaFin != null && !fechaFin.isEmpty())) {
@@ -81,9 +80,6 @@ public class ActividadService {
     }
 
     public ActividadResponse create(ActividadRequest req) {
-        // Validar entidades relacionadas
-        Temporada temporada = temporadaRepository.findById(Long.valueOf(req.getTemporadaId()))
-            .orElseThrow(() -> new EntityNotFoundException("Temporada no encontrada"));
         TipoActividad tipo = tipoActividadRepository.findById(req.getTipoActividadId())
             .orElseThrow(() -> new EntityNotFoundException("TipoActividad no encontrado"));
         Espacio espacio = espacioRepository.findById(Long.valueOf(req.getEspacioId()))
@@ -94,18 +90,33 @@ public class ActividadService {
                 .orElseThrow(() -> new EntityNotFoundException("Departamento no encontrado"));
         }
 
-        Actividad actividad = Actividad.builder()
-            .temporada(temporada)
-            .tipoActividad(tipo)
-            .descripcion(req.getDescripcion())
-            .estado(Actividad.EstadoActividad.valueOf(req.getEstado()))
-            .fecha(LocalDate.parse(req.getFecha()))
-            .horaInicio(LocalTime.parse(req.getHoraInicio()))
-            .horaFin(LocalTime.parse(req.getHoraFin()))
-            .espacio(espacio)
-            .departamento(departamento)
-            .notas(req.getNotas())
-            .build();
+        Temporada temporada = temporadaRepository.findById(Long.valueOf(req.getTemporada()))
+            .orElseThrow(() -> new EntityNotFoundException("Temporada no encontrada"));
+
+        Actividad actividad = new Actividad();
+        actividad.setTitulo(req.getTitulo());
+        actividad.setTemporada(temporada);
+        actividad.setDescripcion(req.getDescripcion());
+        actividad.setTipoActividad(tipo);
+        actividad.setEspacio(espacio);
+        actividad.setFecha(LocalDate.parse(req.getFecha()));
+        actividad.setHoraInicio(LocalTime.parse(req.getHoraInicio()));
+        actividad.setHoraFin(LocalTime.parse(req.getHoraFin()));
+        actividad.setDepartamento(departamento);
+        actividad.setNotas(req.getNotas());
+
+        if (req.getTipoMovimiento() != null) {
+            actividad.setTipoMovimiento(Actividad.TipoMovimiento.valueOf(req.getTipoMovimiento()));
+        }
+        actividad.setNumCamiones(req.getNumCamiones());
+        actividad.setLugarOrigen(req.getLugarOrigen());
+        actividad.setLugarDestino(req.getLugarDestino());
+        actividad.setProduccionNombre(req.getProduccionNombre());
+        if (req.getEstado() != null) {
+            actividad.setEstado(Actividad.EstadoActividad.valueOf(req.getEstado()));
+        } else {
+            actividad.setEstado(Actividad.EstadoActividad.PENDIENTE);
+        }
 
         actividad = actividadRepository.save(actividad);
         return toResponse(actividad);
@@ -115,8 +126,6 @@ public class ActividadService {
         Actividad actividad = actividadRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Actividad no encontrada"));
 
-        Temporada temporada = temporadaRepository.findById(Long.valueOf(req.getTemporadaId()))
-            .orElseThrow(() -> new EntityNotFoundException("Temporada no encontrada"));
         TipoActividad tipo = tipoActividadRepository.findById(req.getTipoActividadId())
             .orElseThrow(() -> new EntityNotFoundException("TipoActividad no encontrado"));
         Espacio espacio = espacioRepository.findById(Long.valueOf(req.getEspacioId()))
@@ -127,16 +136,33 @@ public class ActividadService {
                 .orElseThrow(() -> new EntityNotFoundException("Departamento no encontrado"));
         }
 
+        Temporada temporada = temporadaRepository.findById(Long.valueOf(req.getTemporada()))
+            .orElseThrow(() -> new EntityNotFoundException("Temporada no encontrada"));
+
+        actividad.setTitulo(req.getTitulo());
         actividad.setTemporada(temporada);
-        actividad.setTipoActividad(tipo);
         actividad.setDescripcion(req.getDescripcion());
-        actividad.setEstado(Actividad.EstadoActividad.valueOf(req.getEstado()));
+        actividad.setTipoActividad(tipo);
+        actividad.setEspacio(espacio);
         actividad.setFecha(LocalDate.parse(req.getFecha()));
         actividad.setHoraInicio(LocalTime.parse(req.getHoraInicio()));
         actividad.setHoraFin(LocalTime.parse(req.getHoraFin()));
-        actividad.setEspacio(espacio);
         actividad.setDepartamento(departamento);
         actividad.setNotas(req.getNotas());
+
+        if (req.getTipoMovimiento() != null) {
+            actividad.setTipoMovimiento(Actividad.TipoMovimiento.valueOf(req.getTipoMovimiento()));
+        } else {
+            actividad.setTipoMovimiento(null);
+        }
+
+        actividad.setNumCamiones(req.getNumCamiones());
+        actividad.setLugarOrigen(req.getLugarOrigen());
+        actividad.setLugarDestino(req.getLugarDestino());
+        actividad.setProduccionNombre(req.getProduccionNombre());
+        if (req.getEstado() != null) {
+            actividad.setEstado(Actividad.EstadoActividad.valueOf(req.getEstado()));
+        }
 
         actividad = actividadRepository.save(actividad);
         return toResponse(actividad);
@@ -148,64 +174,54 @@ public class ActividadService {
         actividadRepository.delete(actividad);
     }
 
-    // NUEVO: clonación
+    // Clonación v2: copia todos los campos excepto id y fecha
     public ActividadResponse cloneActividad(String id, String fechaDestino) {
         Actividad original = actividadRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Actividad a clonar no encontrada"));
 
         LocalDate nuevaFecha = LocalDate.parse(fechaDestino);
 
-        Actividad clonada = Actividad.builder()
-            .temporada(original.getTemporada())
-            .tipoActividad(original.getTipoActividad())
-            .descripcion(original.getDescripcion())
-            .estado(Actividad.EstadoActividad.PROGRAMADA)
-            .fecha(nuevaFecha)
-            .horaInicio(original.getHoraInicio())
-            .horaFin(original.getHoraFin())
-            .espacio(original.getEspacio())
-            .departamento(original.getDepartamento())
-            .notas(original.getNotas())
-            .build();
+        Actividad clonada = new Actividad();
+        clonada.setTitulo(original.getTitulo());
+        clonada.setTemporada(original.getTemporada());
+        clonada.setDescripcion(original.getDescripcion());
+        clonada.setTipoActividad(original.getTipoActividad());
+        clonada.setEspacio(original.getEspacio());
+        clonada.setFecha(nuevaFecha);
+        clonada.setHoraInicio(original.getHoraInicio());
+        clonada.setHoraFin(original.getHoraFin());
+        clonada.setDepartamento(original.getDepartamento());
+        clonada.setNotas(original.getNotas());
+        clonada.setTipoMovimiento(original.getTipoMovimiento());
+        clonada.setNumCamiones(original.getNumCamiones());
+        clonada.setLugarOrigen(original.getLugarOrigen());
+        clonada.setLugarDestino(original.getLugarDestino());
+        clonada.setProduccionNombre(original.getProduccionNombre());
+        clonada.setEstado(Actividad.EstadoActividad.PENDIENTE); // Estado siempre reiniciado
 
         clonada = actividadRepository.save(clonada);
         return toResponse(clonada);
     }
 
-    // NUEVO: cambio de estado (máquina de estados)
+    // Cambio de estado almacén v2
     public ActividadResponse changeStatus(String id, String nuevoEstado) {
         Actividad actividad = actividadRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Actividad no encontrada"));
 
-        Actividad.EstadoActividad estadoActual = actividad.getEstado();
         Actividad.EstadoActividad estadoDestino;
-
         try {
             estadoDestino = Actividad.EstadoActividad.valueOf(nuevoEstado);
         } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException("Estado destino inválido.");
         }
 
-        // Lógica simple de transición: solo se permiten ciertos cambios
-        boolean transicionValida = false;
-        switch (estadoActual) {
-            case PROGRAMADA:
-                transicionValida = (estadoDestino == Actividad.EstadoActividad.EN_CURSO || estadoDestino == Actividad.EstadoActividad.CANCELADA);
-                break;
-            case EN_CURSO:
-                transicionValida = (estadoDestino == Actividad.EstadoActividad.FINALIZADA || estadoDestino == Actividad.EstadoActividad.CANCELADA);
-                break;
-            case FINALIZADA:
-            case CANCELADA:
-                transicionValida = false; // No se puede avanzar desde FINALIZADA/CANCELADA
-                break;
+        // Regla: solo actividades de espacio.ALMACEN pueden cambiar estado
+        if (actividad.getEspacio() == null /* || !actividad.getEspacio().getTipo().equals(TipoEspacio.ALMACEN) */ ) {
+            throw new IllegalArgumentException("Solo las actividades de almacén pueden cambiar de estado");
         }
-
-        if (!transicionValida) {
-            throw new IllegalArgumentException("Transición de estado no permitida desde " + estadoActual.name() + " a " + estadoDestino.name());
-        }
-
+        // La máquina de estados puede parametrizarse según reglas de negocio. Para demo: aceptamos siempre el cambio
         actividad.setEstado(estadoDestino);
+
         actividad = actividadRepository.save(actividad);
         return toResponse(actividad);
     }
@@ -213,28 +229,25 @@ public class ActividadService {
     private ActividadResponse toResponse(Actividad a) {
         return ActividadResponse.builder()
             .id(a.getId())
+            .titulo(a.getTitulo())
+            .temporada(a.getTemporada() != null ? a.getTemporada().getId().toString() : null)
             .descripcion(a.getDescripcion())
-            .estado(a.getEstado().name())
-            .fecha(a.getFecha().toString())
-            .horaInicio(a.getHoraInicio().toString())
-            .horaFin(a.getHoraFin().toString())
+            .estado(a.getEstado() != null ? a.getEstado().name() : null)
+            .fecha(a.getFecha() != null ? a.getFecha().toString() : null)
+            .horaInicio(a.getHoraInicio() != null ? a.getHoraInicio().toString() : null)
+            .horaFin(a.getHoraFin() != null ? a.getHoraFin().toString() : null)
             .notas(a.getNotas())
-            .tipoActividad(
-                ActividadResponse.TipoActividadInfo.builder()
-                    .id(String.valueOf(a.getTipoActividad().getId()))
+            .tipoActividad(a.getTipoActividad() != null
+                ? ActividadResponse.TipoActividadInfo.builder()
+                    .id(a.getTipoActividad().getId())
                     .nombre(a.getTipoActividad().getNombre())
                     .colorHex(a.getTipoActividad().getColorHex())
-                    .build())
-            .espacio(
-                ActividadResponse.EspacioInfo.builder()
+                    .build() : null)
+            .espacio(a.getEspacio() != null
+                ? ActividadResponse.EspacioInfo.builder()
                     .id(String.valueOf(a.getEspacio().getId()))
                     .nombre(a.getEspacio().getNombre())
-                    .build())
-            .temporada(
-                ActividadResponse.TemporadaInfo.builder()
-                    .id(String.valueOf(a.getTemporada().getId()))
-                    .nombre(a.getTemporada().getNombre())
-                    .build())
+                    .build() : null)
             .departamento(a.getDepartamento() != null
                 ? ActividadResponse.DepartamentoInfo.builder()
                     .id(String.valueOf(a.getDepartamento().getId()))
@@ -243,6 +256,13 @@ public class ActividadService {
                 : null)
             .createdAt(a.getCreatedAt() != null ? a.getCreatedAt().toString() : null)
             .updatedAt(a.getUpdatedAt() != null ? a.getUpdatedAt().toString() : null)
+            .tipoMovimiento(a.getTipoMovimiento() != null ? a.getTipoMovimiento().name() : null)
+            .numCamiones(a.getNumCamiones())
+            .lugarOrigen(a.getLugarOrigen())
+            .lugarDestino(a.getLugarDestino())
+            .produccionNombre(a.getProduccionNombre())
+            .googleEventId(a.getGoogleEventId())
+            .ultimaSincronizacion(a.getUltimaSincronizacion() != null ? a.getUltimaSincronizacion().toString() : null)
             .build();
     }
 }

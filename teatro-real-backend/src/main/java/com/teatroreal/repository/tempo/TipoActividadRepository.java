@@ -8,6 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface TipoActividadRepository extends JpaRepository<TipoActividad, String> {
-    Optional<TipoActividad> findByNombre(String nombre);
-    boolean existsByNombre(String nombre);
+    Optional<TipoActividad> findByNombreIgnoreCase(String nombre);
+    boolean existsByNombreIgnoreCase(String nombre);
 }

@@ -20,4 +20,6 @@ public class TipoActividadRequest {
 
     @Size(max = 250)
     private String descripcion;
+
+    private Boolean activo;
 }

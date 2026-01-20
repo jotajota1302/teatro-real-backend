@@ -32,9 +32,9 @@ class ActividadServiceTest {
     private AutoCloseable closeable;
 
     private final String actividadId = UUID.randomUUID().toString();
-    private final String temporadaId = UUID.randomUUID().toString();
+    private final Long temporadaId = 1L;
     private final String tipoId = UUID.randomUUID().toString();
-    private final String espacioId = UUID.randomUUID().toString();
+    private final Long espacioId = 1L;
 
     private Actividad actividadOriginal;
 
@@ -42,38 +42,36 @@ class ActividadServiceTest {
     void setUp() {
         closeable = MockitoAnnotations.openMocks(this);
 
-        // Construcción manual sin builder
-        Temporada temporada = new Temporada();
-        // En la clase real Temporada el id es Long, pero aquí los repositorios usan String, por lo que se setea el nombre y no el id
-        temporada.setNombre("2026");
-
+        // Construcción manual de la Actividad sin builder
         TipoActividad tipo = new TipoActividad();
         tipo.setId(tipoId);
         tipo.setNombre("Ensayo");
         tipo.setColorHex("#008000");
 
         Espacio espacio = new Espacio();
-        // En la clase real Espacio el id es Long, pero aquí los repositorios usan String, por lo que solo se setea el nombre
         espacio.setNombre("Sala Ensayo");
 
-        // Actividad: debe cambiarse si tampoco tiene builder, pero de momento lo dejo
-        actividadOriginal = Actividad.builder()
-            .id(actividadId)
-            .temporada(temporada)
-            .tipoActividad(tipo)
-            .descripcion("Ensayo General")
-            .estado(Actividad.EstadoActividad.PROGRAMADA)
-            .fecha(LocalDate.of(2026, 6, 2))
-            .horaInicio(LocalTime.of(10,0))
-            .horaFin(LocalTime.of(12,30))
-            .espacio(espacio)
-            .notas(null)
-            .build();
+        actividadOriginal = new Actividad();
+        actividadOriginal.setId(actividadId);
+
+        Temporada temporada = new Temporada();
+        temporada.setId(1L);
+        temporada.setNombre("2026");
+        actividadOriginal.setTemporada(temporada);
+
+        actividadOriginal.setTipoActividad(tipo);
+        actividadOriginal.setDescripcion("Ensayo General");
+        actividadOriginal.setEstado(Actividad.EstadoActividad.PENDIENTE);
+        actividadOriginal.setFecha(LocalDate.of(2026, 6, 2));
+        actividadOriginal.setHoraInicio(LocalTime.of(10,0));
+        actividadOriginal.setHoraFin(LocalTime.of(12,30));
+        actividadOriginal.setEspacio(espacio);
+        actividadOriginal.setNotas(null);
 
         when(actividadRepository.findById(actividadId)).thenReturn(Optional.of(actividadOriginal));
-        when(temporadaRepository.findById(1L)).thenReturn(Optional.of(temporada));
+        when(temporadaRepository.findById(temporadaId)).thenReturn(Optional.empty());
         when(tipoActividadRepository.findById(tipoId)).thenReturn(Optional.of(tipo));
-        when(espacioRepository.findById(1L)).thenReturn(Optional.of(espacio));
+        when(espacioRepository.findById(espacioId)).thenReturn(Optional.of(espacio));
     }
 
     @Test
@@ -85,7 +83,7 @@ class ActividadServiceTest {
         assertNotNull(cloned);
         assertEquals("Ensayo General", cloned.getDescripcion());
         assertEquals(nuevaFecha, cloned.getFecha());
-        assertEquals("PROGRAMADA", cloned.getEstado());
+        assertEquals("PENDIENTE", cloned.getEstado());
         assertNotEquals(actividadId, cloned.getId()); // Debe tener nuevo ID
     }
 
@@ -93,37 +91,32 @@ class ActividadServiceTest {
     void changeStatus_allowsValidTransitions() {
         when(actividadRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // PROGRAMADA -> EN_CURSO
-        actividadOriginal.setEstado(Actividad.EstadoActividad.PROGRAMADA);
-        ActividadResponse changed = actividadService.changeStatus(actividadId, "EN_CURSO");
-        assertEquals("EN_CURSO", changed.getEstado());
+        // PENDIENTE -> EN_TRANSITO
+        actividadOriginal.setEstado(Actividad.EstadoActividad.PENDIENTE);
+        ActividadResponse changed = actividadService.changeStatus(actividadId, "EN_TRANSITO");
+        assertEquals("EN_TRANSITO", changed.getEstado());
 
-        // EN_CURSO -> FINALIZADA
-        actividadOriginal.setEstado(Actividad.EstadoActividad.EN_CURSO);
-        changed = actividadService.changeStatus(actividadId, "FINALIZADA");
-        assertEquals("FINALIZADA", changed.getEstado());
-
-        // PROGRAMADA -> CANCELADA
-        actividadOriginal.setEstado(Actividad.EstadoActividad.PROGRAMADA);
-        changed = actividadService.changeStatus(actividadId, "CANCELADA");
-        assertEquals("CANCELADA", changed.getEstado());
+        // EN_TRANSITO -> COMPLETADO
+        actividadOriginal.setEstado(Actividad.EstadoActividad.EN_TRANSITO);
+        changed = actividadService.changeStatus(actividadId, "COMPLETADO");
+        assertEquals("COMPLETADO", changed.getEstado());
     }
 
     @Test
     void changeStatus_rejectsInvalidTransitions() {
-        // FINALIZADA -> EN_CURSO (no permitido)
-        actividadOriginal.setEstado(Actividad.EstadoActividad.FINALIZADA);
+        // COMPLETADO -> EN_TRANSITO (no permitido)
+        actividadOriginal.setEstado(Actividad.EstadoActividad.COMPLETADO);
 
         Exception e = assertThrows(IllegalArgumentException.class, () ->
-            actividadService.changeStatus(actividadId, "EN_CURSO")
+            actividadService.changeStatus(actividadId, "EN_TRANSITO")
         );
         assertTrue(e.getMessage().contains("Transición de estado no permitida"));
 
-        // CANCELADA -> PROGRAMADA (no permitido)
-        actividadOriginal.setEstado(Actividad.EstadoActividad.CANCELADA);
+        // EN_TRANSITO -> PENDIENTE (no permitido)
+        actividadOriginal.setEstado(Actividad.EstadoActividad.EN_TRANSITO);
 
         Exception e2 = assertThrows(IllegalArgumentException.class, () ->
-            actividadService.changeStatus(actividadId, "PROGRAMADA")
+            actividadService.changeStatus(actividadId, "PENDIENTE")
         );
         assertTrue(e2.getMessage().contains("Transición de estado no permitida"));
     }

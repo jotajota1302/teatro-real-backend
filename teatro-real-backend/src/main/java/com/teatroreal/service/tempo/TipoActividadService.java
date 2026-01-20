@@ -33,13 +33,18 @@ public class TipoActividadService {
     }
 
     public TipoActividadResponse create(TipoActividadRequest request) {
-        if (tipoActividadRepository.existsByNombre(request.getNombre())) {
+        if (tipoActividadRepository.existsByNombreIgnoreCase(request.getNombre())) {
             throw new IllegalArgumentException("Ya existe un Tipo de Actividad con ese nombre");
         }
         TipoActividad tipoActividad = new TipoActividad();
         tipoActividad.setNombre(request.getNombre());
         tipoActividad.setColorHex(request.getColorHex());
         tipoActividad.setDescripcion(request.getDescripcion());
+        if (request.getActivo() != null) {
+            tipoActividad.setActivo(request.getActivo());
+        } else {
+            tipoActividad.setActivo(true);
+        }
         tipoActividad = tipoActividadRepository.save(tipoActividad);
         return toResponse(tipoActividad);
     }
@@ -48,14 +53,17 @@ public class TipoActividadService {
         TipoActividad tipoActividad = tipoActividadRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("TipoActividad no encontrado"));
 
-        boolean nombreChanged = !tipoActividad.getNombre().equals(request.getNombre());
-        if (nombreChanged && tipoActividadRepository.existsByNombre(request.getNombre())) {
+        boolean nombreChanged = !tipoActividad.getNombre().equalsIgnoreCase(request.getNombre());
+        if (nombreChanged && tipoActividadRepository.existsByNombreIgnoreCase(request.getNombre())) {
             throw new IllegalArgumentException("Ya existe un Tipo de Actividad con ese nombre");
         }
 
         tipoActividad.setNombre(request.getNombre());
         tipoActividad.setColorHex(request.getColorHex());
         tipoActividad.setDescripcion(request.getDescripcion());
+        if (request.getActivo() != null) {
+            tipoActividad.setActivo(request.getActivo());
+        }
         tipoActividad = tipoActividadRepository.save(tipoActividad);
         return toResponse(tipoActividad);
     }
@@ -72,6 +80,7 @@ public class TipoActividadService {
                 .nombre(tipo.getNombre())
                 .colorHex(tipo.getColorHex())
                 .descripcion(tipo.getDescripcion())
+                .activo(tipo.getActivo())
                 .build();
     }
 }

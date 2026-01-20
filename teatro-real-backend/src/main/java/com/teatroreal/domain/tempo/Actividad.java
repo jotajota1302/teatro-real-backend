@@ -1,189 +1,180 @@
 package com.teatroreal.domain.tempo;
 
-import com.teatroreal.domain.tempo.Espacio;
-import com.teatroreal.domain.tempo.TipoActividad;
-import com.teatroreal.domain.tempo.Temporada;
-import com.teatroreal.domain.tempo.Departamento;
+import com.teatroreal.domain.user.Usuario;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import lombok.Builder;
-import lombok.AllArgsConstructor;
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "actividad")
-@Builder
-@AllArgsConstructor
+@Table(name = "actividades")
 public class Actividad implements Serializable {
 
     @Id
     @Column(length = 36)
     private String id;
 
-    @ManyToOne(optional = false)
+    @PrePersist
+    public void prePersist() {
+        if (id == null) {
+            id = UUID.randomUUID().toString();
+        }
+    }
+
+    @NotBlank
+    @Column(nullable = false, length = 255)
+    private String titulo;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "temporada_id", nullable = false)
     private Temporada temporada;
 
-    @ManyToOne(optional = false)
+    @Column(columnDefinition = "TEXT")
+    private String descripcion;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tipo_actividad_id", nullable = false)
     private TipoActividad tipoActividad;
 
-    @NotBlank
-    @Size(max = 255)
-    @Column(nullable = false, length = 255)
-    private String descripcion;
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private EstadoActividad estado;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "espacio_id", nullable = false)
+    private Espacio espacio;
 
     @NotNull
     @Column(nullable = false)
     private LocalDate fecha;
 
     @NotNull
-    @Column(name = "hora_inicio", nullable = false)
+    @Column(nullable = false)
     private LocalTime horaInicio;
 
     @NotNull
-    @Column(name = "hora_fin", nullable = false)
+    @Column(nullable = false)
     private LocalTime horaFin;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "espacio_id", nullable = false)
-    private Espacio espacio;
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "departamento_id")
     private Departamento departamento;
 
-    @Size(max = 500)
-    @Column(length = 500)
+    @Column(columnDefinition = "TEXT")
     private String notas;
 
+    // Campos específicos almacén
+    @Enumerated(EnumType.STRING)
+    private TipoMovimiento tipoMovimiento;
+
+    private Integer numCamiones;
+    private String lugarOrigen;
+    private String lugarDestino;
+    private String produccionNombre;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private EstadoActividad estado = EstadoActividad.PENDIENTE;
+
+    private String googleEventId;
+    private LocalDateTime ultimaSincronizacion;
+
+    // Relación con documentos
+    @OneToMany(mappedBy = "actividad", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ActividadDocumento> documentos = new ArrayList<>();
+
+    // Auditoría
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private Usuario createdBy;
+
     @CreationTimestamp
-    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    public Actividad() {}
-
-    @PrePersist
-    public void prePersist() {
-        if (this.id == null) {
-            this.id = UUID.randomUUID().toString();
-        }
+    // ENUMS: según modelo v2 / plan implementación backend
+    public enum EstadoActividad {
+        PENDIENTE, EN_TRANSITO, COMPLETADO
     }
 
-    public enum EstadoActividad {
-        PROGRAMADA,
-        EN_CURSO,
-        FINALIZADA,
-        CANCELADA
+    public enum TipoMovimiento {
+        ENTRADA, SALIDA, INTERNO
     }
 
     // GETTERS Y SETTERS
 
-    public String getId() {
-        return id;
-    }
-    public void setId(String id) {
-        this.id = id;
-    }
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-    public Temporada getTemporada() {
-        return temporada;
-    }
-    public void setTemporada(Temporada temporada) {
-        this.temporada = temporada;
-    }
+    public String getTitulo() { return titulo; }
+    public void setTitulo(String titulo) { this.titulo = titulo; }
 
-    public TipoActividad getTipoActividad() {
-        return tipoActividad;
-    }
-    public void setTipoActividad(TipoActividad tipoActividad) {
-        this.tipoActividad = tipoActividad;
-    }
+    public Temporada getTemporada() { return temporada; }
+    public void setTemporada(Temporada temporada) { this.temporada = temporada; }
 
-    public String getDescripcion() {
-        return descripcion;
-    }
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
+    public String getDescripcion() { return descripcion; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
 
-    public EstadoActividad getEstado() {
-        return estado;
-    }
-    public void setEstado(EstadoActividad estado) {
-        this.estado = estado;
-    }
+    public TipoActividad getTipoActividad() { return tipoActividad; }
+    public void setTipoActividad(TipoActividad tipoActividad) { this.tipoActividad = tipoActividad; }
 
-    public LocalDate getFecha() {
-        return fecha;
-    }
-    public void setFecha(LocalDate fecha) {
-        this.fecha = fecha;
-    }
+    public Espacio getEspacio() { return espacio; }
+    public void setEspacio(Espacio espacio) { this.espacio = espacio; }
 
-    public LocalTime getHoraInicio() {
-        return horaInicio;
-    }
-    public void setHoraInicio(LocalTime horaInicio) {
-        this.horaInicio = horaInicio;
-    }
+    public LocalDate getFecha() { return fecha; }
+    public void setFecha(LocalDate fecha) { this.fecha = fecha; }
 
-    public LocalTime getHoraFin() {
-        return horaFin;
-    }
-    public void setHoraFin(LocalTime horaFin) {
-        this.horaFin = horaFin;
-    }
+    public LocalTime getHoraInicio() { return horaInicio; }
+    public void setHoraInicio(LocalTime horaInicio) { this.horaInicio = horaInicio; }
 
-    public Espacio getEspacio() {
-        return espacio;
-    }
-    public void setEspacio(Espacio espacio) {
-        this.espacio = espacio;
-    }
+    public LocalTime getHoraFin() { return horaFin; }
+    public void setHoraFin(LocalTime horaFin) { this.horaFin = horaFin; }
 
-    public Departamento getDepartamento() {
-        return departamento;
-    }
-    public void setDepartamento(Departamento departamento) {
-        this.departamento = departamento;
-    }
+    public Departamento getDepartamento() { return departamento; }
+    public void setDepartamento(Departamento departamento) { this.departamento = departamento; }
 
-    public String getNotas() {
-        return notas;
-    }
-    public void setNotas(String notas) {
-        this.notas = notas;
-    }
+    public String getNotas() { return notas; }
+    public void setNotas(String notas) { this.notas = notas; }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+    public TipoMovimiento getTipoMovimiento() { return tipoMovimiento; }
+    public void setTipoMovimiento(TipoMovimiento tipoMovimiento) { this.tipoMovimiento = tipoMovimiento; }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+    public Integer getNumCamiones() { return numCamiones; }
+    public void setNumCamiones(Integer numCamiones) { this.numCamiones = numCamiones; }
+
+    public String getLugarOrigen() { return lugarOrigen; }
+    public void setLugarOrigen(String lugarOrigen) { this.lugarOrigen = lugarOrigen; }
+
+    public String getLugarDestino() { return lugarDestino; }
+    public void setLugarDestino(String lugarDestino) { this.lugarDestino = lugarDestino; }
+
+    public String getProduccionNombre() { return produccionNombre; }
+    public void setProduccionNombre(String produccionNombre) { this.produccionNombre = produccionNombre; }
+
+    public EstadoActividad getEstado() { return estado; }
+    public void setEstado(EstadoActividad estado) { this.estado = estado; }
+
+    public String getGoogleEventId() { return googleEventId; }
+    public void setGoogleEventId(String googleEventId) { this.googleEventId = googleEventId; }
+
+    public LocalDateTime getUltimaSincronizacion() { return ultimaSincronizacion; }
+    public void setUltimaSincronizacion(LocalDateTime ultimaSincronizacion) { this.ultimaSincronizacion = ultimaSincronizacion; }
+
+    public List<ActividadDocumento> getDocumentos() { return documentos; }
+    public void setDocumentos(List<ActividadDocumento> documentos) { this.documentos = documentos; }
+
+    public Usuario getCreatedBy() { return createdBy; }
+    public void setCreatedBy(Usuario createdBy) { this.createdBy = createdBy; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }
