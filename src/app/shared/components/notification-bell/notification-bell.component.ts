@@ -29,7 +29,7 @@ import { Router } from '@angular/router';
             aria-haspopup="true"
             aria-controls="notification-menu"
             type="button">
-      <mat-icon>notifications</mat-icon>
+      <mat-icon class="text-white">notifications</mat-icon>
     </button>
 
     <mat-menu #notificationMenu="matMenu" class="notification-menu w-80" id="notification-menu">

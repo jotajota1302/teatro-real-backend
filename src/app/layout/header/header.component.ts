@@ -13,8 +13,7 @@ import { AuthService } from '../../core/auth/auth.service';
   template: `
     <header class="w-full flex items-center justify-between py-2 px-6 bg-teatro-primary shadow-md z-20">
       <div class="flex items-center gap-3">
-        <img src="/assets/images/teatro-real-logo.png" alt="Teatro Real" class="h-10 mr-2" />
-        <span class="font-bold text-xl text-teatro-gold">Teatro Real</span>
+        <img src="/assets/images/teatro-real-logo.svg" alt="Teatro Real" class="h-14 w-auto flex-shrink-0 mr-2" />
       </div>
       <div class="flex items-center gap-4 h-12">
         <div class="flex items-center h-11 self-center">
@@ -34,7 +33,9 @@ import { AuthService } from '../../core/auth/auth.service';
   `,
   styles: [`
     header {
-      min-height: 60px;
+      min-height: 64px;
+      padding-top: 8px;
+      padding-right: 16px;
     }
     .bg-teatro-primary {
       background-color: #1a1a2e;
