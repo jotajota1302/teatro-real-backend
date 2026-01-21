@@ -86,7 +86,9 @@ export class AuthService {
 
   hasRole(roles: string[]): boolean {
     const user = this.currentUserSignal();
-    return user ? roles.includes(user.rol.nombre) : false;
+    return user && user.rol && user.rol.nombre
+      ? roles.includes(user.rol.nombre)
+      : false;
   }
 
   // --- Permisos por módulo (signals)

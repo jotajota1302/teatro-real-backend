@@ -3,8 +3,7 @@ import { Routes } from '@angular/router';
 export const TOPS_ROUTES: Routes = [
   {
     path: '',
-    // Componente/contenedor dummy por defecto para Tops
-    component: class TopsPlaceholderComponent {},
+    loadComponent: () => import('./tops-placeholder.component').then(m => m.TopsPlaceholderComponent),
     title: 'TOPS Módulo (placeholder)'
   }
   // Añadir aquí rutas reales de TOPS cuando existan los componentes.
