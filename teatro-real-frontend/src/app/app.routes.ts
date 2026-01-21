@@ -62,6 +62,10 @@ export const routes: Routes = [
       .then(m => m.CarteleriaSalaComponent)
   },
   {
+    path: 'acceso-denegado',
+    loadComponent: () => import('./shared/acceso-denegado.component').then(m => m.AccesoDenegadoComponent)
+  },
+  {
     path: '**',
     redirectTo: 'dashboard'
   }

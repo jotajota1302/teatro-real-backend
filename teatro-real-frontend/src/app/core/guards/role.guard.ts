@@ -12,5 +12,5 @@ export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot): boolean
     return true;
   }
 
-  return auth.hasRole(roles) ? true : router.createUrlTree(['/dashboard']);
+  return auth.hasRole(roles) ? true : router.createUrlTree(['/acceso-denegado']);
 };
