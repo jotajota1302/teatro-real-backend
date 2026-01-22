@@ -15,6 +15,7 @@ import { NotificationBellComponent } from '../../shared/components/notification-
         <span class="font-black text-xl tracking-tight uppercase text-white">Teatro Real</span>
       </div>
       <ul class="flex-1 flex flex-col gap-1">
+
         <li>
           <a routerLink="/dashboard" routerLinkActive="active"
              class="sidebar-link" [routerLinkActiveOptions]="{ exact: true }">
@@ -22,21 +23,70 @@ import { NotificationBellComponent } from '../../shared/components/notification-
             <span>Dashboard</span>
           </a>
         </li>
+        
+        <li class="uppercase text-xs tracking-wider text-teatro-gray-400 px-6 pt-6 pb-1">Tempo</li>
+
         <li>
-          <a routerLink="/tempo" routerLinkActive="active"
+          <a routerLink="/tempo/espacios" routerLinkActive="active"
              class="sidebar-link">
-            <mat-icon fontIcon="calendar_today" class="sidebar-icon">calendar_today</mat-icon>
-            <span>TEMPO</span>
+            <mat-icon fontIcon="location_city" class="sidebar-icon">location_city</mat-icon>
+            <span>Espacios</span>
           </a>
         </li>
         <li>
-          <a routerLink="/tops" routerLinkActive="active"
+          <a routerLink="/tempo/calendario" routerLinkActive="active"
              class="sidebar-link">
-            <mat-icon fontIcon="menu_book" class="sidebar-icon">menu_book</mat-icon>
-            <span>TOPS</span>
+            <mat-icon fontIcon="calendar_month" class="sidebar-icon">calendar_month</mat-icon>
+            <span>Calendario</span>
           </a>
         </li>
         <li>
+          <a routerLink="/tempo/movimientos" routerLinkActive="active"
+             class="sidebar-link">
+            <mat-icon fontIcon="local_shipping" class="sidebar-icon">local_shipping</mat-icon>
+            <span>Logística</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/carteleria/global" routerLinkActive="active"
+             class="sidebar-link">
+            <mat-icon fontIcon="view_week" class="sidebar-icon">view_week</mat-icon>
+            <span>Cartelería</span>
+          </a>
+        </li>
+
+        <li class="uppercase text-xs tracking-wider text-teatro-gray-400 px-6 pt-6 pb-1">Tops</li>
+
+        <li>
+          <a routerLink="/tempo/producciones" routerLinkActive="active"
+             class="sidebar-link">
+            <mat-icon fontIcon="album" class="sidebar-icon">album</mat-icon>
+            <span>Producciones</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/tops/guiones-tecnicos" routerLinkActive="active"
+             class="sidebar-link">
+            <mat-icon fontIcon="description" class="sidebar-icon">description</mat-icon>
+            <span>Guiones Técnicos</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/tops/guiones-new" routerLinkActive="active"
+             class="sidebar-link">
+            <mat-icon fontIcon="auto_fix_high" class="sidebar-icon">auto_fix_high</mat-icon>
+            <span>Guiones NEW</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/tops/editor-guiones" routerLinkActive="active"
+             class="sidebar-link">
+            <mat-icon fontIcon="edit" class="sidebar-icon">edit</mat-icon>
+            <span>Editor De Guiones</span>
+          </a>
+        </li>
+
+        <li class="mt-8">
           <a routerLink="/admin" routerLinkActive="active"
              class="sidebar-link">
             <mat-icon fontIcon="admin_panel_settings" class="sidebar-icon">admin_panel_settings</mat-icon>
