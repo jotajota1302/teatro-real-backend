@@ -289,7 +289,16 @@ export class WeeklyExcelViewComponent {
     this.actividadService.loadActividades({
       fechaInicio: start,
       fechaFin: end
-    }).subscribe();
+    }).subscribe({
+      next: () => {},
+      error: (err) => {
+        console.error('Error cargando actividades de la semana:', err);
+        // Si tienes alguna señal o estado para mostrar error, aquí puedes setearlo
+        // Ejemplo: this.errorSignal.set(true);
+        // También puedes resetear el loading si hace falta desde fuera del servicio
+        // alert eliminado a petición del usuario - solo se muestra el error en consola
+      }
+    });
     // EspacioService lo llama el landing
   }
 

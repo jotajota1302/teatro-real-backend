@@ -108,20 +108,19 @@ export class CalendarioComponent {
 
     this.loadActividades();
 
-    // Recarga actividades al cambiar filtro
+    // Recarga actividades al cambiar filtro (con el último rango)
     effect(() => {
       this.loadActividades();
     }, { allowSignalWrites: true });
   }
 
-  // Carga actividades con los filtros activos
-  loadActividades(): void {
-    const hoy = new Date();
-    const inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-    const fin = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+  // Carga actividades para un rango opcional de fechas, aplicando filtros
+  loadActividades(rangoInicio?: string, rangoFin?: string): void {
+    const inicio = rangoInicio ?? this.rangeStart();
+    const fin = rangoFin ?? this.rangeEnd();
     this.actividadService.loadActividades({
-      fechaInicio: inicio.toISOString().slice(0, 10),
-      fechaFin: fin.toISOString().slice(0, 10),
+      fechaInicio: inicio,
+      fechaFin: fin,
       espacioId: this.selectedEspacioId() ? Number(this.selectedEspacioId()) : undefined,
       tipoActividadId: this.selectedTipoId() ? Number(this.selectedTipoId()) : undefined
     }).subscribe();
@@ -144,7 +143,12 @@ export class CalendarioComponent {
   }
 
   // Opciones calculadas de FullCalendar segun los datos filtrados
+  // Añade un signal para el rango actualmente visible (inicialmente el mes actual)
+  private rangeStart = signal<string>(new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0,10));
+  private rangeEnd = signal<string>(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().slice(0,10));
+
   calendarOptions = computed(() => {
+    const self = this;
     const actividades = this.actividadService.actividades();
     const eventos = actividades.map(act => {
       return {
@@ -175,6 +179,17 @@ export class CalendarioComponent {
       selectable: true,
       themeSystem: 'standard',
       events: eventos,
+      datesSet(arg: any) {
+        // Se llama cada vez que cambias de mes/semana/día en el calendario
+        self.rangeStart.set(arg.startStr);
+        self.rangeEnd.set(arg.endStr);
+        self.actividadService.loadActividades({
+          fechaInicio: arg.startStr,
+          fechaFin: arg.endStr,
+          espacioId: self.selectedEspacioId() ? Number(self.selectedEspacioId()) : undefined,
+          tipoActividadId: self.selectedTipoId() ? Number(self.selectedTipoId()) : undefined
+        }).subscribe();
+      },
       eventClick: (info: any) => {
         alert(
           `Título: ${info.event.title}\nEspacio: ${info.event.extendedProps.espacio}\nTipo: ${info.event.extendedProps.tipo}`
