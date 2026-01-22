@@ -36,7 +36,7 @@ export class ActividadService {
    */
   loadActividades(filter: CalendarioFilter): Observable<Actividad[]> {
     this.loadingSignal.set(true);
-    return this.api.get<Actividad[]>('/actividades', filter).pipe(
+    return this.api.get<Actividad[]>('/api/actividades/search', filter).pipe(
       tap(actividades => {
         this.actividadesSignal.set(actividades);
         this.loadingSignal.set(false);
