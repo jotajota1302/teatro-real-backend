@@ -89,9 +89,9 @@ export class CalendarioComponent {
   private espacioService = inject(EspacioService);
   private tipoActividadService = inject(TipoActividadService);
 
-  // State signals para filtros seleccionados
-  private selectedEspacioId = signal<string | ''>('');
-  private selectedTipoId = signal<string | ''>('');
+  // State signals para filtros seleccionados (ahora públicas)
+  selectedEspacioId = signal<string | ''>('');
+  selectedTipoId = signal<string | ''>('');
 
   // Signals públicas para el template
   espacios = this.espacioService.espacios;

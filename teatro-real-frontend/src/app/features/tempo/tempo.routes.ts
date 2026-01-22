@@ -3,8 +3,42 @@ import { Routes } from '@angular/router';
 export const TEMPO_ROUTES: Routes = [
   {
     path: '',
-    loadComponent: () => import('./tempo-placeholder.component').then(m => m.TempoPlaceholderComponent),
-    title: 'Tempo Módulo (placeholder)'
-  }
-  // Añadir aquí rutas reales de TEMPO cuando existan los componentes.
+    redirectTo: 'actividad',
+    pathMatch: 'full'
+  },
+  {
+    path: 'actividad',
+    loadComponent: () => import('./actividad/actividad-status-control/actividad-status-control.component').then(m => m.ActividadStatusControlComponent),
+    title: 'Actividades'
+  },
+  {
+    path: 'espacios',
+    loadComponent: () => import('./espacios/espacio-list/espacio-list.component').then(m => m.EspacioListComponent),
+    title: 'Espacios'
+  },
+  {
+    path: 'producciones',
+    loadComponent: () => import('./producciones/producciones-list/producciones-list.component').then(m => m.ProduccionesListComponent),
+    title: 'Producciones'
+  },
+  {
+    path: 'movimientos',
+    loadComponent: () => import('./movimientos/movimientos-list/movimientos-list.component').then(m => m.MovimientosListComponent),
+    title: 'Movimientos Pendientes'
+  },
+  {
+    path: 'calendario',
+    loadComponent: () => import('./calendario/calendario.component').then(m => m.CalendarioComponent),
+    title: 'Calendario'
+  },
+  {
+    path: 'departamentos',
+    loadComponent: () => import('./departamentos/departamento-list/departamento-list.component').then(m => m.DepartamentoListComponent),
+    title: 'Departamentos'
+  },
+  {
+    path: 'tipos-actividad',
+    loadComponent: () => import('./tipos-actividad/tipo-list/tipo-list.component').then(m => m.TipoListComponent),
+    title: 'Tipos de Actividad'
+  },
 ];
