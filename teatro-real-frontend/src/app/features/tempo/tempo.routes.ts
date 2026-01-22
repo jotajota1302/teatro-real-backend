@@ -13,7 +13,7 @@ export const TEMPO_ROUTES: Routes = [
   },
   {
     path: 'espacios',
-    loadComponent: () => import('./espacios/espacio-list/espacio-list.component').then(m => m.EspacioListComponent),
+    loadComponent: () => import('./espacios/espacios-dashboard/espacios-dashboard.component').then(m => m.EspaciosDashboardComponent),
     title: 'Espacios'
   },
   {
@@ -23,8 +23,8 @@ export const TEMPO_ROUTES: Routes = [
   },
   {
     path: 'movimientos',
-    loadComponent: () => import('./movimientos/movimientos-list/movimientos-list.component').then(m => m.MovimientosListComponent),
-    title: 'Movimientos Pendientes'
+    loadComponent: () => import('./logistica/logistica.component').then(m => m.LogisticaComponent),
+    title: 'Logística – Teatro Real'
   },
   {
     path: 'calendario',
