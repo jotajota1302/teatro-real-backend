@@ -18,7 +18,7 @@ public class TemporadaService {
         return temporadaRepository.findAll();
     }
 
-    public Temporada findById(String id) {
+    public Temporada findById(Long id) {
         return temporadaRepository.findById(id).orElseThrow(() -> new RuntimeException("Temporada no encontrada"));
     }
 
@@ -26,7 +26,7 @@ public class TemporadaService {
         return temporadaRepository.save(t);
     }
 
-    public Temporada update(String id, Temporada t) {
+    public Temporada update(Long id, Temporada t) {
         Temporada existing = temporadaRepository.findById(id).orElseThrow(() -> new RuntimeException("Temporada no encontrada"));
         existing.setNombre(t.getNombre());
         existing.setFechaInicio(t.getFechaInicio());
@@ -35,12 +35,12 @@ public class TemporadaService {
         return temporadaRepository.save(existing);
     }
 
-    public void delete(String id) {
+    public void delete(Long id) {
         temporadaRepository.deleteById(id);
     }
 
     // Activar temporada (marca solo una como activa)
-    public Temporada activar(String id) {
+    public Temporada activar(Long id) {
         List<Temporada> temporadas = temporadaRepository.findAll();
         for (Temporada t : temporadas) {
             t.setActiva(t.getId().equals(id));

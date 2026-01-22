@@ -34,7 +34,8 @@ public class EspacioAdminController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<Espacio> getById(@PathVariable String id) {
-        return ResponseEntity.ok(espacioRepository.findById(id)
+        Long longId = Long.valueOf(id);
+        return ResponseEntity.ok(espacioRepository.findById(longId)
                 .orElseThrow(() -> new EntityNotFoundException("Espacio no encontrado")));
     }
 
@@ -53,9 +54,10 @@ public class EspacioAdminController {
     })
     @PutMapping("/{id}")
     public ResponseEntity<Espacio> update(@PathVariable String id, @Valid @RequestBody Espacio espacio) {
-        if (!espacioRepository.existsById(id))
+        Long longId = Long.valueOf(id);
+        if (!espacioRepository.existsById(longId))
             throw new EntityNotFoundException("Espacio no encontrado");
-        espacio.setId(Long.valueOf(id));
+        espacio.setId(longId);
         Espacio updated = espacioRepository.save(espacio);
         return ResponseEntity.ok(updated);
     }
@@ -67,7 +69,8 @@ public class EspacioAdminController {
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
-        Espacio espacio = espacioRepository.findById(id)
+        Long longId = Long.valueOf(id);
+        Espacio espacio = espacioRepository.findById(longId)
                 .orElseThrow(() -> new EntityNotFoundException("Espacio no encontrado"));
         espacioRepository.delete(espacio);
         return ResponseEntity.noContent().build();
