@@ -33,9 +33,9 @@ public class Actividad implements Serializable {
     @Column(nullable = false, length = 255)
     private String titulo;
 
-    @NotBlank
-    @Column(nullable = false, length = 20)
-    private String temporada; // Ej: "2025-2026"
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "temporada_id", nullable = false)
+    private Temporada temporada;
 
     @Column(columnDefinition = "TEXT")
     private String descripcion;
@@ -115,8 +115,8 @@ public class Actividad implements Serializable {
     public String getTitulo() { return titulo; }
     public void setTitulo(String titulo) { this.titulo = titulo; }
 
-    public String getTemporada() { return temporada; }
-    public void setTemporada(String temporada) { this.temporada = temporada; }
+    public Temporada getTemporada() { return temporada; }
+    public void setTemporada(Temporada temporada) { this.temporada = temporada; }
 
     public String getDescripcion() { return descripcion; }
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }

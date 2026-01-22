@@ -8,6 +8,7 @@ import com.teatroreal.repository.tempo.ActividadRepository;
 import com.teatroreal.repository.tempo.TipoActividadRepository;
 import com.teatroreal.repository.tempo.EspacioRepository;
 import com.teatroreal.repository.tempo.DepartamentoRepository;
+import com.teatroreal.repository.tempo.TemporadaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ public class ActividadService {
     private final TipoActividadRepository tipoActividadRepository;
     private final EspacioRepository espacioRepository;
     private final DepartamentoRepository departamentoRepository;
+    private final TemporadaRepository temporadaRepository;
 
     public List<ActividadResponse> getAll() {
         return actividadRepository.findAll()
@@ -56,7 +58,7 @@ public class ActividadService {
         }
         if (temporada != null && !temporada.isEmpty()) {
             result = result.stream()
-                    .filter(a -> temporada.equals(a.getTemporada()))
+                    .filter(a -> temporada.equals(a.getTemporada() != null ? a.getTemporada().getId().toString() : null))
                     .collect(Collectors.toList());
         }
         if ((fechaInicio != null && !fechaInicio.isEmpty()) || (fechaFin != null && !fechaFin.isEmpty())) {
@@ -80,7 +82,7 @@ public class ActividadService {
     public ActividadResponse create(ActividadRequest req) {
         TipoActividad tipo = tipoActividadRepository.findById(req.getTipoActividadId())
             .orElseThrow(() -> new EntityNotFoundException("TipoActividad no encontrado"));
-        Espacio espacio = espacioRepository.findById(req.getEspacioId())
+        Espacio espacio = espacioRepository.findById(Long.valueOf(req.getEspacioId()))
             .orElseThrow(() -> new EntityNotFoundException("Espacio no encontrado"));
         Departamento departamento = null;
         if (req.getDepartamentoId() != null && !req.getDepartamentoId().isEmpty()) {
@@ -88,9 +90,12 @@ public class ActividadService {
                 .orElseThrow(() -> new EntityNotFoundException("Departamento no encontrado"));
         }
 
+        Temporada temporada = temporadaRepository.findById(Long.valueOf(req.getTemporada()))
+            .orElseThrow(() -> new EntityNotFoundException("Temporada no encontrada"));
+
         Actividad actividad = new Actividad();
         actividad.setTitulo(req.getTitulo());
-        actividad.setTemporada(req.getTemporada());
+        actividad.setTemporada(temporada);
         actividad.setDescripcion(req.getDescripcion());
         actividad.setTipoActividad(tipo);
         actividad.setEspacio(espacio);
@@ -123,7 +128,7 @@ public class ActividadService {
 
         TipoActividad tipo = tipoActividadRepository.findById(req.getTipoActividadId())
             .orElseThrow(() -> new EntityNotFoundException("TipoActividad no encontrado"));
-        Espacio espacio = espacioRepository.findById(req.getEspacioId())
+        Espacio espacio = espacioRepository.findById(Long.valueOf(req.getEspacioId()))
             .orElseThrow(() -> new EntityNotFoundException("Espacio no encontrado"));
         Departamento departamento = null;
         if (req.getDepartamentoId() != null && !req.getDepartamentoId().isEmpty()) {
@@ -131,8 +136,11 @@ public class ActividadService {
                 .orElseThrow(() -> new EntityNotFoundException("Departamento no encontrado"));
         }
 
+        Temporada temporada = temporadaRepository.findById(Long.valueOf(req.getTemporada()))
+            .orElseThrow(() -> new EntityNotFoundException("Temporada no encontrada"));
+
         actividad.setTitulo(req.getTitulo());
-        actividad.setTemporada(req.getTemporada());
+        actividad.setTemporada(temporada);
         actividad.setDescripcion(req.getDescripcion());
         actividad.setTipoActividad(tipo);
         actividad.setEspacio(espacio);
@@ -222,7 +230,7 @@ public class ActividadService {
         return ActividadResponse.builder()
             .id(a.getId())
             .titulo(a.getTitulo())
-            .temporada(a.getTemporada())
+            .temporada(a.getTemporada() != null ? a.getTemporada().getId().toString() : null)
             .descripcion(a.getDescripcion())
             .estado(a.getEstado() != null ? a.getEstado().name() : null)
             .fecha(a.getFecha() != null ? a.getFecha().toString() : null)
@@ -237,7 +245,7 @@ public class ActividadService {
                     .build() : null)
             .espacio(a.getEspacio() != null
                 ? ActividadResponse.EspacioInfo.builder()
-                    .id(a.getEspacio().getId())
+                    .id(String.valueOf(a.getEspacio().getId()))
                     .nombre(a.getEspacio().getNombre())
                     .build() : null)
             .departamento(a.getDepartamento() != null

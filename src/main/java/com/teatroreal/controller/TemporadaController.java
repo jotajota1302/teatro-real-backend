@@ -26,7 +26,7 @@ public class TemporadaController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Obtener temporada por ID")
-    public Temporada findById(@PathVariable String id) {
+    public Temporada findById(@PathVariable Long id) {
         return temporadaService.findById(id);
     }
 
@@ -38,19 +38,19 @@ public class TemporadaController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Actualizar temporada")
-    public Temporada update(@PathVariable String id, @RequestBody Temporada t) {
+    public Temporada update(@PathVariable Long id, @RequestBody Temporada t) {
         return temporadaService.update(id, t);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar temporada")
-    public void delete(@PathVariable String id) {
+    public void delete(@PathVariable Long id) {
         temporadaService.delete(id);
     }
 
     @PutMapping("/{id}/activar")
     @Operation(summary = "Activar temporada (marcar como actual)")
-    public Temporada activar(@PathVariable String id) {
+    public Temporada activar(@PathVariable Long id) {
         return temporadaService.activar(id);
     }
 }
