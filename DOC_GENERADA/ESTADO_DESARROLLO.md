@@ -1,255 +1,231 @@
-# Teatro Real - Estado de Desarrollo v2
+# Teatro Real - Estado de Desarrollo
 
 ## Dashboard de Progreso
 
 | Módulo | Estado | Progreso | Última Actualización |
 |--------|--------|----------|----------------------|
 | **Sprint 0: Setup** | Completado | 100% | 2025-12-11 |
-| **Sprint 1: Auth + Layout** | En progreso | 50% | 2025-12-11 |
-| **Sprint 2: TEMPO** | En progreso | 20% | 2025-12-11 |
-| **Sprint 3: TOPS** | Pendiente | 3% | 2025-12-11 |
-| **Sprint 4: Integraciones v2** | Pendiente | 0% | - |
-| **Sprint 5: Testing + Deploy** | Pendiente | 0% | - |
+| **Sprint 1: Auth + Layout** | Completado | 95% | 2025-01-23 |
+| **Sprint 2: TEMPO** | Completado | 95% | 2026-01-23 |
+| **Sprint 2: Logística** | En Progreso | 30% | 2025-01-23 |
+| **Sprint 3: TOPS** | En Progreso | 15% | 2025-01-23 |
+| **Sprint 4: Integraciones** | Parcial | 35% | 2026-01-23 |
+| **Sprint 5: Testing + Deploy** | En Progreso | 30% | 2025-01-23 |
 
-**Progreso Global: ~20%**
+> **TEMPO:** Cartelería digital completada (global + por sala).
+> **Logística:** Frontend básico existe (30%), falta calendario y backend completo.
 
----
-
-## Changelog v2 (Feedback Cliente 2025-12-17)
-
-> Los cambios v2 incorporan el feedback del cliente tras la demo, documentado en `TR- Requisitos Generales - v1.3.docx`
-
-| Área | Cambios Principales | Impacto Horas |
-|------|---------------------|---------------|
-| **Auth/Roles** | 4 roles (ADMIN, GESTOR, OPERADOR, VISUALIZADOR), permisos por módulo | +10h |
-| **TEMPO** | Landing semanal Excel, temporadas, estados almacén, clonar, Drive | +44h frontend, +20h backend |
-| **TOPS** | Landing 2 listas, temporadas, editor Word, colores config | +30h frontend, +16h backend |
-| **Cartelería** | Vista global (todas las salas) | +8h frontend, +4h backend |
-| **Notificaciones** | Sistema notificaciones en header | +8h frontend, +4h backend |
-| **Drive** | Integración navegador Drive intranet | +14h frontend, +7h backend |
-| **TOTAL** | | **+159h** |
-
-### Estimación Actualizada
-
-| Componente | v1 | v2 | Delta |
-|------------|-----|-----|-------|
-| Backend | 222h | 273h | +51h |
-| Frontend | 259h | 367h | +108h |
-| **TOTAL** | **481h** | **640h** | **+159h** |
+**Progreso Global: ~55%**
 
 ---
 
-## Sprint 0: Setup del Proyecto ✅ COMPLETADO
+## Resumen Ejecutivo
 
-### Backend (Spring Boot 2.7.18 + Java 8)
+### Stack Tecnológico Actualizado
+- **Frontend:** Angular 18.2 + Angular Material 18 + TailwindCSS 3.4
+- **Backend:** Spring Boot 3.3.0 + Java 17 (actualizado desde 2.7/Java 8)
+- **Base de datos:** H2 (desarrollo) / PostgreSQL 16 (producción)
+- **Autenticación:** JWT con 4 roles (ADMIN, GESTOR, OPERADOR, VISUALIZADOR)
+- **Documentación API:** SpringDoc OpenAPI 2.2.0
+
+### MVP Desplegado
+- **URL:** https://teatro-real-app.vercel.app/dashboard/home
+
+---
+
+## Sprint 0: Setup del Proyecto - COMPLETADO 100%
+
+### Backend (Spring Boot 3.3.0 + Java 17)
 
 | Tarea | Estado | Notas |
 |-------|--------|-------|
-| Crear proyecto Spring Boot + Maven | ✅ Completado | pom.xml configurado |
-| Configurar estructura de paquetes | ✅ Completado | controller, service, entity, dto, repository, config |
-| Configurar H2 para desarrollo | ✅ Completado | application.yml |
-| Configurar application.yml (dev/prod) | ✅ Completado | Puerto 8080, H2 console habilitada |
-| Configurar SpringDoc OpenAPI 1.7.0 | ✅ Completado | Swagger UI en /swagger-ui.html |
+| Crear proyecto Spring Boot + Maven | [x] Completado | pom.xml configurado |
+| Configurar estructura de paquetes | [x] Completado | controller, service, domain, dto, repository, config |
+| Configurar H2 para desarrollo | [x] Completado | application.yml |
+| Configurar application.yml (dev/prod) | [x] Completado | Puerto 8080 |
+| Configurar SpringDoc OpenAPI 2.2.0 | [x] Completado | Swagger UI |
+| Actualizar a Java 17 + Spring Boot 3.3 | [x] Completado | 2025-01-23 |
 
 ### Frontend (Angular 18.2 + Material 18)
 
 | Tarea | Estado | Notas |
 |-------|--------|-------|
-| Crear proyecto Angular 18 standalone | ✅ Completado | Angular 18.2.0 |
-| Configurar Angular Material 18 | ✅ Completado | Tema dark custom Teatro Real |
-| Configurar TailwindCSS 3.4 | ✅ Completado | tailwind.config.js con colores Teatro Real |
-| Estructura de carpetas | ✅ Completado | core/, features/, models, services, layouts |
-| Environment files | ✅ Completado | environment.ts + environment.prod.ts |
-| Proxy config para desarrollo | ✅ Completado | proxy.conf.json → localhost:8080 |
-
-### Verificación Sprint 0
-
-- ✅ Backend arranca sin errores en http://localhost:8080
-- ✅ Frontend arranca sin errores en http://localhost:4200
-- ✅ Swagger UI accesible en http://localhost:8080/swagger-ui.html
-- ✅ H2 Console accesible en http://localhost:8080/h2-console
-- ✅ Proxy Frontend → Backend funcionando
+| Crear proyecto Angular 18 standalone | [x] Completado | Angular 18.2.0 |
+| Configurar Angular Material 18 | [x] Completado | Tema Teatro Real |
+| Configurar TailwindCSS 3.4 | [x] Completado | tailwind.config.js |
+| Estructura de carpetas | [x] Completado | core/, features/, shared/, layout/ |
+| Environment files | [x] Completado | environment.ts + environment.prod.ts |
+| Proxy config para desarrollo | [x] Completado | proxy.conf.json |
 
 ---
 
-## Sprint 1: Autenticación + Layout (v2: 4 Roles)
+## Sprint 1: Autenticación + Layout - COMPLETADO 95%
 
 ### Backend
 
 | Tarea | Estado | Notas |
 |-------|--------|-------|
-| Entidad JPA: Usuario | [ ] Pendiente | |
-| Entidad JPA: Rol (4 roles v2) | [ ] Pendiente | ADMIN, GESTOR, OPERADOR, VISUALIZADOR |
-| Entidad JPA: Departamento (v2: jefe, personal) | [ ] Pendiente | Nuevos campos descripcion, jefeId, personalIds |
-| **v2:** Entidad JPA: PermisoModulo | [ ] Pendiente | usuarioId, modulo, nivelAcceso |
-| **v2:** Entidad JPA: Temporada | [ ] Pendiente | nombre, fechaInicio, fechaFin, activa |
-| Migración V1: Schema inicial | [ ] Pendiente | |
-| Migración V2: Datos semilla roles | [ ] Pendiente | |
-| SecurityConfig básico | [ ] Pendiente | |
-| AuthController (login, me, logout) | [ ] Pendiente | |
-| JWT Token generation/validation | [ ] Pendiente | |
-| **v2:** PermisoModuloService | [ ] Pendiente | |
-| **v2:** TemporadaService + Controller | [ ] Pendiente | |
+| Entidades JPA: Usuario, Rol, PermisoModulo | [x] Completado | domain/user/ |
+| Entidad JPA: Departamento | [x] Completado | domain/tempo/ |
+| SecurityConfig + JWT | [x] Completado | SecurityConfig.java |
+| JwtAuthFilter + JwtUtil | [x] Completado | security/ |
+| AuthController (login, me, logout) | [x] Completado | controller/auth/ |
+| UsuarioController | [x] Completado | controller/user/ |
+| RolController | [x] Completado | controller/ |
+| PermisoModuloController | [x] Completado | controller/ |
 | Tests de autenticación | [ ] Pendiente | |
 
 ### Frontend
 
 | Tarea | Estado | Notas |
 |-------|--------|-------|
-| AuthService con signals (v2: 4 roles) | [ ] Pendiente | Métodos isAdmin, isGestor, isOperador, isVisualizador |
-| Auth Guard + Role Guard | [ ] Pendiente | Carpeta guards/ existe |
-| **v2:** ModulePermissionGuard | [ ] Pendiente | Verificar acceso a TEMPO/TOPS/ADMIN |
-| Auth Interceptor (JWT) | [ ] Pendiente | |
-| Página de Login | [ ] Pendiente | |
-| Main Layout (sidebar + header) | ✅ Completado | main-layout.component.ts |
-| Sidebar con navegación | ✅ Completado | sidenav.component.ts |
-| Header con usuario/logout | ✅ Completado | navbar.component.ts |
-| **v2:** NotificationBell en header | [ ] Pendiente | Componente campana notificaciones |
-| **v2:** TemporadaSelector en header | [ ] Pendiente | Dropdown selector temporada |
-| Footer | ✅ Completado | footer.component.ts |
-| **v2:** NotificationService | [ ] Pendiente | Polling + signals |
-| **v2:** TemporadaService | [ ] Pendiente | |
+| auth.models.ts (4 roles) | [x] Completado | core/auth/ |
+| AuthService con signals | [x] Completado | core/auth/ |
+| Auth Guard | [x] Completado | core/auth/ |
+| Role Guard | [x] Completado | core/guards/ |
+| Module Permission Guard | [x] Completado | core/guards/ |
+| Auth Interceptor (JWT) | [x] Completado | core/auth/ |
+| Página de Login | [x] Completado | features/auth/login/ |
+| Main Layout | [x] Completado | layout/main-layout/ |
+| Sidebar con navegación | [x] Completado | layout/sidebar/ |
+| Header con notificaciones | [x] Completado | layout/header/ |
+| Notification Bell | [x] Completado | shared/components/ |
+| Temporada Selector | [x] Completado | shared/components/ |
 | Tests de auth | [ ] Pendiente | |
 
 ### Verificación Sprint 1
 
-- [ ] Login funcional (local, OAuth Google en fase posterior)
-- [ ] JWT generado y validado
-- ✅ Layout principal visible
-- ✅ Navegación entre módulos
-- [ ] Logout funcional
-- [ ] **v2:** Selector de temporada funcional
-- [ ] **v2:** Campana de notificaciones visible
+- [x] Login funcional con JWT
+- [x] 4 roles implementados (ADMIN, GESTOR, OPERADOR, VISUALIZADOR)
+- [x] Guards por rol y módulo
+- [x] Layout principal visible
+- [x] Navegación entre módulos
+- [x] Header con selector temporada y notificaciones
+- [ ] Tests unitarios pendientes
 
 ---
 
-## Sprint 2: Módulo TEMPO (v2: Landing Excel + Estados + Clone)
+## Sprint 2: Módulo TEMPO - COMPLETADO 95%
 
 ### Backend
 
 | Tarea | Estado | Notas |
 |-------|--------|-------|
-| Entidad JPA: Espacio (v2: color, dimensiones) | ✅ Parcial | Existe, faltan nuevos campos v2 |
-| Entidad JPA: TipoActividad | [ ] Pendiente | |
-| Entidad JPA: Actividad (v2: temporadaId, descripcion, estado) | [ ] Pendiente | Nuevos campos v2 |
-| **v2:** Entidad JPA: ActividadDocumento | [ ] Pendiente | origen: LOCAL/DRIVE_INTRANET |
-| **v2:** Migración V4: Updates v2 TEMPO | [ ] Pendiente | |
-| EspacioRepository | ✅ Completado | EspacioRepository.java |
-| TipoActividadRepository | [ ] Pendiente | |
-| ActividadRepository | [ ] Pendiente | |
-| CRUD EspacioService (v2: actualizar campos) | ✅ Parcial | Existe, actualizar para v2 |
-| CRUD TipoActividadService | [ ] Pendiente | |
-| CRUD ActividadService | [ ] Pendiente | |
-| **v2:** ActividadService.clone() | [ ] Pendiente | Clonar actividad a nueva fecha |
-| **v2:** ActividadService.updateStatus() | [ ] Pendiente | PENDIENTE → EN_TRANSITO → COMPLETADO |
-| Filtros y búsqueda actividades | [ ] Pendiente | |
-| EspacioController | ✅ Completado | EspacioController.java |
-| TipoActividadController | [ ] Pendiente | |
-| ActividadController | [ ] Pendiente | |
-| **v2:** POST /actividades/{id}/clone | [ ] Pendiente | |
-| **v2:** PUT /actividades/{id}/status | [ ] Pendiente | |
-| **v2:** GET /signage/global | [ ] Pendiente | Cartelería global |
-| DataInitializer (datos semilla) | ✅ Completado | DataInitializer.java |
+| Entidad JPA: Espacio | [x] Completado | domain/tempo/Espacio.java |
+| Entidad JPA: TipoActividad | [x] Completado | domain/tempo/TipoActividad.java |
+| Entidad JPA: Actividad | [x] Completado | domain/tempo/Actividad.java |
+| Entidad JPA: ActividadDocumento | [x] Completado | domain/tempo/ActividadDocumento.java |
+| Entidad JPA: Temporada | [x] Completado | domain/tempo/Temporada.java |
+| Repositorios TEMPO | [x] Completado | repository/tempo/ |
+| EspacioService + Controller | [x] Completado | service/tempo/, controller/tempo/ |
+| TipoActividadService + Controller | [x] Completado | service/tempo/, controller/tempo/ |
+| ActividadService + Controller | [x] Completado | service/tempo/, controller/tempo/ |
+| ActividadDocumentoService + Controller | [x] Completado | service/tempo/, controller/tempo/ |
+| TemporadaService + Controller | [x] Completado | service/tempo/, controller/ |
+| DepartamentoService + Controller | [x] Completado | service/, controller/ |
+| NotificacionController | [x] Completado | controller/tempo/ |
+| SignageService + Controller | [x] Completado | service/tempo/, controller/tempo/ |
+| DashboardService + Controller | [x] Completado | service/dashboard/, controller/dashboard/ |
+| Filtros y búsqueda actividades | [x] Completado | |
 | Tests TEMPO | [ ] Pendiente | |
 
 ### Frontend
 
 | Tarea | Estado | Notas |
 |-------|--------|-------|
-| Modelos TypeScript TEMPO (v2 actualizados) | [ ] Pendiente | temporadaId, descripcion, estado, etc. |
-| ActividadService (v2: clone, updateStatus) | [ ] Pendiente | |
-| EspacioService | [ ] Pendiente | |
-| TipoActividadService | [ ] Pendiente | |
-| **v2:** TEMPO Landing Component | [ ] Pendiente | Contenedor para vistas |
-| **v2:** WeeklyExcelView Component | [ ] Pendiente | Vista semanal estilo Excel |
-| Componente Calendario (FullCalendar) | [ ] Pendiente | calendario.component.ts existe (placeholder) |
-| Vista mensual | [ ] Pendiente | |
-| Vista semanal | [ ] Pendiente | |
-| Dialog crear/editar actividad (v2: nuevos campos) | [ ] Pendiente | temporada, descripcion |
-| **v2:** StatusBadge Component | [ ] Pendiente | Estados almacén |
-| **v2:** Actividad Status Control | [ ] Pendiente | Botones cambio estado |
-| **v2:** Actividad Clone Dialog | [ ] Pendiente | |
-| **v2:** DocumentSourcePicker | [ ] Pendiente | Local vs Drive |
-| Filtros por espacio/tipo/temporada | [ ] Pendiente | |
-| Lista de espacios (admin, v2: campos nuevos) | [ ] Pendiente | color, capacidad, dimensiones |
-| Form espacio (admin) | [ ] Pendiente | |
-| Lista tipos actividad (admin) | [ ] Pendiente | |
-| Form tipo actividad (admin) | [ ] Pendiente | |
-| **v2:** CRUD Departamentos (jefe, personal) | [ ] Pendiente | |
+| Modelos TypeScript TEMPO | [x] Completado | features/tempo/models/ |
+| ActividadService | [x] Completado | features/tempo/services/ |
+| EspacioService | [x] Completado | features/tempo/services/ |
+| TipoActividadService | [x] Completado | features/tempo/services/ |
+| Componente Calendario (FullCalendar) | [x] Completado | features/tempo/calendario/ |
+| TEMPO Landing (vista semanal Excel) | [x] Completado | features/tempo/landing/ |
+| Weekly Excel View | [x] Completado | features/tempo/landing/weekly-excel-view/ |
+| Dialog crear/editar actividad | [x] Completado | features/tempo/actividad/actividad-dialog/ |
+| Dialog clonar actividad | [x] Completado | features/tempo/actividad/actividad-clone-dialog/ |
+| Control estados almacén | [x] Completado | features/tempo/actividad/actividad-status-control/ |
+| Lista de espacios | [x] Completado | features/tempo/espacios/espacio-list/ |
+| Form espacio | [x] Completado | features/tempo/espacios/espacio-form/ |
+| Dashboard espacios | [x] Completado | features/tempo/espacios/espacios-dashboard/ |
+| Lista tipos actividad | [x] Completado | features/tempo/tipos-actividad/tipo-list/ |
+| Form tipo actividad | [x] Completado | features/tempo/tipos-actividad/tipo-form/ |
+| Lista departamentos | [x] Completado | features/tempo/departamentos/departamento-list/ |
+| Form departamento | [x] Completado | features/tempo/departamentos/departamento-form/ |
+| Cartelería Global | [x] Completado | features/carteleria/carteleria-global/ |
+| Cartelería por Sala | [x] Completado | features/carteleria/carteleria-sala/ |
 | Tests TEMPO | [ ] Pendiente | |
 
 ### Verificación Sprint 2
 
-- [ ] **v2:** Landing TEMPO con vista semanal Excel
-- [ ] Calendario visual con actividades
-- [ ] Crear/editar/eliminar actividades
-- [ ] **v2:** Clonar actividad a otra fecha
-- [ ] **v2:** Estados almacén (Pendiente → En tránsito → Completado)
-- [ ] Filtrar por espacio, tipo y **temporada**
-- [ ] **v2:** Seleccionar documentos de Drive o Local
-- [ ] Colores por tipo de actividad
-- [ ] CRUD de espacios (admin, con campos v2)
-- [ ] CRUD de tipos de actividad (admin)
-- [ ] **v2:** CRUD de departamentos (con jefe y personal)
+- [x] Calendario visual con actividades
+- [x] Crear/editar/eliminar actividades
+- [x] Clonar actividades
+- [x] Estados de almacén (PENDIENTE, EN_TRANSITO, COMPLETADO)
+- [x] Vista semanal tipo Excel
+- [x] Filtros por espacio y tipo
+- [x] CRUD de espacios
+- [x] CRUD de tipos de actividad
+- [x] CRUD de departamentos
+- [x] Cartelería global y por sala
+- [ ] Tests unitarios pendientes
 
 ---
 
-## Sprint 3: Módulo TOPS (v2: Landing + Editor Word + Colores)
+## Sprint 3: Módulo TOPS - EN PROGRESO 15%
 
 ### Backend
 
 | Tarea | Estado | Notas |
 |-------|--------|-------|
-| Entidad JPA: Guion (v2: temporadaId) | [ ] Pendiente | |
-| Entidad JPA: Acto | [ ] Pendiente | |
-| Entidad JPA: Escena | [ ] Pendiente | |
-| Entidad JPA: ElementoGuion | [ ] Pendiente | |
-| Entidad JPA: ElementoAdjunto (v2: origen, driveFileId) | [ ] Pendiente | |
-| **v2:** Entidad JPA: ColorElementoGuion | [ ] Pendiente | Colores configurables |
-| Repositorios TOPS | [ ] Pendiente | |
-| GuionService (CRUD + bloqueo, v2: filtro temporada) | [ ] Pendiente | |
-| Operaciones jerárquicas (crear acto/escena/elemento) | [ ] Pendiente | |
+| Entidad JPA: Guion | [x] Completado | domain/tops/Guion.java |
+| Entidad JPA: Acto | [x] Completado | domain/tops/Acto.java |
+| Entidad JPA: Escena | [x] Completado | domain/tops/Escena.java |
+| Entidad JPA: ElementoGuion | [x] Completado | domain/tops/ElementoGuion.java |
+| Entidad JPA: ColorElementoGuion | [x] Completado | domain/tops/ColorElementoGuion.java |
+| GuionRepository | [x] Completado | repository/tops/ |
+| ActoRepository | [x] Completado | repository/tops/ |
+| EscenaRepository | [x] Completado | repository/tops/ |
+| ElementoGuionRepository | [x] Completado | repository/tops/ |
+| ColorElementoGuionRepository | [x] Completado | repository/tops/ |
+| **GuionService** | **[ ] PENDIENTE** | **CRÍTICO - Falta implementar** |
+| **GuionController** | **[ ] PENDIENTE** | **CRÍTICO - Falta implementar** |
+| ActoService + Controller | [x] Completado | service/tops/, controller/tops/ |
+| EscenaService + Controller | [x] Completado | service/tops/, controller/tops/ |
+| ElementoGuionService + Controller | [x] Completado | service/tops/, controller/tops/ |
+| ColorElementoGuionService | [x] Completado | service/tops/ |
+| Operaciones jerárquicas | [ ] Pendiente | |
 | Reordenar elementos (drag & drop API) | [ ] Pendiente | |
 | Vistas (completa, tops, departamento) | [ ] Pendiente | |
 | HistorialService (auditoría) | [ ] Pendiente | |
-| **v2:** ColorElementoService | [ ] Pendiente | |
-| Controllers TOPS | [ ] Pendiente | |
 | Tests TOPS | [ ] Pendiente | |
 
-### Frontend
+### Frontend - **CASI TODO PENDIENTE**
 
 | Tarea | Estado | Notas |
 |-------|--------|-------|
-| Modelos TypeScript TOPS (v2 actualizados) | [ ] Pendiente | temporadaId, ColorElementoGuion |
-| GuionService (v2: filtro temporada, computed misGuiones) | [ ] Pendiente | |
+| Modelos TypeScript TOPS | [ ] Pendiente | |
+| GuionService | [ ] Pendiente | |
 | ElementoService | [ ] Pendiente | |
-| **v2:** ColorElementoService | [ ] Pendiente | |
-| **v2:** TOPS Landing Component | [ ] Pendiente | 2 listas: temporada + mis guiones |
-| Lista de guiones (v2: filtro temporada) | [ ] Pendiente | guiones.component.ts existe (placeholder) |
+| **TOPS Landing (2 listas)** | **[ ] PENDIENTE** | **Solo hay placeholder** |
+| Lista de guiones | [ ] Pendiente | |
 | Detalle guion (metadata) | [ ] Pendiente | |
 | Form crear/editar guion | [ ] Pendiente | |
-| Editor principal (v2: estilos Word) | [ ] Pendiente | |
-| **v2:** Estilos editor emulando Word | [ ] Pendiente | |
+| **Editor principal** | **[ ] PENDIENTE** | **Componente principal** |
 | Panel de Acto (expandible) | [ ] Pendiente | |
 | Panel de Escena | [ ] Pendiente | |
-| Elemento item (v2: colores configurables) | [ ] Pendiente | |
+| Elemento item (TOP, E, M, etc.) | [ ] Pendiente | |
 | Tabla de Pasada | [ ] Pendiente | |
 | Dialog crear/editar TOP | [ ] Pendiente | |
 | Drag & drop para reordenar | [ ] Pendiente | |
 | Indicador de bloqueo | [ ] Pendiente | |
 | Vista solo TOPs | [ ] Pendiente | |
 | Vista por departamento | [ ] Pendiente | |
-| **v2:** Admin colores elementos | [ ] Pendiente | |
 | Tests TOPS | [ ] Pendiente | |
 
 ### Verificación Sprint 3
 
-- [ ] **v2:** Landing TOPS con 2 listas (temporada + mis guiones)
-- [ ] Lista de guiones con filtro por temporada
+- [ ] Lista de guiones con filtros
 - [ ] Crear nuevo guion con metadata
 - [ ] Editor jerárquico (actos → escenas → elementos)
-- [ ] **v2:** Editor con estilo visual tipo Word
-- [ ] **v2:** Colores de elementos configurables
 - [ ] Tabla de pasada funcional
 - [ ] Crear/editar TOPs con todos los campos
 - [ ] Drag & drop para reordenar
@@ -258,21 +234,16 @@
 
 ---
 
-## Sprint 4: Integraciones v2 (Drive + Notificaciones + Cartelería Global)
+## Sprint 4: Integraciones - PARCIAL 25%
 
 ### Backend
 
 | Tarea | Estado | Notas |
 |-------|--------|-------|
-| Google Calendar sync completo | [ ] Pendiente | |
-| **v2:** DriveService (integración intranet) | [ ] Pendiente | browse, search, getFileInfo |
-| **v2:** DriveController | [ ] Pendiente | /drive/browse, /drive/search |
-| **v2:** NotificacionService | [ ] Pendiente | Crear, marcar leída, broadcast |
-| **v2:** NotificacionController | [ ] Pendiente | GET, PUT read, PUT read-all |
-| **v2:** Entidad Notificacion | [ ] Pendiente | |
-| Webhook para cambios en tiempo real | [ ] Pendiente | |
+| Google Calendar sync | [ ] Pendiente | Fase posterior |
+| Webhook tiempo real | [ ] Pendiente | |
 | ExportWordService (Apache POI) | [ ] Pendiente | |
-| NotificationService (email) | [ ] Pendiente | |
+| NotificationService | [x] Completado | Parcial - controller existe |
 | Tests de integración | [ ] Pendiente | |
 
 ### Frontend
@@ -280,301 +251,289 @@
 | Tarea | Estado | Notas |
 |-------|--------|-------|
 | WebSocketService | [ ] Pendiente | |
-| Actualización en tiempo real | [ ] Pendiente | |
-| **v2:** DriveService | [ ] Pendiente | |
-| **v2:** DriveFileSelector Component | [ ] Pendiente | Modal navegador Drive |
+| Actualización tiempo real | [ ] Pendiente | |
 | Descarga exportación Word | [ ] Pendiente | |
-| Dashboard con widgets | [ ] Pendiente | home.component.ts existe (placeholder) |
-| Notificaciones (snackbar/toast) | [ ] Pendiente | |
-| Modo Cartelería por sala | [ ] Pendiente | carteleria.component.ts existe (placeholder) |
-| **v2:** Cartelería Global Component | [ ] Pendiente | Vista todas las salas |
-| **v2:** Admin Temporadas | [ ] Pendiente | CRUD temporadas |
-| **v2:** Admin Permisos Módulo | [ ] Pendiente | Configurar permisos usuarios |
+| Dashboard con widgets | [x] Completado | features/dashboard/ |
+| NotificationService | [x] Completado | core/services/ |
+| Notification Bell | [x] Completado | shared/components/ |
+| Modo Cartelería | [x] Completado | features/carteleria/ |
 | Tests de integración | [ ] Pendiente | |
-
-### Verificación Sprint 4
-
-- [ ] Sincronización con Google Calendar
-- [ ] Updates en tiempo real (WebSocket)
-- [ ] **v2:** Navegador Drive intranet funcional
-- [ ] **v2:** Sistema de notificaciones funcional
-- [ ] Exportar guion a Word
-- [ ] Dashboard con actividades del día
-- [ ] Notificaciones de cambios
-- [ ] Modo cartelería por sala funcional
-- [ ] **v2:** Modo cartelería global funcional
-- [ ] **v2:** Admin temporadas funcional
-- [ ] **v2:** Admin permisos por módulo funcional
 
 ---
 
-## Sprint 5: Testing + Deploy
+## Sprint 5: Testing + Deploy - EN PROGRESO 30%
 
 ### Backend
 
 | Tarea | Estado | Notas |
 |-------|--------|-------|
-| Tests unitarios adicionales | [ ] Pendiente | |
+| Tests unitarios | [ ] Pendiente | |
 | Tests de integración | [ ] Pendiente | |
-| Documentación OpenAPI/Swagger | ✅ Completado | Configurado en OpenApiConfig.java |
-| Dockerfile + optimización | [ ] Pendiente | |
-| Configuración producción (PostgreSQL) | [ ] Pendiente | |
-| Scripts de migración de datos | [ ] Pendiente | |
+| Documentación Swagger | [x] Completado | SpringDoc configurado |
+| Dockerfile | [ ] Pendiente | |
+| Configuración producción | [ ] Pendiente | |
+| build.ps1 para compilación | [x] Completado | Java 17 configurado |
 
 ### Frontend
 
 | Tarea | Estado | Notas |
 |-------|--------|-------|
-| Tests unitarios adicionales | [ ] Pendiente | |
+| Tests unitarios | [ ] Pendiente | |
 | Tests E2E (Playwright) | [ ] Pendiente | |
-| Responsive / Mobile fixes | [ ] Pendiente | |
+| Responsive / Mobile | [ ] Pendiente | |
 | Accesibilidad (a11y) | [ ] Pendiente | |
-| Optimización bundle | [ ] Pendiente | |
-| Configuración producción | [ ] Pendiente | |
-
-### Verificación Sprint 5
-
-- [ ] Cobertura de tests > 70%
-- ✅ Documentación API completa (Swagger)
-- [ ] Build de producción optimizado
-- [ ] Docker images listas
-- [ ] Responsive en tablet/móvil
-- [ ] MVP v2 completo y funcional
+| Optimización bundle | [x] Completado | Build funciona |
+| Deploy Vercel | [x] Completado | MVP desplegado |
 
 ---
 
-## Inventario de Código Existente
+## Módulo Logística - INCLUIDO EN PLANIFICACIÓN (Requisitos v1.3)
 
-### Backend - Archivos Implementados
+> **ACTUALIZACIÓN 2025-01-23:** Módulo ahora incluido formalmente en la planificación.
+> Ver: PLANIFICACION_3_SEMANAS.md (Semana 2), PLAN_IMPLEMENTACION_FRONTEND/BACKEND_v2.md
+
+### Requisitos según TR-Requisitos Generales v1.3
+
+| Requisito | Estado | Descripción |
+|-----------|--------|-------------|
+| Almacenes | [ ] Pendiente | Arganda-Campa, Arganda-Nave (espacios tipo ALMACEN) |
+| Tipos operación | [~] Parcial | RECOGIDA (verde), SALIDA (rosa) |
+| Estados | [~] Parcial | PENDIENTE_INICIO → EN_TRANSITO → COMPLETADO |
+| **Vista calendario** | [ ] Pendiente | **Vista mes, semana, día (como TEMPO)** |
+| Campos v1.3 | [ ] Pendiente | Nº camiones, lugar origen/destino |
+| Botones transición | [ ] Pendiente | Botones para cambiar estado |
+| Filtros | [~] Parcial | Por almacén, tipo, temporada, fecha |
+
+### Frontend - IMPLEMENTADO 50% (falta calendario y campos v1.3)
+
+| Tarea | Estado | Notas |
+|-------|--------|-------|
+| LogisticaComponent (landing) | [x] Completado | features/tempo/logistica/ |
+| LogisticaService | [x] Completado | features/tempo/logistica/ |
+| Vista con estadísticas | [x] Completado | Programados, En tránsito, Completados |
+| Filtros por tipo/estado | [x] Completado | |
+| Lista de operaciones | [x] Completado | |
+| MovimientosListComponent | [x] Completado | features/tempo/movimientos/ |
+| ProduccionesListComponent | [x] Completado | features/tempo/producciones/ |
+| **Calendario Logística (FullCalendar)** | [ ] **PENDIENTE** | **Vista mes/semana/día (v1.3)** |
+| **Colores calendario** | [ ] **PENDIENTE** | **Verde=RECOGIDA, Rosa=SALIDA** |
+| **Dialog crear operación (campos v1.3)** | [ ] **PENDIENTE** | **Nº camiones, origen, destino, almacén** |
+| **Botones transición estado** | [ ] **PENDIENTE** | **Pendiente→Tránsito→Completado** |
+| Ver detalle operación | [ ] Pendiente | |
+
+### Backend - PENDIENTE 0%
+
+| Tarea | Estado | Notas |
+|-------|--------|-------|
+| Entidad OperacionLogistica (v1.3) | [ ] Pendiente | Campos: numeroCamiones, lugarOrigen, lugarDestino |
+| Migración SQL (espacios ALMACEN) | [ ] Pendiente | Arganda-Campa, Arganda-Nave |
+| OperacionLogisticaRepository | [ ] Pendiente | Con queries para calendario |
+| LogisticaService | [ ] Pendiente | CRUD + transiciones estado |
+| LogisticaController | [ ] Pendiente | Endpoints v1.3 |
+| GET /api/logistica/calendario | [ ] Pendiente | Para FullCalendar |
+| PUT /api/.../iniciar-transito | [ ] Pendiente | Botón PENDIENTE→EN_TRANSITO |
+| PUT /api/.../completar | [ ] Pendiente | Botón EN_TRANSITO→COMPLETADO |
+
+### Rutas Configuradas
+
+- `/tempo/movimientos` → LogisticaComponent (landing con estadísticas)
+- `/tempo/producciones` → ProduccionesListComponent
+
+### Próximos Pasos (Semana 2)
+
+1. **Backend:** Crear entidades, migración, service y controller
+2. **Frontend:** Añadir vista calendario con FullCalendar
+3. **Frontend:** Crear dialog con campos v1.3 (nºcamiones, origen, destino)
+4. **Frontend:** Implementar botones de transición de estado
+
+---
+
+## Módulo Admin - PLACEHOLDER 5%
+
+### Estado Actual
+| Tarea | Estado | Notas |
+|-------|--------|-------|
+| admin-placeholder.component | [x] Existe | Solo placeholder |
+| CRUD Usuarios | [ ] Pendiente | |
+| Gestión 4 roles | [ ] Pendiente | |
+| Permisos por módulo | [ ] Pendiente | |
+| CRUD Temporadas | [ ] Pendiente | |
+| Configuración colores TOPS | [ ] Pendiente | |
+
+---
+
+## Inventario de Código - Actualizado 2025-01-23
+
+### Backend - 96 archivos Java
+
 ```
-teatro-real-backend/
-├── pom.xml                                    ✅ Configurado
-├── src/main/java/com/teatroreal/
-│   ├── TeatroRealApplication.java            ✅ Main class
-│   ├── config/
-│   │   ├── OpenApiConfig.java                ✅ Swagger config
-│   │   ├── CorsConfig.java                   ✅ CORS habilitado
-│   │   └── DataInitializer.java              ✅ Datos semilla
-│   ├── controller/
-│   │   ├── EspacioController.java            ✅ CRUD Espacios
-│   │   └── HealthController.java             ✅ Health check
-│   ├── dto/
-│   │   ├── ApiResponse.java                  ✅ Response wrapper
-│   │   ├── EspacioDTO.java                   ✅ DTO Espacio
-│   │   └── HealthResponse.java               ✅ Health DTO
-│   ├── entity/
-│   │   └── Espacio.java                      ✅ Entidad JPA (actualizar v2)
-│   ├── exception/
-│   │   └── GlobalExceptionHandler.java       ✅ Manejo errores
-│   ├── repository/
-│   │   └── EspacioRepository.java            ✅ JPA Repository
-│   └── service/
-│       └── EspacioService.java               ✅ Lógica negocio
-└── src/main/resources/
-    └── application.yml                       ✅ Configuración
+teatro-real-backend/src/main/java/com/teatroreal/
+├── TeatroRealBackendApplication.java
+├── config/
+│   └── SecurityConfig.java
+├── controller/
+│   ├── auth/AuthController.java
+│   ├── admin/EspacioAdminController.java
+│   ├── admin/TipoActividadAdminController.java
+│   ├── dashboard/DashboardController.java
+│   ├── tempo/ActividadController.java
+│   ├── tempo/ActividadDocumentoController.java
+│   ├── tempo/EspacioController.java
+│   ├── tempo/NotificacionController.java
+│   ├── tempo/SignageController.java
+│   ├── tempo/TipoActividadController.java
+│   ├── tops/ActoController.java
+│   ├── tops/ElementoGuionController.java
+│   ├── tops/EscenaController.java
+│   ├── user/UsuarioController.java
+│   ├── DepartamentoController.java
+│   ├── PermisoModuloController.java
+│   ├── RolController.java
+│   └── TemporadaController.java
+├── domain/
+│   ├── tempo/Actividad.java, ActividadDocumento.java, Departamento.java
+│   ├── tempo/Espacio.java, Temporada.java, TipoActividad.java
+│   ├── tops/Acto.java, ColorElementoGuion.java, ElementoGuion.java
+│   ├── tops/Escena.java, Guion.java
+│   └── user/PermisoModulo.java, Rol.java, Usuario.java
+├── dto/
+│   ├── request/*.java (9 archivos)
+│   └── response/*.java (15 archivos)
+├── repository/
+│   ├── tempo/*.java (6 archivos)
+│   ├── tops/*.java (5 archivos)
+│   └── *.java (3 archivos)
+├── security/
+│   ├── JwtAuthFilter.java
+│   └── JwtUtil.java
+└── service/
+    ├── dashboard/DashboardService.java
+    ├── tempo/*.java (7 archivos)
+    ├── tops/*.java (5 archivos - FALTA GuionService)
+    └── user/UsuarioService.java
 ```
 
-### Frontend - Archivos Implementados
+### Frontend - 57 archivos TypeScript
+
 ```
-teatro-real-frontend/
-├── angular.json                              ✅ Configurado + proxy
-├── package.json                              ✅ Dependencies + Material
-├── proxy.conf.json                           ✅ Proxy → localhost:8080
-├── tailwind.config.js                        ✅ Colores Teatro Real
-├── src/
-│   ├── main.ts                               ✅ Bootstrap
-│   ├── styles.scss                           ✅ Estilos + Material theme
-│   ├── environments/
-│   │   ├── environment.ts                    ✅ Config desarrollo
-│   │   └── environment.prod.ts               ✅ Config producción
-│   └── app/
-│       ├── app.component.ts                  ✅ Root component
-│       ├── app.config.ts                     ✅ App config
-│       ├── app.routes.ts                     ✅ Rutas definidas
-│       ├── core/
-│       │   ├── components/
-│       │   │   ├── navbar/navbar.component.ts     ✅ Header
-│       │   │   ├── sidenav/sidenav.component.ts   ✅ Sidebar
-│       │   │   └── footer/footer.component.ts     ✅ Footer
-│       │   ├── layouts/
-│       │   │   └── main-layout.component.ts       ✅ Layout principal
-│       │   ├── models/
-│       │   │   └── route.model.ts                 ✅ Modelo rutas
-│       │   ├── services/
-│       │   │   └── layout.service.ts              ✅ Estado sidebar
-│       │   └── guards/                            📁 (vacío)
-│       └── features/
-│           ├── home/home.component.ts             ✅ Placeholder
-│           ├── calendario/calendario.component.ts ✅ Placeholder
-│           ├── espacios/espacios.component.ts     ✅ Placeholder
-│           ├── producciones/producciones.component.ts ✅ Placeholder
-│           ├── guiones/guiones.component.ts       ✅ Placeholder
-│           ├── logistica/logistica.component.ts   ✅ Placeholder
-│           └── carteleria/carteleria.component.ts ✅ Placeholder
+teatro-real-frontend/src/app/
+├── app.component.ts, app.config.ts, app.routes.ts
+├── core/
+│   ├── auth/ (5 archivos)
+│   ├── guards/ (2 archivos)
+│   └── services/ (3 archivos)
+├── features/
+│   ├── admin/ (2 archivos - placeholder)
+│   ├── auth/login/ (1 archivo)
+│   ├── carteleria/ (2 archivos)
+│   ├── dashboard/ (3 archivos)
+│   ├── tempo/ (20+ archivos - COMPLETO)
+│   └── tops/ (2 archivos - PLACEHOLDER)
+├── layout/ (3 archivos)
+└── shared/components/ (5 archivos)
 ```
 
-### Archivos Pendientes v2 (Nuevos)
+---
 
-**Backend:**
-- `entity/Temporada.java`
-- `entity/PermisoModulo.java`
-- `entity/Notificacion.java`
-- `entity/ColorElementoGuion.java`
-- `service/NotificacionService.java`
-- `service/DriveService.java`
-- `service/TemporadaService.java`
-- `controller/NotificacionController.java`
-- `controller/DriveController.java`
-- `controller/TemporadaController.java`
-- `controller/SignageController.java`
+## Tareas Prioritarias - Próximos Pasos
 
-**Frontend:**
-- `shared/components/temporada-selector/`
-- `shared/components/notification-bell/`
-- `shared/components/status-badge/`
-- `shared/components/drive-file-selector/`
-- `shared/components/document-source-picker/`
-- `core/services/notification.service.ts`
-- `core/services/drive.service.ts`
-- `core/services/temporada.service.ts`
-- `features/tempo/landing/weekly-excel-view/`
-- `features/tops/landing/tops-landing.component.ts`
-- `features/carteleria/carteleria-global/`
-- `features/admin/temporadas/`
-- `features/admin/permisos-modulo/`
-- `features/admin/colores-elementos/`
+### ALTA PRIORIDAD (TOPS)
+
+1. [ ] **Backend: Crear GuionService.java**
+   - CRUD guiones
+   - Lock/unlock para edición
+   - Filtro por temporada
+
+2. [ ] **Backend: Crear GuionController.java**
+   - GET /api/guiones
+   - GET /api/guiones/{id}
+   - POST /api/guiones
+   - PUT /api/guiones/{id}
+   - DELETE /api/guiones/{id}
+   - POST /api/guiones/{id}/lock
+   - POST /api/guiones/{id}/unlock
+
+3. [ ] **Frontend: Crear TOPS Landing**
+   - Lista guiones de temporada
+   - Lista mis guiones
+
+4. [ ] **Frontend: Crear Editor TOPS**
+   - Panel actos expandible
+   - Panel escenas
+   - Elementos con colores
+
+### MEDIA PRIORIDAD
+
+5. [ ] **Documentar módulo Logística en plan**
+6. [ ] **Implementar backend Logística**
+7. [ ] **Admin: CRUD Usuarios**
+8. [ ] **Admin: Gestión permisos**
+
+### BAJA PRIORIDAD
+
+9. [ ] Tests unitarios backend
+10. [ ] Tests unitarios frontend
+11. [ ] Google Calendar sync
+12. [ ] Export Word
 
 ---
 
-## Registro de Cambios
+## URLs de Desarrollo
 
-| Fecha | Sprint | Cambio | Autor |
-|-------|--------|--------|-------|
-| 2025-12-11 | - | Documento creado con estado actual | Sistema |
-| 2025-12-11 | 0-2 | Marcadas tareas completadas según código existente | Sistema |
-| 2025-12-11 | 0 | Angular Material 18 instalado y configurado (tema dark) | Sistema |
-| 2025-12-11 | 0 | proxy.conf.json creado y vinculado a angular.json | Sistema |
-| 2025-12-11 | 0 | environment.ts y environment.prod.ts creados | Sistema |
-| 2025-12-20 | - | **v2:** Actualizado con feedback cliente (v1.3) | Sistema |
-| 2025-12-20 | - | **v2:** Añadidas tareas: 4 roles, temporadas, estados almacén | Sistema |
-| 2025-12-20 | - | **v2:** Añadidas tareas: landing Excel, landing TOPS, cartelería global | Sistema |
-| 2025-12-20 | - | **v2:** Añadidas tareas: Drive intranet, notificaciones, colores config | Sistema |
-| 2025-12-20 | - | **v2:** Estimación actualizada: 481h → 640h (+159h) | Sistema |
-
----
-
-## Bloqueos Actuales
-
-| ID | Descripción | Sprint | Fecha Detectado | Estado |
-|----|-------------|--------|-----------------|--------|
-| ~~B-001~~ | ~~Angular Material no instalado~~ | 0 | 2025-12-11 | Resuelto |
-| ~~B-002~~ | ~~Proxy frontend→backend no configurado~~ | 0 | 2025-12-11 | Resuelto |
-| ~~B-003~~ | ~~Environment files no creados~~ | 0 | 2025-12-11 | Resuelto |
-
----
-
-## Próximas Tareas Prioritarias (v2)
-
-### Fase 1: Completar Sprint 1 (Auth con 4 roles)
-1. [ ] Crear entidades Usuario, Rol, Departamento, PermisoModulo, Temporada (Backend)
-2. [ ] Implementar JWT básico con validación de roles
-3. [ ] AuthService con 4 roles + ModulePermissionGuard (Frontend)
-4. [ ] TemporadaService + TemporadaSelector (Frontend)
-5. [ ] NotificationService + NotificationBell (Frontend)
-6. [ ] Conectar login en frontend
-
-### Fase 2: Sprint 2 TEMPO con features v2
-1. [ ] Actualizar entidad Espacio con campos v2 (color, dimensiones)
-2. [ ] Crear entidad Actividad con campos v2 (temporadaId, descripcion, estado)
-3. [ ] Implementar endpoints clone y status
-4. [ ] Landing TEMPO con WeeklyExcelView
-5. [ ] StatusBadge + controles de estado almacén
-6. [ ] Integrar FullCalendar con filtro temporada
-
-### Fase 3: Sprint 3 TOPS con features v2
-1. [ ] Landing TOPS con 2 listas
-2. [ ] Editor con estilos Word
-3. [ ] Colores configurables para elementos
-4. [ ] Filtro por temporada
-
-### Fase 4: Sprint 4 Integraciones v2
-1. [ ] DriveService + DriveFileSelector
-2. [ ] Sistema notificaciones completo
-3. [ ] Cartelería global
-
----
-
-## Notas y Decisiones Técnicas
-
-### Stack Tecnológico Confirmado
-- **Frontend:** Angular 18.2 + Angular Material 18 + TailwindCSS 3.4
-- **Backend:** Spring Boot 2.7.18 + Java 8
-- **Base de datos:** H2 (desarrollo) / PostgreSQL 16 (producción)
-- **Autenticación:** JWT (OAuth 2.0 con Google en fase posterior)
-- **Documentación API:** SpringDoc OpenAPI 1.7.0
-
-### URLs de Desarrollo
 | Servicio | URL |
 |----------|-----|
-| Frontend Angular | http://localhost:4200 |
-| Backend API | http://localhost:8080/api |
+| Frontend Angular (local) | http://localhost:4200 |
+| Backend API (local) | http://localhost:8080/api |
 | Swagger UI | http://localhost:8080/swagger-ui.html |
 | H2 Console | http://localhost:8080/h2-console |
+| **MVP Producción** | https://teatro-real-app.vercel.app |
 
 ### Credenciales H2 (Desarrollo)
 - **JDBC URL:** jdbc:h2:mem:teatroreal
 - **Usuario:** sa
 - **Password:** (vacío)
 
-### Decisiones v2
-- **4 Roles:** ADMIN (todo), GESTOR (edición), OPERADOR (operaciones limitadas), VISUALIZADOR (solo lectura)
-- **Permisos por módulo:** Tabla PermisoModulo para granularidad extra
-- **Estados almacén:** Máquina de estados simple PENDIENTE → EN_TRANSITO → COMPLETADO
-- **Drive Intranet:** Integración lectura-only para seleccionar documentos
-- **Cartelería global:** Vista dashboard de todas las salas en tiempo real
-
 ---
 
-## Comandos Útiles
+## Comandos de Desarrollo
 
-### Backend
-```bash
-# Desarrollo (Windows)
+### Backend (Java 17)
+```powershell
+# Compilar con Java 17 (Windows)
 cd teatro-real-backend
-mvnw.cmd spring-boot:run
+.\build.ps1 clean compile
+
+# Ejecutar
+.\build.ps1 spring-boot:run
 
 # Tests
-mvnw.cmd test
-
-# Build
-mvnw.cmd clean package -DskipTests
+.\build.ps1 test
 ```
 
 ### Frontend
 ```bash
-# Desarrollo
 cd teatro-real-frontend
 npm install
-npm start
-
-# Tests
-npm test
-
-# Build producción
-npm run build
+npm start        # http://localhost:4200
+npm run build    # Build producción
+npm test         # Tests
 ```
 
 ---
 
-## Documentación de Referencia v2
+## Registro de Cambios
 
-| Documento | Descripción |
-|-----------|-------------|
-| `DOC_GENERADA/SINTESIS_REQUISITOS_FINAL_v2.md` | Síntesis completa de requisitos (actualizada) |
-| `DOC_GENERADA/PLAN_IMPLEMENTACION_BACKEND_v2.md` | Plan detallado backend (273h) |
-| `DOC_GENERADA/PLAN_IMPLEMENTACION_FRONTEND_v2.md` | Plan detallado frontend (367h) |
-| `DOC_INICIAL/TR- Requisitos Generales - v1.3.docx` | Requisitos originales con feedback cliente |
+| Fecha | Cambio | Autor |
+|-------|--------|-------|
+| 2025-12-11 | Documento creado | Sistema |
+| 2025-01-23 | Actualización completa basada en análisis de código | Claude |
+| 2025-01-23 | Actualizado a Java 17 + Spring Boot 3.3 | JJ |
+| 2025-01-23 | Merge ramas Fran + Sandra → JJ | JJ |
+| 2025-01-23 | Identificado módulo Logística no planificado | Claude |
+| 2025-01-23 | Identificado que TOPS frontend está sin implementar | Claude |
+| 2026-01-23 | Implementado SignageController + Cartelería completa (global + sala) | Claude |
 
 ---
 
-*Última actualización: 2025-12-20 (v2)*
+*Última actualización: 2026-01-23*
+*Progreso Global: ~55%*

@@ -1,57 +1,59 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./src/**/*.{html,ts}",
-  ],
+  content: ['./src/**/*.{html,ts,scss,css}'],
   theme: {
     fontFamily: {
       sans: ['Montserrat', 'sans-serif'],
+      montserrat: ['Montserrat', 'sans-serif'],
     },
     extend: {
       colors: {
-        // Teatro Real - Colores principales
-        'teatro': {
-          carmesi: '#CF102D',
-          'carmesi-dark': '#A00D24',
-          'carmesi-light': '#E54D64',
-          negro: '#010101',
-          'negro-carbon': '#232323',
-          'negro-suave': '#080808',
-          blanco: '#FFFFFF',
-        },
-        // Grises corporativos
-        'tr-gray': {
-          900: '#232323',
-          800: '#333333',
-          600: '#666666',
-          400: '#999999',
-          200: '#CCCCCC',
-          100: '#F5F5F5',
-        },
-        // Colores de actividades TEMPO
-        'actividad': {
-          funcion: '#1E3A5F',
-          ensayo: '#2E7D32',
-          montaje: '#E57373',
-          'pauta-tecnica': '#757575',
-          evento: '#AD1457',
-          nocturnas: '#EF6C00',
-          visitas: '#7B1FA2',
-          cargas: '#F9A825',
-          escenario: '#FAFAFA',
-          cursos: '#EC407A',
-          prensa: '#C62828',
-          flamenco: '#9C27B0',
-        },
-        // Estados
-        'estado': {
-          exito: '#2E7D32',
-          error: '#C62828',
-          advertencia: '#EF6C00',
-          info: '#1565C0',
-          neutro: '#757575',
-        },
+        // Paleta Teatro Real
+        'teatro-black': '#010101',
+        'teatro-crimson': '#CF102D',
+        'teatro-crimson-dark': '#A00D24',
+        'teatro-crimson-light': '#E54D64',
+        'teatro-white': '#FFFFFF',
+
+        // Grises sistema
+        'teatro-gray-900': '#232323',
+        'teatro-gray-800': '#333333',
+        'teatro-gray-600': '#666666',
+        'teatro-gray-400': '#999999',
+        'teatro-gray-200': '#CCCCCC',
+        'teatro-gray-100': '#F5F5F5',
+
+        // Estados/feedback
+        'teatro-success': '#2E7D32',
+        'teatro-error': '#C62828',
+        'teatro-warning': '#EF6C00',
+        'teatro-info': '#1565C0',
+
+        // Actividades TEMPO extendidas
+        'tempo-funcion': '#1E3A5F',
+        'tempo-ensayo': '#2E7D32',
+        'tempo-montaje': '#E57373',
+        'tempo-pauta': '#757575',
+        'tempo-evento': '#AD1457',
+        'tempo-nocturna': '#EF6C00',
+        'tempo-visita': '#7B1FA2',
+        'tempo-cargas': '#F9A825',
+        'tempo-cursos': '#EC407A',
+        'tempo-prensa': '#C62828',
+        'tempo-flamenco': '#9C27B0',
       },
+      borderRadius: {
+        'sm': '4px',
+        'md': '8px',
+        'lg': '16px',
+      },
+      boxShadow: {
+        'sm': '0 1px 2px rgba(0,0,0,0.05)',
+        'md': '0 2px 8px rgba(0,0,0,0.1)',
+        'lg': '0 4px 16px rgba(0,0,0,0.15)',
+        'xl': '0 8px 32px rgba(0,0,0,0.20)',
+        'elevated': '0 10px 40px rgba(0,0,0,0.25)',
+      }
     },
   },
   plugins: [],

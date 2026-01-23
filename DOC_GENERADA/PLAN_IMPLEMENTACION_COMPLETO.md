@@ -1,10 +1,10 @@
 # Teatro Real - Plan de Implementación Completo
 ## Fullstack: Angular 18 + Spring Boot 2.7 + PostgreSQL
-
+  
 ---
 **Proyecto:** Gestión Interna del Teatro Real
 **Fecha:** 2025-12-11
-**Última actualización:** 2025-12-11
+**Última actualización:** 2025-12-20 (Frontend v2) / 2025-01-13 (Backend v2)
 **Stack Tecnológico:**
 - **Frontend:** Angular 18.2 + Angular Material 18 + TailwindCSS 3.4
 - **Backend:** Spring Boot 2.7.18 + Java 8
@@ -23,9 +23,9 @@
 
 | Módulo | Descripción | Complejidad |
 |--------|-------------|-------------|
-| **ADMIN** | Usuarios, roles, departamentos, configuración | Media |
-| **TEMPO** | Actividades, calendario, espacios, sincronización Google Calendar | Media-Alta |
-| **TOPS** | Guiones técnicos, TOPs, pasadas, editor jerárquico | Alta |
+| **ADMIN** | Usuarios, 4 roles (ADMIN, GESTOR, OPERADOR, VISUALIZADOR), departamentos (jefe + personal), temporadas, permisos por módulo (TEMPO, TOPS, ADMIN), colores de elementos TOPS | Media |
+| **TEMPO** | Actividades, calendario (mensual/semanal/diario), landing semanal estilo Excel, espacios (salas y almacenes), estados de almacén (PENDIENTE → EN_TRANSITO → COMPLETADO), documentos (Local / Drive intranet), cartelería por sala y cartelería global, sincronización Google Calendar | Media-Alta |
+| **TOPS** | Guiones técnicos asociados a temporadas, TOPs, pasadas, editor jerárquico con estilos tipo Word, elementos con colores configurables, adjuntos (Local / Drive intranet), vistas global/TOPs/departamento, historial de cambios | Alta |
 
 ### 1.2 Arquitectura General
 
