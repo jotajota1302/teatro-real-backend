@@ -47,7 +47,9 @@ teatro-real-backend/
 │   │   │   │   │   ├── Departamento.java           ← MODIFICADO v2
 │   │   │   │   │   ├── DepartamentoUsuario.java    ← NUEVO v2
 │   │   │   │   │   ├── Documento.java              ← NUEVO v2
-│   │   │   │   │   └── Notificacion.java           ← NUEVO v2
+│   │   │   │   │   ├── Notificacion.java           ← NUEVO v2
+│   │   │   │   │   ├── OperacionLogistica.java     ← NUEVO (Logística)
+│   │   │   │   │   └── Camion.java                 ← NUEVO (Logística)
 │   │   │   │   └── tops/
 │   │   │   │       ├── Guion.java                  ← MODIFICADO v2
 │   │   │   │       ├── Acto.java
@@ -60,7 +62,9 @@ teatro-real-backend/
 │   │   │   ├── repository/
 │   │   │   │   ├── user/
 │   │   │   │   ├── tempo/
-│   │   │   │   │   └── NotificacionRepository.java ← NUEVO v2
+│   │   │   │   │   ├── NotificacionRepository.java     ← NUEVO v2
+│   │   │   │   │   ├── OperacionLogisticaRepository.java ← NUEVO (Logística)
+│   │   │   │   │   └── CamionRepository.java           ← NUEVO (Logística)
 │   │   │   │   └── tops/
 │   │   │   │
 │   │   │   ├── service/
@@ -71,7 +75,8 @@ teatro-real-backend/
 │   │   │   │   │   ├── EspacioService.java
 │   │   │   │   │   ├── GoogleCalendarService.java
 │   │   │   │   │   ├── DriveService.java           ← NUEVO v2
-│   │   │   │   │   └── NotificacionService.java    ← NUEVO v2
+│   │   │   │   │   ├── NotificacionService.java    ← NUEVO v2
+│   │   │   │   │   └── LogisticaService.java       ← NUEVO (Logística)
 │   │   │   │   └── tops/
 │   │   │   │       ├── GuionService.java           ← MODIFICADO v2
 │   │   │   │       └── ExportWordService.java
@@ -82,7 +87,8 @@ teatro-real-backend/
 │   │   │   │   │   ├── ActividadController.java    ← MODIFICADO v2
 │   │   │   │   │   ├── SignageController.java      ← NUEVO v2
 │   │   │   │   │   ├── DriveController.java        ← NUEVO v2
-│   │   │   │   │   └── NotificacionController.java ← NUEVO v2
+│   │   │   │   │   ├── NotificacionController.java ← NUEVO v2
+│   │   │   │   │   └── LogisticaController.java    ← NUEVO (Logística)
 │   │   │   │   ├── tops/
 │   │   │   │   │   └── GuionController.java        ← MODIFICADO v2
 │   │   │   │   └── admin/
@@ -392,6 +398,96 @@ public class Notificacion {
 }
 ```
 
+### 2.2.1 Módulo Logística (NUEVO)
+
+```java
+// OperacionLogistica.java - NUEVO
+@Entity
+@Table(name = "operaciones_logistica")
+public class OperacionLogistica {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String nombre;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TipoOperacion tipo;  // RECOGIDA, SALIDA
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EstadoOperacion estado = EstadoOperacion.PROGRAMADO;
+
+    @Column(nullable = false)
+    private String origen;
+
+    @Column(nullable = false)
+    private String destino;
+
+    private LocalDate fechaProgramada;
+    private LocalDateTime fechaEjecucion;
+
+    @Column(columnDefinition = "TEXT")
+    private String descripcion;
+
+    private String responsable;
+
+    @ManyToOne
+    @JoinColumn(name = "actividad_id")
+    private Actividad actividad;
+
+    @ManyToMany
+    @JoinTable(
+        name = "operacion_camion",
+        joinColumns = @JoinColumn(name = "operacion_id"),
+        inverseJoinColumns = @JoinColumn(name = "camion_id")
+    )
+    private Set<Camion> camiones = new HashSet<>();
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+}
+
+public enum TipoOperacion {
+    RECOGIDA, SALIDA
+}
+
+public enum EstadoOperacion {
+    PROGRAMADO, EN_TRANSITO, COMPLETADO, CANCELADO
+}
+
+// Camion.java - NUEVO
+@Entity
+@Table(name = "camiones")
+public class Camion {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String matricula;
+
+    private Integer capacidad;  // En m³ o kg
+
+    private String conductor;
+
+    @Enumerated(EnumType.STRING)
+    private EstadoCamion estado = EstadoCamion.DISPONIBLE;
+
+    @ManyToMany(mappedBy = "camiones")
+    private Set<OperacionLogistica> operaciones = new HashSet<>();
+}
+
+public enum EstadoCamion {
+    DISPONIBLE, EN_RUTA, MANTENIMIENTO
+}
+```
+
 ### 2.3 Módulo TOPS (ACTUALIZADO)
 
 ```java
@@ -647,6 +743,21 @@ CREATE INDEX IF NOT EXISTS idx_actividades_estado ON actividades(estado);
 | PUT | `/api/notificaciones/{id}/read` | Marcar como leída |
 | PUT | `/api/notificaciones/read-all` | Marcar todas como leídas |
 
+### 4.5.1 Logística (NUEVO)
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/logistica/operaciones` | Listar operaciones (filtros: tipo, estado, fecha) |
+| GET | `/api/logistica/operaciones/{id}` | Detalle operación |
+| POST | `/api/logistica/operaciones` | Crear operación |
+| PUT | `/api/logistica/operaciones/{id}` | Actualizar operación |
+| PUT | `/api/logistica/operaciones/{id}/estado` | Cambiar estado (PROGRAMADO → EN_TRANSITO → COMPLETADO) |
+| DELETE | `/api/logistica/operaciones/{id}` | Eliminar operación |
+| GET | `/api/logistica/stats` | Estadísticas (programados, en tránsito, completados, camiones) |
+| GET | `/api/logistica/camiones` | Listar camiones |
+| POST | `/api/logistica/camiones` | Crear camión |
+| PUT | `/api/logistica/camiones/{id}` | Actualizar camión |
+| PUT | `/api/logistica/camiones/{id}/estado` | Cambiar estado camión |
+
 ### 4.6 TOPS - Guiones (ACTUALIZADO v2)
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
@@ -774,6 +885,98 @@ public class NotificacionService {
             .orElseThrow(() -> new NotFoundException("Notificación no encontrada"));
         notif.setLeida(true);
         notificacionRepository.save(notif);
+    }
+}
+```
+
+### 5.2.1 LogisticaService (NUEVO - Logística)
+
+```java
+@Service
+@RequiredArgsConstructor
+public class LogisticaService {
+
+    private final OperacionLogisticaRepository operacionRepository;
+    private final CamionRepository camionRepository;
+
+    public List<OperacionLogistica> findAll() {
+        return operacionRepository.findAll();
+    }
+
+    public List<OperacionLogistica> findByFilter(
+            TipoOperacion tipo,
+            EstadoOperacion estado,
+            LocalDate fechaInicio,
+            LocalDate fechaFin) {
+        // Filtrado dinámico con Specification o Query
+        return operacionRepository.findByFilters(tipo, estado, fechaInicio, fechaFin);
+    }
+
+    public LogisticaStatsDTO getStats() {
+        return LogisticaStatsDTO.builder()
+            .programados(operacionRepository.countByEstado(EstadoOperacion.PROGRAMADO))
+            .enTransito(operacionRepository.countByEstado(EstadoOperacion.EN_TRANSITO))
+            .completados(operacionRepository.countByEstado(EstadoOperacion.COMPLETADO))
+            .camionesHoy(camionRepository.countByEstado(EstadoCamion.EN_RUTA))
+            .build();
+    }
+
+    public OperacionLogistica create(OperacionLogisticaDTO dto) {
+        OperacionLogistica op = new OperacionLogistica();
+        op.setNombre(dto.getNombre());
+        op.setTipo(dto.getTipo());
+        op.setEstado(EstadoOperacion.PROGRAMADO);
+        op.setOrigen(dto.getOrigen());
+        op.setDestino(dto.getDestino());
+        op.setFechaProgramada(dto.getFechaProgramada());
+        op.setDescripcion(dto.getDescripcion());
+        op.setResponsable(dto.getResponsable());
+        return operacionRepository.save(op);
+    }
+
+    public OperacionLogistica updateEstado(Long id, EstadoOperacion nuevoEstado) {
+        OperacionLogistica op = operacionRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("Operación no encontrada"));
+
+        // Validar transición de estados
+        validarTransicionEstado(op.getEstado(), nuevoEstado);
+
+        op.setEstado(nuevoEstado);
+        if (nuevoEstado == EstadoOperacion.COMPLETADO) {
+            op.setFechaEjecucion(LocalDateTime.now());
+        }
+        return operacionRepository.save(op);
+    }
+
+    private void validarTransicionEstado(EstadoOperacion actual, EstadoOperacion nuevo) {
+        // PROGRAMADO -> EN_TRANSITO -> COMPLETADO
+        // Cualquier estado -> CANCELADO
+        if (nuevo == EstadoOperacion.CANCELADO) return;
+
+        if (actual == EstadoOperacion.PROGRAMADO && nuevo != EstadoOperacion.EN_TRANSITO) {
+            throw new BusinessException("Solo puede pasar a EN_TRANSITO");
+        }
+        if (actual == EstadoOperacion.EN_TRANSITO && nuevo != EstadoOperacion.COMPLETADO) {
+            throw new BusinessException("Solo puede pasar a COMPLETADO");
+        }
+    }
+
+    public void delete(Long id) {
+        operacionRepository.deleteById(id);
+    }
+
+    // Camiones
+    public List<Camion> findAllCamiones() {
+        return camionRepository.findAll();
+    }
+
+    public Camion createCamion(CamionDTO dto) {
+        Camion c = new Camion();
+        c.setMatricula(dto.getMatricula());
+        c.setCapacidad(dto.getCapacidad());
+        c.setConductor(dto.getConductor());
+        c.setEstado(EstadoCamion.DISPONIBLE);
+        return camionRepository.save(c);
     }
 }
 ```

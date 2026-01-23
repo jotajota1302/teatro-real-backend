@@ -16,7 +16,7 @@
 | Semana | Fran (Backend focus) | Sandra (Frontend focus) | Sergio (Validación) |
 |--------|---------------------|------------------------|---------------------|
 | **S1** | Auth + Entidades base | Auth + Layout + Componentes shared | Daily review código |
-| **S2** | TEMPO API completa | TEMPO UI completa | Sprint review miércoles |
+| **S2** | TEMPO + Logística API | TEMPO + Logística UI | Sprint review miércoles |
 | **S3** | TOPS API + Integraciones | TOPS UI + Cartelería | Demo final viernes |
 
 ---
@@ -93,7 +93,7 @@
 
 ---
 
-## Semana 2: Módulo TEMPO Completo
+## Semana 2: Módulos TEMPO + Logística
 
 ### Lunes S2
 
@@ -146,22 +146,40 @@
 
 **Entregable:** CRUD actividades completo con estados y clone
 
+### Jueves S2 (Logística)
+
+| Dev | Tarea | Horas | Con Agente |
+|-----|-------|-------|------------|
+| **Fran** | Entidad OperacionLogistica (tipo: RECOGIDA/SALIDA, estado, origen, destino) | 2h | Con enums |
+| **Fran** | Entidad CamionLogistica (matrícula, capacidad, estado) | 1h | |
+| **Fran** | LogisticaRepository + LogisticaService | 3h | CRUD + filtros |
+| **Sandra** | LogisticaComponent (dashboard con estadísticas) | 3h | Stats: programados, en tránsito, completados |
+| **Sandra** | LogisticaService frontend (con filtros tipo/estado) | 2h | Signals |
+| **Sergio** | Review: Flujos logística | 1h | EOD |
+
+**Entregable:** Dashboard Logística con operaciones y estadísticas
+
 ### Viernes S2
 
 | Dev | Tarea | Horas | Con Agente |
 |-----|-------|-------|------------|
-| **Fran** | Admin: CRUD Espacios (con campos v2) | 3h | Controller completo |
+| **Fran** | LogisticaController (CRUD + filtros por tipo/estado/fecha) | 3h | REST endpoints |
+| **Fran** | Admin: CRUD Espacios (con campos v2) | 2h | Controller completo |
 | **Fran** | Admin: CRUD TiposActividad | 2h | Controller completo |
-| **Sandra** | Admin: Lista + Form Espacios | 3h | Material table + form |
-| **Sandra** | Admin: Lista + Form TiposActividad | 2h | Con color picker |
-| **Sandra** | Admin: Lista + Form Departamentos (jefe, personal) | 3h | Con selects usuarios |
-| **Sergio** | **SPRINT REVIEW S2** | 2h | Demo TEMPO completo |
+| **Sandra** | Lista Operaciones Logística (tabla con filtros) | 3h | Material table |
+| **Sandra** | Dialog Operación Logística (crear/editar) | 2h | Material Dialog |
+| **Sandra** | Admin: Lista + Form Espacios, TiposActividad, Departamentos | 3h | Material components |
+| **Sergio** | **SPRINT REVIEW S2** | 2h | Demo TEMPO + Logística |
 
 ### Entregables Semana 2 ✓
 - [ ] Landing TEMPO con vista semanal Excel
 - [ ] Calendario FullCalendar integrado
 - [ ] CRUD actividades con estados almacén
 - [ ] Clonar actividades funcionando
+- [ ] **Dashboard Logística con estadísticas (programados, en tránsito, completados)**
+- [ ] **CRUD operaciones logística (recogidas/salidas)**
+- [ ] **Filtros logística por tipo y estado**
+- [ ] **Gestión camiones**
 - [ ] Admin: Espacios, Tipos, Departamentos
 - [ ] Filtros por temporada operativos
 

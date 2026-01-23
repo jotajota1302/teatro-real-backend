@@ -153,9 +153,21 @@ teatro-real-frontend/
 │   │   │   │   ├── espacios/
 │   │   │   │   │   ├── espacio-list/
 │   │   │   │   │   └── espacio-form/         # ACTUALIZADO: nuevos campos
-│   │   │   │   └── tipos-actividad/
+│   │   │   │   ├── tipos-actividad/
 │   │   │   │       ├── tipo-list/
 │   │   │   │       └── tipo-form/
+│   │   │   │   └── logistica/                 # NUEVO: Módulo Logística (almacén)
+│   │   │   │       ├── logistica.component.ts    # Dashboard con estadísticas
+│   │   │   │       ├── logistica.component.html
+│   │   │   │       ├── logistica.component.scss
+│   │   │   │       ├── services/
+│   │   │   │       │   └── logistica.service.ts  # CRUD operaciones + filtros
+│   │   │   │       ├── models/
+│   │   │   │       │   ├── operacion-logistica.model.ts
+│   │   │   │       │   └── camion.model.ts
+│   │   │   │       ├── operacion-list/           # Lista operaciones con filtros
+│   │   │   │       ├── operacion-form/           # Dialog crear/editar operación
+│   │   │   │       └── camion-management/        # Gestión de camiones
 │   │   │   │
 │   │   │   ├── tops/                      # Módulo TOPS
 │   │   │   │   ├── tops.routes.ts
@@ -593,6 +605,54 @@ export interface CalendarioFilter {
   temporadaId?: number;  // NUEVO v2
   fechaInicio: string;
   fechaFin: string;
+}
+```
+
+### 3.2.1 Modelos Logística (Nuevo)
+
+```typescript
+// features/tempo/logistica/models/operacion-logistica.model.ts
+
+export type TipoOperacion = 'RECOGIDA' | 'SALIDA';
+export type EstadoOperacion = 'PROGRAMADO' | 'EN_TRANSITO' | 'COMPLETADO' | 'CANCELADO';
+
+export interface OperacionLogistica {
+  id: number;
+  nombre: string;
+  tipo: TipoOperacion;
+  estado: EstadoOperacion;
+  origen: string;           // Ubicación de origen
+  destino: string;          // Ubicación de destino
+  fechaProgramada: string;  // ISO date
+  fechaEjecucion?: string;  // ISO date (cuando se completó)
+  camiones: Camion[];
+  descripcion?: string;
+  responsable?: string;
+  actividadId?: number;     // Relación opcional con actividad
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Camion {
+  id: number;
+  matricula: string;
+  capacidad: number;        // En m³ o kg
+  conductor?: string;
+  estado: 'DISPONIBLE' | 'EN_RUTA' | 'MANTENIMIENTO';
+}
+
+export interface LogisticaStats {
+  programados: number;
+  enTransito: number;
+  completados: number;
+  camionesHoy: number;
+}
+
+export interface LogisticaFilter {
+  tipo?: TipoOperacion;
+  estado?: EstadoOperacion;
+  fechaInicio?: string;
+  fechaFin?: string;
 }
 ```
 
@@ -1126,6 +1186,96 @@ export class ActividadService {
 
   exportCalendario(filter: CalendarioFilter): Observable<Blob> {
     return this.api.downloadBlob('/actividades/export');
+  }
+}
+```
+
+### 5.1.1 LogisticaService (Nuevo)
+
+```typescript
+// features/tempo/logistica/services/logistica.service.ts
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { Observable, tap } from 'rxjs';
+import { ApiService } from '../../../../core/services/api.service';
+import {
+  OperacionLogistica,
+  LogisticaStats,
+  LogisticaFilter,
+  Camion
+} from '../models/operacion-logistica.model';
+
+@Injectable({ providedIn: 'root' })
+export class LogisticaService {
+  private api = inject(ApiService);
+
+  // Signals
+  private operacionesSignal = signal<OperacionLogistica[]>([]);
+  private statsSignal = signal<LogisticaStats>({
+    programados: 0,
+    enTransito: 0,
+    completados: 0,
+    camionesHoy: 0
+  });
+  private filterSignal = signal<LogisticaFilter>({});
+
+  // Public computed
+  readonly operaciones = this.operacionesSignal.asReadonly();
+  readonly stats = this.statsSignal.asReadonly();
+  readonly filter = this.filterSignal.asReadonly();
+
+  // Operaciones filtradas
+  readonly operacionesFiltradas = computed(() => {
+    const ops = this.operacionesSignal();
+    const f = this.filterSignal();
+
+    return ops.filter(op => {
+      if (f.tipo && op.tipo !== f.tipo) return false;
+      if (f.estado && op.estado !== f.estado) return false;
+      return true;
+    });
+  });
+
+  // API calls
+  loadOperaciones(): Observable<OperacionLogistica[]> {
+    return this.api.get<OperacionLogistica[]>('/logistica/operaciones').pipe(
+      tap(data => this.operacionesSignal.set(data))
+    );
+  }
+
+  loadStats(): Observable<LogisticaStats> {
+    return this.api.get<LogisticaStats>('/logistica/stats').pipe(
+      tap(data => this.statsSignal.set(data))
+    );
+  }
+
+  createOperacion(data: Partial<OperacionLogistica>): Observable<OperacionLogistica> {
+    return this.api.post<OperacionLogistica>('/logistica/operaciones', data);
+  }
+
+  updateOperacion(id: number, data: Partial<OperacionLogistica>): Observable<OperacionLogistica> {
+    return this.api.put<OperacionLogistica>(`/logistica/operaciones/${id}`, data);
+  }
+
+  updateEstado(id: number, estado: string): Observable<OperacionLogistica> {
+    return this.api.put<OperacionLogistica>(`/logistica/operaciones/${id}/estado`, { estado });
+  }
+
+  deleteOperacion(id: number): Observable<void> {
+    return this.api.delete<void>(`/logistica/operaciones/${id}`);
+  }
+
+  // Camiones
+  loadCamiones(): Observable<Camion[]> {
+    return this.api.get<Camion[]>('/logistica/camiones');
+  }
+
+  // Filtros
+  setFilter(filter: LogisticaFilter): void {
+    this.filterSignal.set(filter);
+  }
+
+  clearFilter(): void {
+    this.filterSignal.set({});
   }
 }
 ```
