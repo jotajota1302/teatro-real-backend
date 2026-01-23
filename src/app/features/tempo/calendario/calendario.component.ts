@@ -10,6 +10,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { ActividadService } from '../services/actividad.service';
 import { EspacioService } from '../services/espacio.service';
 import { TipoActividadService } from '../services/tipo-actividad.service';
+import { TemporadaService } from '../../../core/services/temporada.service';
 
 /**
  * Componente Calendario con FullCalendar integrado.
@@ -41,6 +42,16 @@ import { TipoActividadService } from '../services/tipo-actividad.service';
             <option value="">Todos</option>
             <option *ngFor="let tipo of tipos()" [value]="tipo.id">
               {{tipo.nombre}}
+            </option>
+          </select>
+        </div>
+        <div>
+          <label for="filtro-temporada" class="block text-xs font-medium text-gray-600">Temporada</label>
+          <select id="filtro-temporada" class="border rounded p-1 w-40"
+            [value]="selectedTemporadaId()" (change)="onTemporadaChange($event)">
+            <option value="">Todas</option>
+            <option *ngFor="let temp of temporadas()" [value]="temp.id">
+              {{temp.nombre}}
             </option>
           </select>
         </div>
@@ -88,14 +99,17 @@ export class CalendarioComponent {
   private actividadService = inject(ActividadService);
   private espacioService = inject(EspacioService);
   private tipoActividadService = inject(TipoActividadService);
+  private temporadaService = inject(TemporadaService);
 
   // State signals para filtros seleccionados (ahora públicas)
   selectedEspacioId = signal<string | ''>('');
   selectedTipoId = signal<string | ''>('');
+  selectedTemporadaId = signal<string | ''>('');
 
   // Signals públicas para el template
   espacios = this.espacioService.espacios;
   tipos = this.tipoActividadService.tipos;
+  temporadas = this.temporadaService.temporadas;
 
   constructor() {
     // Carga espacios/tipos si no hay (evita recargar si ya están en memoria)
@@ -122,7 +136,8 @@ export class CalendarioComponent {
       fechaInicio: inicio,
       fechaFin: fin,
       espacioId: this.selectedEspacioId() ? Number(this.selectedEspacioId()) : undefined,
-      tipoActividadId: this.selectedTipoId() ? Number(this.selectedTipoId()) : undefined
+      tipoActividadId: this.selectedTipoId() ? Number(this.selectedTipoId()) : undefined,
+      temporadaId: this.selectedTemporadaId() ? Number(this.selectedTemporadaId()) : undefined
     }).subscribe();
   }
 
@@ -136,10 +151,16 @@ export class CalendarioComponent {
     const val = (e.target as HTMLSelectElement).value;
     this.selectedTipoId.set(val);
   }
-  // Limpiar filtros (ambos a '')
+  // Event handler: filtro temporada
+  onTemporadaChange(e: Event): void {
+    const val = (e.target as HTMLSelectElement).value;
+    this.selectedTemporadaId.set(val);
+  }
+  // Limpiar filtros (todos a '')
   resetFiltros(): void {
     this.selectedEspacioId.set('');
     this.selectedTipoId.set('');
+    this.selectedTemporadaId.set('');
   }
 
   // Opciones calculadas de FullCalendar segun los datos filtrados
@@ -187,7 +208,8 @@ export class CalendarioComponent {
           fechaInicio: arg.startStr,
           fechaFin: arg.endStr,
           espacioId: self.selectedEspacioId() ? Number(self.selectedEspacioId()) : undefined,
-          tipoActividadId: self.selectedTipoId() ? Number(self.selectedTipoId()) : undefined
+          tipoActividadId: self.selectedTipoId() ? Number(self.selectedTipoId()) : undefined,
+          temporadaId: self.selectedTemporadaId() ? Number(self.selectedTemporadaId()) : undefined
         }).subscribe();
       },
       eventClick: (info: any) => {

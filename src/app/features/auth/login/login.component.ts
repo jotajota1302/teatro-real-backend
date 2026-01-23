@@ -6,7 +6,6 @@ import { Router } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
@@ -14,17 +13,17 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
   standalone: true,
   imports: [
     CommonModule, ReactiveFormsModule,
-    MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatSnackBarModule
+    MatFormFieldModule, MatInputModule, MatButtonModule, MatSnackBarModule
   ],
   template: `
     <div class="login-bg">
       <div class="login-card">
         <div class="login-logo-legacy">
-          <svg width="70" height="70" viewBox="0 0 44 44" fill="none" aria-label="Teatro Real logo" class="login-logo-svg mb-2">
+          <svg width="70" height="70" viewBox="0 0 44 44" fill="none" aria-label="Teatro Real logo" class="login-logo-svg">
             <circle cx="22" cy="22" r="20" fill="#FFF" stroke="#CF102D" stroke-width="2.5"/>
-            <text x="11" y="33.5" font-family="Montserrat, Arial, sans-serif" font-size="24" fill="#010101" font-weight="700">T</text>
-            <text x="24" y="33.5" font-family="Montserrat, Arial, sans-serif" font-size="24" fill="#CF102D" font-weight="700">R</text>
-            <circle cx="35" cy="14" r="5" fill="#CF102D"/>
+            <text x="22" y="28" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="18" fill="#010101" font-weight="700">T</text>
+            <text x="22" y="28" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="18" fill="#CF102D" font-weight="700" dx="8">R</text>
+            <circle cx="35" cy="12" r="4" fill="#CF102D"/>
           </svg>
           <div class="login-logo-text-legacy">TEATRO REAL</div>
         </div>
@@ -47,10 +46,16 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
           <button mat-raised-button color="primary" class="btn-primary-legacy" type="submit" [disabled]="form.invalid || loading()">
             ENTRAR
           </button>
-          <button mat-stroked-button color="accent" class="btn-google-legacy" type="button" (click)="loginGoogle()" [disabled]="loading()">
+          <button mat-stroked-button class="btn-google-legacy" type="button" (click)="loginGoogle()" [disabled]="loading()">
             ENTRAR CON GOOGLE
           </button>
         </form>
+        <!-- Boton DEV para desarrollo rapido -->
+        <div class="dev-section">
+          <button mat-flat-button class="btn-dev" type="button" (click)="devLogin()">
+            ENTRAR COMO ADMIN (DEV)
+          </button>
+        </div>
       </div>
     </div>
   `,
@@ -138,27 +143,27 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
       background: #fff;
       border-radius: 4px;
     }
-    .mat-mdc-form-field-infix {
-      padding: 8px 0 !important;
-      min-height: 36px;
-      font-size: 0.97rem;
-      font-family: 'Montserrat', sans-serif;
-      color: #010101;
-      background: #fff;
+    :host ::ng-deep .login-form-field-legacy .mat-mdc-form-field-infix {
+      padding: 12px 0 !important;
+      min-height: 20px;
     }
-    .mat-mdc-form-field-label {
-      color: #666666 !important;
-      font-size: .9rem;
-      font-family: 'Montserrat', Arial, sans-serif;
+    :host ::ng-deep .login-form-field-legacy .mat-mdc-text-field-wrapper {
+      padding: 0 12px;
     }
-    .mat-mdc-input-element {
-      font-size: .97rem !important;
+    :host ::ng-deep .login-form-field-legacy input.mat-mdc-input-element {
+      font-size: 0.95rem !important;
       font-family: 'Montserrat', sans-serif !important;
       color: #232323;
       font-weight: 500;
+      height: auto;
+      line-height: 1.4;
     }
-    .mat-mdc-input-element::placeholder {
+    :host ::ng-deep .login-form-field-legacy input::placeholder {
       color: #999;
+      font-size: 0.95rem;
+    }
+    :host ::ng-deep .login-form-field-legacy .mdc-notched-outline__notch {
+      border-right: none;
     }
     .btn-primary-legacy {
       background-color: #CF102D !important;
@@ -210,8 +215,29 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
       color: #fff !important;
       border-color: #A00D24 !important;
     }
-    .google-icon {
-      display: none;
+    .dev-section {
+      width: 100%;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px dashed #ccc;
+    }
+    .btn-dev {
+      width: 100%;
+      background: #f5f5f5 !important;
+      color: #666 !important;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 10px 0;
+      border-radius: 4px !important;
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-dev:hover {
+      background: #e0e0e0 !important;
+      color: #333 !important;
     }
     /* Error y validaciones */
     .mat-mdc-form-field-error, .mat-mdc-form-field-error[role="alert"] {
@@ -281,5 +307,9 @@ export class LoginComponent {
   loginGoogle() {
     this.loading.set(true);
     this.auth.loginWithGoogle();
+  }
+
+  devLogin() {
+    this.auth.devLogin();
   }
 }

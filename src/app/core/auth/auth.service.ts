@@ -80,6 +80,25 @@ export class AuthService {
     window.location.href = `${this.API_URL}/google`;
   }
 
+  // --- Login DEV (solo desarrollo - bypass sin backend)
+  devLogin(): void {
+    const devUser: Usuario = {
+      id: 'dev-admin-001',
+      email: 'admin@teatroreal.es',
+      nombre: 'Admin (DEV)',
+      rol: {
+        id: 1,
+        nombre: 'ADMIN',
+        descripcion: 'Administrador de desarrollo',
+        permisos: []
+      },
+      activo: true
+    };
+    const devToken = 'dev-token-' + Date.now();
+    this.setAuth(devToken, devUser);
+    this.router.navigate(['/']);
+  }
+
   // --- Callback OAuth
   handleAuthCallback(token: string) {
     return this.http.get<LoginTokenResponse>(`${this.API_URL}/me`, {
