@@ -128,21 +128,21 @@ import { TemporadaService } from '../../../core/services/temporada.service';
       background: #ffffff;
       border-radius: 1rem;
       border: 1px solid rgba(15, 23, 42, 0.08);
-      padding: 1.25rem;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+      padding: 1.4rem;
+      box-shadow: 0 20px 35px rgba(15, 23, 42, 0.1);
     }
 
     .calendar-card {
       position: relative;
-      padding: 1rem;
+      padding: 1.4rem;
     }
 
     .stat-card {
       border-radius: 0.9rem;
       border: 1px solid rgba(15, 23, 42, 0.08);
-      padding: 1rem 1.25rem;
+      padding: 1.2rem;
       background: #ffffff;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+      box-shadow: 0 15px 30px rgba(15, 23, 42, 0.08);
     }
 
     .form-label {
