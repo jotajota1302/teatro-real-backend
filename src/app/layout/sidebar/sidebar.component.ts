@@ -16,6 +16,7 @@ import { NotificationBellComponent } from '../../shared/components/notification-
       </div>
       <ul class="flex-1 flex flex-col gap-1">
 
+        <!-- TODO: Habilitar cuando se implemente el Dashboard
         <li>
           <a routerLink="/dashboard" routerLinkActive="active"
              class="sidebar-link" [routerLinkActiveOptions]="{ exact: true }">
@@ -23,7 +24,7 @@ import { NotificationBellComponent } from '../../shared/components/notification-
             <span>Dashboard</span>
           </a>
         </li>
-        
+        -->
         <li class="uppercase text-xs tracking-wider text-teatro-gray-400 px-6 pt-6 pb-1">Tempo</li>
 
         <li>
