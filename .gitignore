@@ -37,3 +37,16 @@ npm-debug.log*
 TEMPLATE-ANGULAR/
 teatro-real-app/
 teatro-real-angular/
+
+# Carpetas locales de trabajo/documentación (no subir al repo)
+CONTEXTO/
+CONTEXTOS_JJ_PROYECTO/
+DOCUMENTACIÓN/
+FORMACION/
+IA/
+PROYECTO/
+codigo_entregable/
+teatro_real_proyecto/
+
+# Backups locales
+_backup_local/
