@@ -9,7 +9,7 @@ import { modulePermissionGuard } from './core/guards/module-permission.guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'dashboard',
+    redirectTo: 'tempo/espacios',
     pathMatch: 'full'
   },
   {
@@ -67,6 +67,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'dashboard'
+    redirectTo: 'tempo/espacios'
   }
 ];

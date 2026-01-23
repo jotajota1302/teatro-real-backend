@@ -1,26 +1,21 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-// Importar los componentes standalone de NotificationBell y TemporadaSelector
 import { NotificationBellComponent } from '../../shared/components/notification-bell/notification-bell.component';
-import { TemporadaSelectorComponent } from '../../shared/components/temporada-selector/temporada-selector.component';
 import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, NotificationBellComponent, TemporadaSelectorComponent],
+  imports: [CommonModule, NotificationBellComponent],
   template: `
     <header class="w-full flex items-center justify-between py-2 px-6 bg-teatro-primary shadow-md z-20">
       <div class="flex items-center gap-3">
         <img src="/assets/images/teatro-real-logo.svg" alt="Teatro Real" class="h-14 w-auto flex-shrink-0 mr-2" />
       </div>
       <div class="flex items-center gap-4 h-12">
-        <div class="flex items-center h-11 self-center">
-          <app-temporada-selector></app-temporada-selector>
-        </div>
         <app-notification-bell class="self-center"></app-notification-bell>
-        <button 
+        <button
           class="btn-logout-theater-real"
           (click)="logout()"
           title="Cerrar sesión"
