@@ -1,7 +1,8 @@
 // teatro-real-frontend/src/app/features/tempo/logistica/logistica.component.ts
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   LogisticaService,
   LogisticaStatDto,
@@ -269,6 +270,9 @@ const ESTADOS_FILTROS = ['Todos', 'Programado', 'En tránsito', 'Completado', 'P
   `]
 })
 export class LogisticaComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
+  private logisticaService = inject(LogisticaService);
+
   stats: LogisticaStatDto | null = null;
   operaciones: OperacionLogisticaDto[] = [];
   loading = true;
@@ -278,14 +282,25 @@ export class LogisticaComponent implements OnInit {
   selectedTipo = TIPO_FILTROS[0];
   selectedEstado = ESTADOS_FILTROS[0];
 
-  constructor(private readonly logisticaService: LogisticaService) {}
-
   ngOnInit(): void {
-    this.logisticaService.obtenerResumen().subscribe(stats => (this.stats = stats));
-    this.logisticaService.operacionesRecientes().subscribe(operaciones => {
-      this.operaciones = operaciones;
-      this.loading = false;
-    });
+    this.logisticaService.obtenerResumen()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: stats => (this.stats = stats),
+        error: () => {} // Silencioso - servicio tiene fallback
+      });
+
+    this.logisticaService.operacionesRecientes()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: operaciones => {
+          this.operaciones = operaciones;
+          this.loading = false;
+        },
+        error: () => {
+          this.loading = false;
+        }
+      });
   }
 
   get statCards() {

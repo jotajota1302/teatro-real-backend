@@ -10,5 +10,7 @@ export const modulePermissionGuard: CanActivateFn = (route: ActivatedRouteSnapsh
   const modulo = route.data['modulo'] as Modulo | undefined;
   if (!modulo) return true; // Si no se especifica el módulo, no bloquea
 
-  return auth.canAccessModule(modulo) ? true : router.createUrlTree(['/tempo/espacios']);
+  // Redirigir a acceso-denegado en lugar de una ruta con guard
+  // para evitar loops de redirección
+  return auth.canAccessModule(modulo) ? true : router.createUrlTree(['/acceso-denegado']);
 };

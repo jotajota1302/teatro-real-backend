@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { EspacioService, TempoEspacioDto } from '../../services/espacio.service';
 
 const CATEGORY_METADATA: Record<string, { label: string; icon: string; accent: string }> = {
@@ -576,6 +577,9 @@ interface DashboardStats {
   `
 })
 export class EspaciosDashboardComponent {
+  private espacioService = inject(EspacioService);
+  private destroyRef = inject(DestroyRef);
+
   espacios = signal<TempoEspacioDto[]>([]);
   groupedSections = signal<CategoryGroup[]>([]);
   loading = signal(true);
@@ -588,7 +592,7 @@ export class EspaciosDashboardComponent {
   editingEspacio = signal<TempoEspacioDto | null>(null);
   formData: Partial<TempoEspacioDto> = this.getEmptyForm();
 
-  constructor(private readonly espacioService: EspacioService) {
+  constructor() {
     this.cargarEspacios();
   }
 
@@ -608,17 +612,19 @@ export class EspaciosDashboardComponent {
   }
 
   cargarEspacios(): void {
-    this.espacioService.obtenerEspaciosResumen().subscribe({
-      next: espacios => {
-        this.espacios.set(espacios);
-        this.loading.set(false);
-        this.actualizarEstadisticas(espacios);
-        this.groupedSections.set(this.agruparPorCategoria(espacios));
-      },
-      error: () => {
-        this.loading.set(false);
-      }
-    });
+    this.espacioService.obtenerEspaciosResumen()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: espacios => {
+          this.espacios.set(espacios);
+          this.loading.set(false);
+          this.actualizarEstadisticas(espacios);
+          this.groupedSections.set(this.agruparPorCategoria(espacios));
+        },
+        error: () => {
+          this.loading.set(false);
+        }
+      });
   }
 
   badgeBackground(disponible: boolean): string {

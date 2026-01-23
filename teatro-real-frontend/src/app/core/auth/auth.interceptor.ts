@@ -1,6 +1,6 @@
 import { HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpEvent, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Observable, throwError, EMPTY } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError, timeout } from 'rxjs/operators';
 import { BackendStatusService } from '../services/backend-status.service';
 import { Router } from '@angular/router';
@@ -30,10 +30,17 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
   const router = inject(Router);
   const token = getStoredToken();
 
-  // Si el backend está offline y no es una ruta crítica, no hacer la petición
+  // Si el backend está offline y no es una ruta crítica, devolver error inmediato
+  // IMPORTANTE: Devolvemos throwError en vez de EMPTY para que los observables completen
+  // y los componentes puedan manejar el estado de error correctamente
   if (!backendStatus.shouldAllowRequest() && !isHealthCheck(req.url)) {
     console.debug(`[Interceptor] Petición bloqueada - backend offline: ${req.url}`);
-    return EMPTY;
+    return throwError(() => new HttpErrorResponse({
+      error: 'Backend offline',
+      status: 0,
+      statusText: 'Service Unavailable',
+      url: req.url
+    }));
   }
 
   // Clonar request con token si existe

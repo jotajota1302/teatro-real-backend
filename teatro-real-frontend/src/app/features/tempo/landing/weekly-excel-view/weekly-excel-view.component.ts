@@ -1,9 +1,10 @@
 // WeeklyExcelViewComponent: Visor semanal tipo Excel para TEMPO
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActividadService } from '../../services/actividad.service';
 import { EspacioService } from '../../services/espacio.service';
 import { addDays, startOfWeek, format } from 'date-fns';
@@ -260,6 +261,7 @@ export class EstadoToLabelPipe implements PipeTransform {
 })
 export class WeeklyExcelViewComponent {
   private actividadService = inject(ActividadService);
+  private destroyRef = inject(DestroyRef);
   espacioService = inject(EspacioService);
   // Semana seleccionada (arranca en lunes actual)
   currentWeekStart = signal(startOfWeek(new Date(), { weekStartsOn: 1 }));
@@ -289,14 +291,12 @@ export class WeeklyExcelViewComponent {
     this.actividadService.loadActividades({
       fechaInicio: start,
       fechaFin: end
-    }).subscribe({
+    }).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
       next: () => {},
       error: (err) => {
-        console.error('Error cargando actividades de la semana:', err);
-        // Si tienes alguna señal o estado para mostrar error, aquí puedes setearlo
-        // Ejemplo: this.errorSignal.set(true);
-        // También puedes resetear el loading si hace falta desde fuera del servicio
-        // alert eliminado a petición del usuario - solo se muestra el error en consola
+        console.warn('[WeeklyExcel] Error cargando actividades:', err?.message || err);
       }
     });
     // EspacioService lo llama el landing
