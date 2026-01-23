@@ -1,8 +1,9 @@
 // teatro-real-frontend/src/app/features/tempo/services/actividad.service.ts
 
-import { Injectable, signal, computed } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { Observable, tap, of, catchError } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
+import { BackendStatusService } from '../../../core/services/backend-status.service';
 import { Actividad, ActividadFormData, CalendarioFilter } from '../models/actividad.model';
 
 /**
@@ -11,16 +12,21 @@ import { Actividad, ActividadFormData, CalendarioFilter } from '../models/activi
  */
 @Injectable({ providedIn: 'root' })
 export class ActividadService {
+  private backendStatus = inject(BackendStatusService);
+
   /** Lista de actividades obtenidas */
   private actividadesSignal = signal<Actividad[]>([]);
   /** Estado de carga global */
   private loadingSignal = signal(false);
+  /** Estado de error */
+  private errorSignal = signal<string | null>(null);
   /** Fecha seleccionada para vista de día/semanal */
   private selectedDateSignal = signal<Date>(new Date());
 
   /** Exposición pública de actividades */
   actividades = this.actividadesSignal.asReadonly();
   loading = this.loadingSignal.asReadonly();
+  error = this.errorSignal.asReadonly();
   selectedDate = this.selectedDateSignal.asReadonly();
 
   /** Actividades filtradas del día (para use en vista diaria/semanal) */
@@ -36,10 +42,20 @@ export class ActividadService {
    */
   loadActividades(filter: CalendarioFilter): Observable<Actividad[]> {
     this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
     return this.api.get<Actividad[]>('/api/actividades/search', filter).pipe(
       tap(actividades => {
         this.actividadesSignal.set(actividades);
         this.loadingSignal.set(false);
+        this.backendStatus.reportSuccess();
+      }),
+      catchError(err => {
+        this.loadingSignal.set(false);
+        this.errorSignal.set('No se pudieron cargar las actividades');
+        // No limpiar actividades existentes - mantener cache
+        console.warn('[ActividadService] Error cargando actividades:', err?.message || err);
+        return of(this.actividadesSignal()); // Retornar datos en cache
       })
     );
   }
