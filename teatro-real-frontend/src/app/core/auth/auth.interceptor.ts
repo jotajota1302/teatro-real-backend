@@ -34,12 +34,12 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
     obs = next(req);
   }
 
-  // Si la respuesta es 401 o 403, gestiona el error de forma controlada
+  // Si la respuesta es 401 o 403, limpia el estado y redirige a login
   return obs.pipe(
     catchError((err: any) => {
       if (err instanceof HttpErrorResponse && (err.status === 401 || err.status === 403)) {
-        // Opcional: aquí podrías notificar al usuario o loguear el error.
-        // ya no borramos el estado global ni forzamos redirección automática
+        clearStoredAuth();
+        window.location.href = '/auth/login';
       }
       return throwError(() => err);
     })

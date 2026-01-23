@@ -1,0 +1,26 @@
+{
+  "name": "teatro-real-frontend",
+  "version": "1.0.0",
+  "description": "Sistema de Gestión Integral para Teatro Real - Frontend (TEMPO + TOPS)",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8080 -c-1",
+    "serve": "npx http-server . -p 3000",
+    "dev": "npx http-server . -p 8080 -o index.html"
+  },
+  "keywords": [
+    "teatro",
+    "gestión",
+    "tempo",
+    "tops",
+    "booking",
+    "operaciones"
+  ],
+  "author": "NTT DATA EMEAL - Teatro Real",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/teatro-real-frontend"
+  },
+  "devDependencies": {}
+}

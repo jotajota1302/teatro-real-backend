@@ -1,6 +1,6 @@
 import { Component, Input, forwardRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { NG_VALUE_ACCESSOR, ControlValueAccessor, FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -103,6 +103,7 @@ export class ColorPickerComponent implements ControlValueAccessor {
     // Muy simple, mejora si necesitas mejor a11y
     if (!bg) return '#222';
     try {
+      // bg === "#rrggbb"
       const hex = bg.charAt(0) === '#' ? bg.slice(1) : bg;
       const r = parseInt(hex.substr(0, 2), 16);
       const g = parseInt(hex.substr(2, 2), 16);

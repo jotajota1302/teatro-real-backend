@@ -1,9 +1,8 @@
 // teatro-real-frontend/src/app/core/services/api.service.ts
 
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
 
 /**
  * Servicio de abstracción HTTP para consumo de APIs REST con tipado seguro.
@@ -13,17 +12,12 @@ import { environment } from '../../../environments/environment';
 export class ApiService {
   constructor(private http: HttpClient) {}
 
-  private buildUrl(path: string): string {
-    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-    return `${environment.apiUrl}${normalizedPath}`;
-  }
-
   /**
    * GET tipado
    */
   get<T>(url: string, params?: any): Observable<T> {
     const httpParams = params ? new HttpParams({ fromObject: params }) : undefined;
-    return this.http.get<T>(this.buildUrl(url), { params: httpParams });
+    return this.http.get<T>(url, { params: httpParams });
   }
 
   /**
@@ -35,7 +29,7 @@ export class ApiService {
     body: any,
     options?: { headers?: HttpHeaders; params?: HttpParams | { [param: string]: string | string[] }; observe?: 'body'; responseType?: 'json'; }
   ): Observable<T> {
-    return this.http.post<T>(this.buildUrl(url), body, options);
+    return this.http.post<T>(url, body, options);
   }
 
   /**
@@ -47,7 +41,7 @@ export class ApiService {
     body: any,
     options?: { headers?: HttpHeaders; params?: HttpParams | { [param: string]: string | string[] }; observe?: 'body'; responseType?: 'json'; }
   ): Observable<T> {
-    return this.http.put<T>(this.buildUrl(url), body, options);
+    return this.http.put<T>(url, body, options);
   }
 
   /**
@@ -58,7 +52,7 @@ export class ApiService {
     url: string,
     options?: { headers?: HttpHeaders; params?: HttpParams | { [param: string]: string | string[] }; observe?: 'body'; responseType?: 'json'; }
   ): Observable<T> {
-    return this.http.delete<T>(this.buildUrl(url), options);
+    return this.http.delete<T>(url, options);
   }
 
   /**
@@ -66,6 +60,6 @@ export class ApiService {
    */
   downloadBlob(url: string, params?: any): Observable<Blob> {
     const httpParams = params ? new HttpParams({ fromObject: params }) : undefined;
-    return this.http.get(this.buildUrl(url), { params: httpParams, responseType: 'blob' });
+    return this.http.get(url, { params: httpParams, responseType: 'blob' });
   }
 }

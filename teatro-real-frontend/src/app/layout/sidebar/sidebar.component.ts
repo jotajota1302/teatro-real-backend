@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+// Importo bell si es standalone (según plan v2 lo es)
 import { NotificationBellComponent } from '../../shared/components/notification-bell/notification-bell.component';
 
 @Component({
@@ -14,7 +15,7 @@ import { NotificationBellComponent } from '../../shared/components/notification-
         <span class="font-black text-xl tracking-tight uppercase text-white">Teatro Real</span>
       </div>
       <ul class="flex-1 flex flex-col gap-1">
-        <!-- Dashboard always on top -->
+
         <li>
           <a routerLink="/dashboard" routerLinkActive="active"
              class="sidebar-link" [routerLinkActiveOptions]="{ exact: true }">
@@ -22,64 +23,70 @@ import { NotificationBellComponent } from '../../shared/components/notification-
             <span>Dashboard</span>
           </a>
         </li>
+        
+        <li class="uppercase text-xs tracking-wider text-teatro-gray-400 px-6 pt-6 pb-1">Tempo</li>
 
-        <!-- Sección Tempo -->
-        <li class="sidebar-section-label mt-2 mb-1">Tempo</li>
         <li>
-          <a routerLink="/tempo/espacios" routerLinkActive="active" class="sidebar-link">
-            <mat-icon fontIcon="meeting_room" class="sidebar-icon">meeting_room</mat-icon>
+          <a routerLink="/tempo/espacios" routerLinkActive="active"
+             class="sidebar-link">
+            <mat-icon fontIcon="location_city" class="sidebar-icon">location_city</mat-icon>
             <span>Espacios</span>
           </a>
         </li>
         <li>
-          <a routerLink="/tempo/calendario" routerLinkActive="active" class="sidebar-link">
-            <mat-icon fontIcon="calendar_today" class="sidebar-icon">calendar_today</mat-icon>
+          <a routerLink="/tempo/calendario" routerLinkActive="active"
+             class="sidebar-link">
+            <mat-icon fontIcon="calendar_month" class="sidebar-icon">calendar_month</mat-icon>
             <span>Calendario</span>
           </a>
         </li>
         <li>
-          <a routerLink="/tempo/logistica" routerLinkActive="active" class="sidebar-link">
+          <a routerLink="/tempo/movimientos" routerLinkActive="active"
+             class="sidebar-link">
             <mat-icon fontIcon="local_shipping" class="sidebar-icon">local_shipping</mat-icon>
             <span>Logística</span>
           </a>
         </li>
         <li>
-          <a routerLink="/tempo/carteleria" routerLinkActive="active" class="sidebar-link">
-            <mat-icon fontIcon="receipt_long" class="sidebar-icon">receipt_long</mat-icon>
+          <a routerLink="/carteleria/global" routerLinkActive="active"
+             class="sidebar-link">
+            <mat-icon fontIcon="view_week" class="sidebar-icon">view_week</mat-icon>
             <span>Cartelería</span>
           </a>
         </li>
 
-        <!-- Sección Tops -->
-        <li class="sidebar-section-label mt-4 mb-1">Tops</li>
+        <li class="uppercase text-xs tracking-wider text-teatro-gray-400 px-6 pt-6 pb-1">Tops</li>
+
         <li>
-          <a routerLink="/tops/producciones" routerLinkActive="active" class="sidebar-link">
-            <mat-icon fontIcon="movie" class="sidebar-icon">movie</mat-icon>
+          <a routerLink="/tempo/producciones" routerLinkActive="active"
+             class="sidebar-link">
+            <mat-icon fontIcon="album" class="sidebar-icon">album</mat-icon>
             <span>Producciones</span>
           </a>
         </li>
         <li>
-          <a routerLink="/tops/guiones-tecnicos" routerLinkActive="active" class="sidebar-link">
+          <a routerLink="/tops/guiones-tecnicos" routerLinkActive="active"
+             class="sidebar-link">
             <mat-icon fontIcon="description" class="sidebar-icon">description</mat-icon>
             <span>Guiones Técnicos</span>
           </a>
         </li>
         <li>
-          <a routerLink="/tops/guiones-new" routerLinkActive="active" class="sidebar-link">
-            <mat-icon fontIcon="fiber_new" class="sidebar-icon">fiber_new</mat-icon>
+          <a routerLink="/tops/guiones-new" routerLinkActive="active"
+             class="sidebar-link">
+            <mat-icon fontIcon="auto_fix_high" class="sidebar-icon">auto_fix_high</mat-icon>
             <span>Guiones NEW</span>
           </a>
         </li>
         <li>
-          <a routerLink="/tops/editor-guiones" routerLinkActive="active" class="sidebar-link">
+          <a routerLink="/tops/editor-guiones" routerLinkActive="active"
+             class="sidebar-link">
             <mat-icon fontIcon="edit" class="sidebar-icon">edit</mat-icon>
-            <span>Editor de Guiones</span>
+            <span>Editor De Guiones</span>
           </a>
         </li>
 
-        <!-- Sección Admin separada al final -->
-        <li class="sidebar-section-label mt-4 mb-1">Admin</li>
-        <li>
+        <li class="mt-8">
           <a routerLink="/admin" routerLinkActive="active"
              class="sidebar-link">
             <mat-icon fontIcon="admin_panel_settings" class="sidebar-icon">admin_panel_settings</mat-icon>
@@ -126,19 +133,6 @@ import { NotificationBellComponent } from '../../shared/components/notification-
       font-size: 22px !important;
       color: inherit !important;
       min-width: 24px;
-    }
-    .sidebar-section-label {
-      color: #b0b0b0;
-      font-weight: 600;
-      font-size: 0.88em;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
-      margin-top: 1rem;
-      margin-bottom: 0.25rem;
-      pointer-events: none;
-      user-select: none;
     }
   `]
 })

@@ -2,7 +2,7 @@ import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { switchMap, tap } from 'rxjs/operators';
-import { Usuario, PermisoModulo, Modulo, RolNombre } from './auth.models';
+import { Usuario, PermisoModulo, Modulo, RolNombre, AuthResponse } from './auth.models';
 import { environment } from '../../../environments/environment';
 
 interface LoginTokenResponse {
@@ -20,10 +20,12 @@ interface UsuarioResponse {
 export class AuthService {
   private readonly API_URL = `${environment.apiUrl}/auth`;
 
+  // Signals privadas v2
   private currentUserSignal = signal<Usuario | null>(null);
   private tokenSignal = signal<string | null>(null);
   private permisosModuloSignal = signal<PermisoModulo[]>([]);
 
+  // Computed públicos v2
   currentUser = this.currentUserSignal.asReadonly();
   isAuthenticated = computed(() => !!this.tokenSignal());
 
@@ -45,6 +47,7 @@ export class AuthService {
     this.loadStoredAuth();
   }
 
+  // --- Login tradicional
   login(email: string, password: string) {
     return this.http.post<LoginTokenResponse>(`${this.API_URL}/login`, { email, password }).pipe(
       switchMap(res =>
@@ -72,10 +75,12 @@ export class AuthService {
     );
   }
 
+  // --- Login Google
   loginWithGoogle(): void {
     window.location.href = `${this.API_URL}/google`;
   }
 
+  // --- Callback OAuth
   handleAuthCallback(token: string) {
     return this.http.get<LoginTokenResponse>(`${this.API_URL}/me`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -105,6 +110,7 @@ export class AuthService {
     );
   }
 
+  // Logout: primero llama al backend, después limpia FE
   logout(): void {
     this.http.post(`${this.API_URL}/logout`, {}).subscribe({
       next: () => {
@@ -112,6 +118,7 @@ export class AuthService {
         this.router.navigate(['/auth/login']);
       },
       error: () => {
+        // Si da error, igual limpia estado y redirige
         this.clearAuth();
         this.router.navigate(['/auth/login']);
       }
@@ -129,6 +136,7 @@ export class AuthService {
       : false;
   }
 
+  // --- Permisos por módulo (signals)
   canAccessModule(modulo: Modulo): boolean {
     const permisos = this.permisosModuloSignal();
     const permiso = permisos.find(p => p.modulo === modulo);
@@ -141,6 +149,7 @@ export class AuthService {
     return permiso ? ['ESCRITURA', 'COMPLETO'].includes(permiso.nivelAcceso) : false;
   }
 
+  // --- Persistencia localStorage protegida para SSR/Node
   private setAuth(token: string, usuario: Usuario): void {
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.setItem('auth_token', token);
@@ -172,6 +181,7 @@ export class AuthService {
     }
   }
 
+  // --- Carga de permisos (por módulo)
   private loadPermisosModulo(): void {
     const token = this.tokenSignal();
     if (!token) return;
