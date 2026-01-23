@@ -3,12 +3,16 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { HeaderComponent } from '../header/header.component';
+import { BackendStatusIndicatorComponent } from '../../shared/backend-status-indicator/backend-status-indicator.component';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, SidebarComponent, HeaderComponent],
+  imports: [CommonModule, RouterModule, SidebarComponent, HeaderComponent, BackendStatusIndicatorComponent],
   template: `
+    <!-- Indicador de estado del backend -->
+    <app-backend-status-indicator></app-backend-status-indicator>
+
     <div class="min-h-screen flex bg-teatro-gray-100 text-teatro-black font-montserrat">
       <!-- Sidebar -->
       <app-sidebar class="hidden md:block"></app-sidebar>

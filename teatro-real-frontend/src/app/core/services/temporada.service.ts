@@ -1,6 +1,6 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, of, catchError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Temporada } from '../../features/tempo/models/actividad.model';
 
@@ -11,10 +11,27 @@ export class TemporadaService {
   private temporadasSignal = signal<Temporada[]>([]);
   private selectedTemporadaSignal = signal<Temporada | null>(null);
 
+  // Mock data para desarrollo sin backend
+  private readonly mockTemporadas: Temporada[] = [
+    {
+      id: 1,
+      nombre: 'Temporada 2024-2025',
+      fechaInicio: '2024-09-01',
+      fechaFin: '2025-07-31',
+      activa: true
+    },
+    {
+      id: 2,
+      nombre: 'Temporada 2023-2024',
+      fechaInicio: '2023-09-01',
+      fechaFin: '2024-07-31',
+      activa: false
+    }
+  ];
+
   temporadas = this.temporadasSignal.asReadonly();
   selectedTemporada = this.selectedTemporadaSignal.asReadonly();
 
-  // Temporada activa (actual)
   temporadaActiva = computed(() =>
     this.temporadasSignal().find(t => t.activa) || null
   );
@@ -27,11 +44,19 @@ export class TemporadaService {
     return this.http.get<Temporada[]>(this.API_URL).pipe(
       tap(temporadas => {
         this.temporadasSignal.set(temporadas);
-        // Seleccionar temporada activa por defecto
         const activa = temporadas.find(t => t.activa);
         if (activa && !this.selectedTemporadaSignal()) {
           this.selectedTemporadaSignal.set(activa);
         }
+      }),
+      catchError(() => {
+        // Fallback a mock data cuando no hay backend
+        this.temporadasSignal.set(this.mockTemporadas);
+        const activa = this.mockTemporadas.find(t => t.activa);
+        if (activa) {
+          this.selectedTemporadaSignal.set(activa);
+        }
+        return of(this.mockTemporadas);
       })
     );
   }

@@ -1,59 +1,44 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, tap, interval } from 'rxjs';
-// Importar Notificacion si se dispone, si no dejar tipo any
-// import { Notificacion } from './notification.models';
-import { environment } from '../../../environments/environment';
+import { Observable, of } from 'rxjs';
 
+/**
+ * Servicio de notificaciones - DESHABILITADO TEMPORALMENTE.
+ * No hace peticiones al backend para evitar errores cuando no está disponible.
+ * TODO: Rehabilitar cuando el backend de notificaciones esté listo.
+ */
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
-  private readonly API_URL = `${environment.apiUrl}/notificaciones`;
-
   private notificacionesSignal = signal<any[]>([]);
   private loadingSignal = signal(false);
 
   notificaciones = this.notificacionesSignal.asReadonly();
   loading = this.loadingSignal.asReadonly();
 
-  // Contador de no leídas
   unreadCount = computed(() =>
     this.notificacionesSignal().filter(n => !n.leida).length
   );
 
-  constructor(private http: HttpClient) {
-    // Polling cada 30 segundos
-    interval(30000).subscribe(() => this.loadNotificaciones().subscribe());
-    // Cargar notificaciones al arrancar
-    this.loadNotificaciones().subscribe();
+  constructor() {
+    // NO hacer peticiones al backend - servicio deshabilitado
   }
 
   loadNotificaciones(): Observable<any[]> {
-    this.loadingSignal.set(true);
-    return this.http.get<any[]>(this.API_URL).pipe(
-      tap(notificaciones => {
-        this.notificacionesSignal.set(notificaciones);
-        this.loadingSignal.set(false);
-      })
-    );
+    // Retornar lista vacía sin hacer peticiones
+    return of([]);
   }
 
   marcarLeida(id: number): Observable<any> {
-    return this.http.put<any>(`${this.API_URL}/${id}/read`, {}).pipe(
-      tap(updated => {
-        this.notificacionesSignal.update(list =>
-          list.map(n => n.id === id ? updated : n)
-        );
-      })
+    // Actualizar solo localmente
+    this.notificacionesSignal.update(list =>
+      list.map(n => n.id === id ? { ...n, leida: true } : n)
     );
+    return of({ id, leida: true });
   }
 
   marcarTodasLeidas(): Observable<void> {
-    return this.http.put<void>(`${this.API_URL}/read-all`, {}).pipe(
-      tap(() => {
-        this.notificacionesSignal.update(list =>
-          list.map(n => ({ ...n, leida: true }))
-        );
-      })
+    this.notificacionesSignal.update(list =>
+      list.map(n => ({ ...n, leida: true }))
     );
+    return of(undefined);
   }
 }

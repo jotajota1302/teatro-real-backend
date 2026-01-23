@@ -1,9 +1,11 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { switchMap, tap } from 'rxjs/operators';
+import { switchMap, tap, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 import { Usuario, PermisoModulo, Modulo, RolNombre, AuthResponse } from './auth.models';
 import { environment } from '../../../environments/environment';
+import { BackendStatusService } from '../services/backend-status.service';
 
 interface LoginTokenResponse {
   token: string;
@@ -39,6 +41,8 @@ export class AuthService {
   isVisualizador = computed(() =>
     this.currentUserSignal()?.rol.nombre === 'VISUALIZADOR'
   );
+
+  private backendStatus = inject(BackendStatusService);
 
   constructor(
     private http: HttpClient,
@@ -204,10 +208,50 @@ export class AuthService {
   private loadPermisosModulo(): void {
     const token = this.tokenSignal();
     if (!token) return;
+
+    // Si el backend está offline, usar permisos por defecto inmediatamente
+    if (this.backendStatus.isOffline()) {
+      this.setDefaultPermisos();
+      return;
+    }
+
     this.http.get<PermisoModulo[]>(`${environment.apiUrl}/usuarios/me/permisos-modulo`, {
       headers: { Authorization: `Bearer ${token}` }
-    }).subscribe(permisos => {
-      this.permisosModuloSignal.set(permisos);
+    }).pipe(
+      catchError(() => {
+        // Fallback silencioso
+        return of(null);
+      })
+    ).subscribe({
+      next: permisos => {
+        if (permisos) {
+          this.permisosModuloSignal.set(permisos);
+          this.backendStatus.reportSuccess();
+        } else {
+          this.setDefaultPermisos();
+        }
+      }
     });
+  }
+
+  /**
+   * Establece permisos por defecto según el rol del usuario.
+   * Usado cuando el backend no está disponible.
+   */
+  private setDefaultPermisos(): void {
+    const user = this.currentUserSignal();
+    const userId = user?.id || 'dev';
+    if (user?.rol?.nombre === 'ADMIN') {
+      this.permisosModuloSignal.set([
+        { id: 1, usuarioId: userId, modulo: 'TEMPO', nivelAcceso: 'COMPLETO' },
+        { id: 2, usuarioId: userId, modulo: 'TOPS', nivelAcceso: 'COMPLETO' },
+        { id: 3, usuarioId: userId, modulo: 'ADMIN', nivelAcceso: 'COMPLETO' }
+      ]);
+    } else {
+      this.permisosModuloSignal.set([
+        { id: 1, usuarioId: userId, modulo: 'TEMPO', nivelAcceso: 'LECTURA' },
+        { id: 2, usuarioId: userId, modulo: 'TOPS', nivelAcceso: 'LECTURA' }
+      ]);
+    }
   }
 }
