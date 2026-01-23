@@ -84,23 +84,33 @@ export class AuthService {
     window.location.href = `${this.API_URL}/google`;
   }
 
-  // --- Login DEV (solo desarrollo - bypass sin backend)
+  // --- Login DEV (solo desarrollo - usa login real con credenciales de prueba)
   devLogin(): void {
-    const devUser: Usuario = {
-      id: 'dev-admin-001',
-      email: 'admin@teatroreal.es',
-      nombre: 'Admin (DEV)',
-      rol: {
-        id: 1,
-        nombre: 'ADMIN',
-        descripcion: 'Administrador de desarrollo',
-        permisos: []
+    // Hacer login real contra el backend para obtener un token JWT válido
+    this.login('admin@teatroreal.es', 'admin123').subscribe({
+      next: () => {
+        this.router.navigate(['/']);
       },
-      activo: true
-    };
-    const devToken = 'dev-token-' + Date.now();
-    this.setAuth(devToken, devUser);
-    this.router.navigate(['/']);
+      error: () => {
+        // Fallback: si el backend no responde, usar datos locales
+        console.warn('[AuthService] Backend no disponible, usando datos locales para dev');
+        const devUser: Usuario = {
+          id: 'dev-admin-001',
+          email: 'admin@teatroreal.es',
+          nombre: 'Admin (DEV)',
+          rol: {
+            id: 1,
+            nombre: 'ADMIN',
+            descripcion: 'Administrador de desarrollo',
+            permisos: []
+          },
+          activo: true
+        };
+        const devToken = 'dev-token-' + Date.now();
+        this.setAuth(devToken, devUser);
+        this.router.navigate(['/']);
+      }
+    });
   }
 
   // --- Callback OAuth
@@ -138,11 +148,13 @@ export class AuthService {
     this.http.post(`${this.API_URL}/logout`, {}).subscribe({
       next: () => {
         this.clearAuth();
+        this.backendStatus.reset(); // Resetear estado para permitir nuevo login
         this.router.navigate(['/auth/login']);
       },
       error: () => {
         // Si da error, igual limpia estado y redirige
         this.clearAuth();
+        this.backendStatus.reset(); // Resetear estado para permitir nuevo login
         this.router.navigate(['/auth/login']);
       }
     });

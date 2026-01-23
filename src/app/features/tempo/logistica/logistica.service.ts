@@ -26,8 +26,8 @@ export interface OperacionLogisticaDto {
 
 @Injectable({ providedIn: 'root' })
 export class LogisticaService {
-  private readonly summaryUrl = '/api/v1/logistica/summary';
-  private readonly operacionesUrl = '/api/v1/logistica/operaciones';
+  private readonly summaryUrl = '/api/logistica/summary';
+  private readonly operacionesUrl = '/api/logistica/operaciones';
 
   private readonly fallbackStats: LogisticaStatDto = {
     programados: 1,

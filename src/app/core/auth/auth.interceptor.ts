@@ -91,8 +91,8 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
             break;
 
           case 403:
-            // Sin permisos - NO redirigir a login, mostrar acceso denegado
-            if (!isPublicRoute(router.url)) {
+            // Sin permisos - NO redirigir si es ruta de auth (logout, login, etc.)
+            if (!isPublicRoute(router.url) && !isAuthRequest(req.url)) {
               router.navigate(['/acceso-denegado']);
             }
             break;
@@ -134,4 +134,12 @@ function isPublicRoute(url: string): boolean {
  */
 function isHealthCheck(url: string): boolean {
   return url.includes('/health') || url.includes('/actuator');
+}
+
+/**
+ * Verifica si es una petición a rutas de autenticación.
+ * Estas rutas no deben redirigir a acceso-denegado en caso de error.
+ */
+function isAuthRequest(url: string): boolean {
+  return url.includes('/api/auth/') || url.includes('/api/usuarios/me');
 }

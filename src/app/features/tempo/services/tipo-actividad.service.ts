@@ -34,7 +34,7 @@ export class TipoActividadService {
    */
   loadTiposActividad(): Observable<TipoActividad[]> {
     this.loadingSignal.set(true);
-    return this.api.get<TipoActividad[]>('/tipos-actividad').pipe(
+    return this.api.get<TipoActividad[]>('/tipo-actividades').pipe(
       tap(tipos => {
         this.tiposSignal.set(tipos);
         this.loadingSignal.set(false);
@@ -53,14 +53,14 @@ export class TipoActividadService {
    * Devuelve tipo de actividad por ID.
    */
   getById(id: number): Observable<TipoActividad> {
-    return this.api.get<TipoActividad>(`/tipos-actividad/${id}`);
+    return this.api.get<TipoActividad>(`/tipo-actividades/${id}`);
   }
 
   /**
    * Crea nuevo tipo de actividad.
    */
   create(data: Partial<TipoActividad>): Observable<TipoActividad> {
-    return this.api.post<TipoActividad>('/tipos-actividad', data).pipe(
+    return this.api.post<TipoActividad>('/tipo-actividades', data).pipe(
       tap(nuevo => {
         this.tiposSignal.update(list => [...list, nuevo]);
       })
@@ -71,7 +71,7 @@ export class TipoActividadService {
    * Actualiza un tipo de actividad existente.
    */
   update(id: number, data: Partial<TipoActividad>): Observable<TipoActividad> {
-    return this.api.put<TipoActividad>(`/tipos-actividad/${id}`, data).pipe(
+    return this.api.put<TipoActividad>(`/tipo-actividades/${id}`, data).pipe(
       tap(updated => {
         this.tiposSignal.update(list =>
           list.map(t => t.id === id ? updated : t)
@@ -84,7 +84,7 @@ export class TipoActividadService {
    * Elimina un tipo de actividad.
    */
   delete(id: number): Observable<void> {
-    return this.api.delete<void>(`/tipos-actividad/${id}`).pipe(
+    return this.api.delete<void>(`/tipo-actividades/${id}`).pipe(
       tap(() => {
         this.tiposSignal.update(list => list.filter(t => t.id !== id));
       })
