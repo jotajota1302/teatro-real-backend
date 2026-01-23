@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { interval, Subscription } from 'rxjs';
 import { format } from 'date-fns';
@@ -40,8 +40,8 @@ interface SignageEntry {
           <span class="text-2xl font-light tracking-wide">Teatro Real</span>
         </div>
         <div class="text-center">
-          <div class="text-xl font-light opacity-90">{{ formattedDate }}</div>
-          <div class="text-4xl font-bold tracking-wider">{{ currentTime }}</div>
+          <div class="text-xl font-light opacity-90">{{ formattedDate() }}</div>
+          <div class="text-4xl font-bold tracking-wider">{{ currentTime() }}</div>
         </div>
         <div class="text-right">
           <div class="text-sm opacity-70">Cartelería Digital</div>
@@ -141,8 +141,9 @@ export class CarteleriaGlobalComponent implements OnInit, OnDestroy {
 
   espacios = signal<SignageEntry[]>([]);
   loading = signal(false);
-  currentTime = format(new Date(), 'HH:mm:ss');
-  formattedDate = format(new Date(), "EEEE, d 'de' MMMM yyyy", { locale: es });
+  currentTime = signal(format(new Date(), 'HH:mm:ss'));
+  currentTimeHHMM = signal(format(new Date(), 'HH:mm')); // Para comparaciones
+  formattedDate = signal(format(new Date(), "EEEE, d 'de' MMMM yyyy", { locale: es }));
 
   private timerSub?: Subscription;
   private refreshSub?: Subscription;
@@ -152,10 +153,11 @@ export class CarteleriaGlobalComponent implements OnInit, OnDestroy {
 
     // Actualizar reloj cada segundo
     this.timerSub = interval(1000).subscribe(() => {
-      this.currentTime = format(new Date(), 'HH:mm:ss');
       const now = new Date();
+      this.currentTime.set(format(now, 'HH:mm:ss'));
+      this.currentTimeHHMM.set(format(now, 'HH:mm'));
       if (now.getHours() === 0 && now.getMinutes() === 0 && now.getSeconds() === 0) {
-        this.formattedDate = format(now, "EEEE, d 'de' MMMM yyyy", { locale: es });
+        this.formattedDate.set(format(now, "EEEE, d 'de' MMMM yyyy", { locale: es }));
       }
     });
 
@@ -209,8 +211,9 @@ export class CarteleriaGlobalComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Usa el signal currentTimeHHMM para evitar crear Date() en cada llamada
   isCurrentActivity(actividad: ActividadSignage): boolean {
-    const now = format(new Date(), 'HH:mm');
+    const now = this.currentTimeHHMM();
     return actividad.horaInicio <= now && actividad.horaFin > now;
   }
 }

@@ -199,6 +199,10 @@ export class AuthService {
       if (token && userStr) {
         this.tokenSignal.set(token);
         this.currentUserSignal.set(JSON.parse(userStr));
+        // Establecer permisos por defecto SÍNCRONAMENTE para que el guard los tenga
+        // disponibles inmediatamente. Luego se actualizarán si el backend responde.
+        this.setDefaultPermisos();
+        // Intentar cargar permisos reales del backend (asíncrono)
         this.loadPermisosModulo();
       }
     }

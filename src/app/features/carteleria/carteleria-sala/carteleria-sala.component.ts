@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { interval, Subscription } from 'rxjs';
@@ -48,7 +48,7 @@ interface SignageEntry {
         </div>
         <div class="text-right">
           <div class="text-2xl font-light">{{ formattedDate }}</div>
-          <div class="text-6xl font-bold tracking-wider">{{ currentTime }}</div>
+          <div class="text-6xl font-bold tracking-wider">{{ currentTime() }}</div>
         </div>
       </div>
 
@@ -148,22 +148,43 @@ export class CarteleriaSalaComponent implements OnInit, OnDestroy {
 
   espacio = signal<SignageEntry | null>(null);
   loading = signal(false);
-  currentTime = format(new Date(), 'HH:mm:ss');
+  currentTime = signal(format(new Date(), 'HH:mm:ss'));
+  currentTimeHHMM = signal(format(new Date(), 'HH:mm')); // Para comparaciones
   formattedDate = format(new Date(), "EEEE, d 'de' MMMM yyyy", { locale: es });
 
   private espacioId: number | null = null;
   private timerSub?: Subscription;
   private refreshSub?: Subscription;
+  private routeSub?: Subscription;
+
+  // Computed signals para actividad actual y futuras (evita recálculo en cada change detection)
+  actividadActual = computed(() => {
+    const actividades = this.espacio()?.actividades || [];
+    const now = this.currentTimeHHMM();
+    return actividades.find(a => a.horaInicio <= now && a.horaFin > now) || null;
+  });
+
+  actividadesFuturas = computed(() => {
+    const actividades = this.espacio()?.actividades || [];
+    const now = this.currentTimeHHMM();
+    const actual = this.actividadActual();
+    return actividades.filter(a => {
+      if (actual && a.id === actual.id) return false;
+      return a.horaFin > now;
+    });
+  });
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
+    this.routeSub = this.route.params.subscribe(params => {
       this.espacioId = +params['espacioId'];
       this.loadSignageData();
     });
 
     // Actualizar reloj cada segundo
     this.timerSub = interval(1000).subscribe(() => {
-      this.currentTime = format(new Date(), 'HH:mm:ss');
+      const now = new Date();
+      this.currentTime.set(format(now, 'HH:mm:ss'));
+      this.currentTimeHHMM.set(format(now, 'HH:mm'));
     });
 
     // Refrescar datos cada 5 minutos
@@ -175,6 +196,7 @@ export class CarteleriaSalaComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.timerSub?.unsubscribe();
     this.refreshSub?.unsubscribe();
+    this.routeSub?.unsubscribe();
   }
 
   loadSignageData(): void {
@@ -203,19 +225,5 @@ export class CarteleriaSalaComponent implements OnInit, OnDestroy {
     });
   }
 
-  actividadActual(): ActividadSignage | null {
-    const actividades = this.espacio()?.actividades || [];
-    const now = format(new Date(), 'HH:mm');
-    return actividades.find(a => a.horaInicio <= now && a.horaFin > now) || null;
-  }
-
-  actividadesFuturas(): ActividadSignage[] {
-    const actividades = this.espacio()?.actividades || [];
-    const now = format(new Date(), 'HH:mm');
-    const actual = this.actividadActual();
-    return actividades.filter(a => {
-      if (actual && a.id === actual.id) return false;
-      return a.horaFin > now;
-    });
-  }
+  // actividadActual y actividadesFuturas ahora son computed signals definidos arriba
 }

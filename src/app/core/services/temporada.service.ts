@@ -36,13 +36,28 @@ export class TemporadaService {
     this.temporadasSignal().find(t => t.activa) || null
   );
 
+  // Flag para saber si ya se cargaron las temporadas
+  private loaded = false;
+
   constructor(private http: HttpClient) {
-    this.loadTemporadas().subscribe();
+    // NO cargar automáticamente en constructor - usar lazy load
+    // Los componentes que necesiten temporadas llamarán loadTemporadas() o ensureLoaded()
+  }
+
+  /**
+   * Asegura que las temporadas estén cargadas (lazy load).
+   * Ideal para llamar desde componentes antes de usar temporadas.
+   */
+  ensureLoaded(): void {
+    if (!this.loaded && this.temporadasSignal().length === 0) {
+      this.loadTemporadas().subscribe();
+    }
   }
 
   loadTemporadas(): Observable<Temporada[]> {
     return this.http.get<Temporada[]>(this.API_URL).pipe(
       tap(temporadas => {
+        this.loaded = true;
         this.temporadasSignal.set(temporadas);
         const activa = temporadas.find(t => t.activa);
         if (activa && !this.selectedTemporadaSignal()) {
@@ -51,6 +66,7 @@ export class TemporadaService {
       }),
       catchError(() => {
         // Fallback a mock data cuando no hay backend
+        this.loaded = true;
         this.temporadasSignal.set(this.mockTemporadas);
         const activa = this.mockTemporadas.find(t => t.activa);
         if (activa) {

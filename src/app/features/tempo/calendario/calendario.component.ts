@@ -1,5 +1,6 @@
-import { Component, inject, signal, computed, effect } from '@angular/core';
+import { Component, inject, signal, computed, DestroyRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { FullCalendarModule } from '@fullcalendar/angular';
 import esLocale from '@fullcalendar/core/locales/es';
@@ -271,12 +272,13 @@ import { TemporadaService } from '../../../core/services/temporada.service';
     }
   `]
 })
-export class CalendarioComponent {
+export class CalendarioComponent implements OnInit {
   // Inyecta servicios de dominio
   actividadService = inject(ActividadService);
   private espacioService = inject(EspacioService);
   private tipoActividadService = inject(TipoActividadService);
   private temporadaService = inject(TemporadaService);
+  private destroyRef = inject(DestroyRef);
 
   // State signals para filtros seleccionados
   selectedEspacioId = signal<string | ''>('');
@@ -292,63 +294,80 @@ export class CalendarioComponent {
   private rangeStart = signal<string>(new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0,10));
   private rangeEnd = signal<string>(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().slice(0,10));
 
+  // Flag para evitar carga inicial múltiple - FullCalendar disparará datesSet
+  private initialLoadDone = false;
+
   constructor() {
-    // Carga espacios/tipos si no hay
+    // Solo cargamos datos de catálogo (espacios/tipos), NO actividades
+    // Las actividades se cargarán cuando FullCalendar dispare datesSet()
+  }
+
+  ngOnInit(): void {
+    // Carga espacios/tipos/temporadas si no hay - con gestión de suscripción
     if (this.espacioService.espacios().length === 0) {
-      this.espacioService.loadEspacios().subscribe();
+      this.espacioService.loadEspacios()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe();
     }
     if (this.tipoActividadService.tipos().length === 0) {
-      this.tipoActividadService.loadTiposActividad().subscribe();
+      this.tipoActividadService.loadTiposActividad()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe();
     }
-
-    this.loadActividades();
-
-    // Recarga actividades al cambiar filtro
-    effect(() => {
-      // Lee los valores para crear dependencia
-      this.selectedEspacioId();
-      this.selectedTipoId();
-      this.selectedTemporadaId();
-      this.loadActividades();
-    }, { allowSignalWrites: true });
+    // Cargar temporadas con lazy load
+    this.temporadaService.ensureLoaded();
+    // NOTA: NO llamamos loadActividades() aquí - FullCalendar lo hará via datesSet
   }
 
   // Carga actividades para un rango opcional de fechas
   loadActividades(rangoInicio?: string, rangoFin?: string): void {
     const inicio = rangoInicio ?? this.rangeStart();
     const fin = rangoFin ?? this.rangeEnd();
+
     this.actividadService.loadActividades({
       fechaInicio: inicio,
       fechaFin: fin,
       espacioId: this.selectedEspacioId() ? Number(this.selectedEspacioId()) : undefined,
       tipoActividadId: this.selectedTipoId() ? Number(this.selectedTipoId()) : undefined,
       temporadaId: this.selectedTemporadaId() ? Number(this.selectedTemporadaId()) : undefined
-    }).subscribe({
-      next: (data) => console.log('Actividades cargadas:', data.length),
-      error: (err) => console.error('Error cargando actividades:', err)
+    }).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (data) => {
+        this.initialLoadDone = true;
+        console.debug('[Calendario] Actividades cargadas:', data.length);
+      },
+      error: (err) => {
+        this.initialLoadDone = true;
+        console.warn('[Calendario] Error cargando actividades:', err?.message || err);
+      }
     });
   }
 
-  // Event handlers
+  // Event handlers - ahora disparan carga explícitamente
   onEspacioChange(e: Event): void {
     const val = (e.target as HTMLSelectElement).value;
     this.selectedEspacioId.set(val);
+    this.loadActividades(); // Carga explícita al cambiar filtro
   }
 
   onTipoChange(e: Event): void {
     const val = (e.target as HTMLSelectElement).value;
     this.selectedTipoId.set(val);
+    this.loadActividades(); // Carga explícita al cambiar filtro
   }
 
   onTemporadaChange(e: Event): void {
     const val = (e.target as HTMLSelectElement).value;
     this.selectedTemporadaId.set(val);
+    this.loadActividades(); // Carga explícita al cambiar filtro
   }
 
   resetFiltros(): void {
     this.selectedEspacioId.set('');
     this.selectedTipoId.set('');
     this.selectedTemporadaId.set('');
+    this.loadActividades(); // Carga explícita al resetear
   }
 
   // Opciones calculadas de FullCalendar
@@ -385,15 +404,20 @@ export class CalendarioComponent {
       themeSystem: 'standard',
       events: eventos,
       datesSet(arg: any) {
-        self.rangeStart.set(arg.startStr);
-        self.rangeEnd.set(arg.endStr);
-        self.actividadService.loadActividades({
-          fechaInicio: arg.startStr,
-          fechaFin: arg.endStr,
-          espacioId: self.selectedEspacioId() ? Number(self.selectedEspacioId()) : undefined,
-          tipoActividadId: self.selectedTipoId() ? Number(self.selectedTipoId()) : undefined,
-          temporadaId: self.selectedTemporadaId() ? Number(self.selectedTemporadaId()) : undefined
-        }).subscribe();
+        // Solo cargar si el rango ha cambiado realmente
+        const newStart = arg.startStr.slice(0, 10);
+        const newEnd = arg.endStr.slice(0, 10);
+        const currentStart = self.rangeStart();
+        const currentEnd = self.rangeEnd();
+
+        if (newStart !== currentStart || newEnd !== currentEnd) {
+          self.rangeStart.set(newStart);
+          self.rangeEnd.set(newEnd);
+          self.loadActividades(newStart, newEnd);
+        } else if (!self.initialLoadDone) {
+          // Primera carga cuando el calendario se inicializa
+          self.loadActividades(newStart, newEnd);
+        }
       },
       eventClick: (info: any) => {
         alert(
