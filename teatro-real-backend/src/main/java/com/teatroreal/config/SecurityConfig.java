@@ -20,13 +20,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
         http
-            .csrf().disable()
-            .cors().and()
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and()
-            .authorizeHttpRequests()
-                .requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .anyRequest().authenticated();
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> {})
+            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())) // Para H2 console
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                // DESARROLLO: permitir todo temporalmente
+                .anyRequest().permitAll()
+            );
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

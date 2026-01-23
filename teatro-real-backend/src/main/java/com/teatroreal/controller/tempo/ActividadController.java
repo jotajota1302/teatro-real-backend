@@ -1,6 +1,8 @@
 package com.teatroreal.controller.tempo;
 
 import com.teatroreal.dto.request.ActividadRequest;
+import com.teatroreal.dto.request.CloneActividadRequest;
+import com.teatroreal.dto.request.StatusActividadRequest;
 import com.teatroreal.dto.response.ActividadResponse;
 import com.teatroreal.service.tempo.ActividadService;
 
@@ -91,9 +93,9 @@ public class ActividadController {
     @PostMapping("/{id}/clone")
     public ResponseEntity<ActividadResponse> cloneActividad(
             @PathVariable String id,
-            @RequestParam String fecha // Formato ISO-8601 yyyy-MM-dd
+            @Valid @RequestBody CloneActividadRequest request
     ) {
-        ActividadResponse cloned = actividadService.cloneActividad(id, fecha);
+        ActividadResponse cloned = actividadService.cloneActividad(id, request.getNuevaFecha());
         return ResponseEntity.status(201).body(cloned);
     }
 
@@ -106,9 +108,9 @@ public class ActividadController {
     @PutMapping("/{id}/status")
     public ResponseEntity<ActividadResponse> changeStatus(
             @PathVariable String id,
-            @RequestParam String nuevoEstado
+            @Valid @RequestBody StatusActividadRequest request
     ) {
-        ActividadResponse changed = actividadService.changeStatus(id, nuevoEstado);
+        ActividadResponse changed = actividadService.changeStatus(id, request.getEstado());
         return ResponseEntity.ok(changed);
     }
 }

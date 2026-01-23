@@ -17,8 +17,8 @@ import { ActividadFormData, TipoActividad, Espacio, Departamento, Temporada } fr
 import { ActividadService } from '../../services/actividad.service';
 import { EspacioService } from '../../services/espacio.service';
 import { TipoActividadService } from '../../services/tipo-actividad.service';
-// TemporadaService: usar si existe, si no comentar la integración hasta implementarse
-// import { TemporadaService } from '../../../core/services/temporada.service';
+import { TemporadaService } from '../../../../core/services/temporada.service';
+import { DepartamentoService } from '../../../../core/services/departamento.service';
 
 @Component({
   selector: 'app-actividad-dialog',
@@ -147,7 +147,8 @@ export class ActividadDialogComponent {
   private actividadService = inject(ActividadService);
   private espacioService = inject(EspacioService);
   private tipoActividadService = inject(TipoActividadService);
-  // private temporadaService = inject(TemporadaService);
+  private temporadaService = inject(TemporadaService);
+  private departamentoService = inject(DepartamentoService);
 
   constructor() {
     this.form = this.fb.group({
@@ -177,20 +178,19 @@ export class ActividadDialogComponent {
   }
 
   loadFormData(): void {
-    // Lógica con signals y loaders (sólo si los servicios existen y devuelven signal/arrays, adaptar según implementación real).
-
+    // Cargar datos desde los servicios con signals
     if (typeof this.tipoActividadService.tipos === 'function') {
       this.tiposActividad = this.tipoActividadService.tipos();
     }
     if (typeof this.espacioService.espacios === 'function') {
       this.espacios = this.espacioService.espacios();
     }
-    // Temporada: integrar si el service existe, si no array vacío
-    // if (typeof this.temporadaService.temporadas === 'function') {
-    //   this.temporadas = this.temporadaService.temporadas();
-    // }
-    this.temporadas = [];
-    this.departamentos = [];
+    if (typeof this.temporadaService.temporadas === 'function') {
+      this.temporadas = this.temporadaService.temporadas();
+    }
+    if (typeof this.departamentoService.departamentos === 'function') {
+      this.departamentos = this.departamentoService.departamentos();
+    }
   }
 
   submit(): void {

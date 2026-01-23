@@ -32,6 +32,7 @@ npm-debug.log*
 
 # Claude
 .claude/
+CLAUDE.md
 
 # Carpetas que no queremos subir
 TEMPLATE-ANGULAR/

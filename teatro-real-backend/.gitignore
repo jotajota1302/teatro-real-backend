@@ -19,3 +19,7 @@ build.cmd
 # OS
 .DS_Store
 Thumbs.db
+
+# H2 Database - trace files (no necesarios)
+data/*.trace.db
+data/*.lock.db
