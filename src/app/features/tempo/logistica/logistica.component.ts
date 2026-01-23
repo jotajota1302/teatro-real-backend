@@ -17,351 +17,256 @@ const ESTADOS_FILTROS = ['Todos', 'Programado', 'En tránsito', 'Completado', 'P
   imports: [CommonModule],
   template: `
     <div class="page">
-      <div class="header">
-        <div>
-          <p class="eyebrow">Tempo</p>
-          <h1>Logística de Almacenes</h1>
-          <p>Gestión de recogidas y salidas de producciones</p>
-        </div>
-        <button class="btn-primary">
-          <span class="material-icons">add</span>
-          Nuevo movimiento
-        </button>
-      </div>
-
-      <div class="stats-grid">
-        <article class="stat-card" *ngFor="let stat of statCards">
-          <p class="label">{{ stat.label }}</p>
-          <p class="value">{{ stat.value }}</p>
-        </article>
-      </div>
-
-      <div class="filters">
-        <label>
-          <span>Tipo</span>
-          <select #tipoSelect [value]="selectedTipo" (change)="setTipo(tipoSelect.value)">
-            <option *ngFor="let option of tipoFiltros">{{ option }}</option>
-          </select>
-        </label>
-        <label>
-          <span>Estado</span>
-          <select #estadoSelect [value]="selectedEstado" (change)="setEstado(estadoSelect.value)">
-            <option *ngFor="let option of estadoFiltros">{{ option }}</option>
-          </select>
-        </label>
-        <div class="spacer"></div>
-        <button class="btn-secondary">Filtros</button>
-      </div>
-
-      <section class="operations">
-        <article *ngFor="let operacion of operacionesFiltradas()" class="operation-card">
-          <div class="operation-main">
-            <div class="icon-circle" [style.background]="operacion.estadoColor + '20'">
-              <span class="material-icons" [style.color]="operacion.estadoColor">{{ operacion.icon }}</span>
-            </div>
-            <div class="operation-body">
-              <div class="operation-heading">
-                <h2>{{ operacion.nombre }}</h2>
-                <span class="badge" [style.background]="operacion.estadoColor + '22'">
-                  {{ operacion.estado }}
-                </span>
-              </div>
-              <p class="operation-route">
-                {{ operacion.desde }} → {{ operacion.hacia }}
-              </p>
-              <div class="operation-meta">
-                <span class="meta-item">
-                  <span class="material-icons">calendar_month</span>
-                  {{ operacion.fecha }} · {{ operacion.hora }}
-                </span>
-                <span class="meta-item">
-                  <span class="material-icons">local_shipping</span>
-                  {{ operacion.camiones }} camiones
-                </span>
-              </div>
-              <p class="operation-detail">{{ operacion.detalle }}</p>
-            </div>
+      <div class="space-y-6">
+        <!-- Header -->
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <h1 class="text-3xl font-semibold text-gray-800">Logística de Almacenes</h1>
+            <p class="text-gray-500">Gestión de recogidas y salidas de producciones</p>
           </div>
-          <div class="operation-actions">
-            <button class="btn-border">Ver detalle</button>
-            <button class="btn-yellow">Iniciar</button>
-          </div>
-        </article>
-
-        <div *ngIf="loading" class="loading-placeholder">
-          <div class="skeleton" *ngFor="let i of [1, 2, 3]"></div>
+          <button class="btn-nuevo">
+            <span class="material-icons text-lg">add</span>
+            Nuevo Movimiento
+          </button>
         </div>
-      </section>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <article class="stat-card" *ngFor="let stat of statCards">
+            <p class="text-sm text-gray-500 uppercase tracking-wide">{{ stat.label }}</p>
+            <p class="text-3xl font-semibold text-gray-800 mt-1">{{ stat.value }}</p>
+          </article>
+        </div>
+
+        <!-- Filters -->
+        <div class="card">
+          <div class="flex flex-wrap gap-4 items-end">
+            <div>
+              <label class="form-label">Tipo</label>
+              <select class="form-select" #tipoSelect [value]="selectedTipo" (change)="setTipo(tipoSelect.value)">
+                <option *ngFor="let option of tipoFiltros">{{ option }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label">Estado</label>
+              <select class="form-select" #estadoSelect [value]="selectedEstado" (change)="setEstado(estadoSelect.value)">
+                <option *ngFor="let option of estadoFiltros">{{ option }}</option>
+              </select>
+            </div>
+            <button class="btn-secondary ml-auto">
+              <span class="material-icons text-sm">filter_list</span>
+              Más filtros
+            </button>
+          </div>
+        </div>
+
+        <!-- Operations List -->
+        <div class="space-y-4">
+          <article *ngFor="let operacion of operacionesFiltradas()" class="card card-hover">
+            <div class="flex gap-4">
+              <div class="icon-circle" [style.background]="operacion.estadoColor + '20'">
+                <span class="material-icons text-2xl" [style.color]="operacion.estadoColor">{{ operacion.icon }}</span>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-1">
+                  <h2 class="text-lg font-semibold text-gray-900">{{ operacion.nombre }}</h2>
+                  <span class="badge-pill" [style.background]="operacion.estadoColor + '22'" [style.color]="operacion.estadoColor">
+                    {{ operacion.estado }}
+                  </span>
+                </div>
+                <p class="text-gray-600 mb-2">
+                  {{ operacion.desde }} <span class="text-gray-400">→</span> {{ operacion.hacia }}
+                </p>
+                <div class="flex flex-wrap gap-4 text-sm text-gray-500">
+                  <span class="flex items-center gap-1">
+                    <span class="material-icons text-base">calendar_month</span>
+                    {{ operacion.fecha }} · {{ operacion.hora }}
+                  </span>
+                  <span class="flex items-center gap-1">
+                    <span class="material-icons text-base">local_shipping</span>
+                    {{ operacion.camiones }} camiones
+                  </span>
+                </div>
+                <p class="text-sm text-gray-500 mt-2">{{ operacion.detalle }}</p>
+              </div>
+              <div class="flex flex-col gap-2">
+                <button class="btn-outline">Ver detalle</button>
+                <button class="btn-action">Iniciar</button>
+              </div>
+            </div>
+          </article>
+
+          <div *ngIf="loading" class="space-y-4">
+            <div class="card h-32 animate-pulse bg-gray-200" *ngFor="let i of [1, 2, 3]"></div>
+          </div>
+
+          <div *ngIf="!loading && operacionesFiltradas().length === 0" class="card text-center py-12">
+            <span class="material-icons text-5xl text-gray-300 mb-2">inventory_2</span>
+            <p class="text-gray-500">No hay operaciones que coincidan con los filtros</p>
+          </div>
+        </div>
+      </div>
     </div>
   `,
-  styles: [
-    `
-      :host {
-        display: block;
-        padding: 2rem;
-        background: #f2f4f7;
-        min-height: 100vh;
-      }
+  styles: [`
+    :host {
+      display: block;
+      background: #f2f4f7;
+    }
 
-      .page {
-        max-width: 1100px;
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        gap: 1.8rem;
-      }
+    .page {
+      background: #f2f4f7;
+      padding: 2rem;
+      min-height: 100vh;
+    }
 
-      .header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-      }
+    .card {
+      background: #ffffff;
+      border-radius: 1rem;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      padding: 1.4rem;
+      box-shadow: 0 20px 35px rgba(15, 23, 42, 0.1);
+    }
 
-      .eyebrow {
-        text-transform: uppercase;
-        color: #8b96ac;
-        font-size: 0.75rem;
-        letter-spacing: 0.3em;
-        margin-bottom: 0.3rem;
-      }
+    .card-hover {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
 
-      .header h1 {
-        font-size: 2.4rem;
-        margin: 0;
-      }
+    .card-hover:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 25px 45px rgba(15, 23, 42, 0.15);
+    }
 
-      .header p {
-        margin: 0;
-        color: #6b7280;
-        font-size: 0.95rem;
-      }
+    .stat-card {
+      border-radius: 0.9rem;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      padding: 1.2rem;
+      background: #ffffff;
+      box-shadow: 0 15px 30px rgba(15, 23, 42, 0.08);
+    }
 
-      .btn-primary {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: linear-gradient(135deg, #f0364d, #c6002b);
-        color: white;
-        border: none;
-        border-radius: 999px;
-        padding: 0.95rem 1.8rem;
-        font-weight: 700;
-        font-size: 0.95rem;
-        cursor: pointer;
-        box-shadow: 0 10px 25px rgba(224, 54, 77, 0.35);
-      }
+    .form-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #6b7280;
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+    }
 
-      .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-      }
+    .form-select {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      background: white;
+      cursor: pointer;
+      min-width: 140px;
+    }
 
-      .stat-card {
-        background: white;
-        border-radius: 1rem;
-        padding: 1.2rem;
-        box-shadow: 0 18px 35px rgba(15, 23, 42, 0.1);
-        display: flex;
-        flex-direction: column;
-        gap: 0.2rem;
-      }
+    .form-select:focus {
+      outline: none;
+      border-color: #CF102D;
+      box-shadow: 0 0 0 2px rgba(207, 16, 45, 0.1);
+    }
 
-      .stat-card .label {
-        text-transform: uppercase;
-        letter-spacing: 0.2em;
-        font-size: 0.75rem;
-        color: #8692a7;
-      }
+    .btn-nuevo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: #CF102D;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(207, 16, 45, 0.3);
+    }
 
-      .stat-card .value {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #1f2937;
-      }
+    .btn-nuevo:hover {
+      background: #a80d25;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(207, 16, 45, 0.4);
+    }
 
-      .filters {
-        background: white;
-        border-radius: 1rem;
-        padding: 1rem 1.4rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        box-shadow: 0 12px 25px rgba(15, 23, 42, 0.08);
-      }
+    .btn-secondary {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.5rem 1rem;
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
 
-      .filters label {
-        display: flex;
-        flex-direction: column;
-        font-size: 0.85rem;
-        color: #515c6f;
-      }
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
 
-      select {
-        margin-top: 0.25rem;
-        border-radius: 0.75rem;
-        border: 1px solid #d1d5db;
-        background: #f8fafc;
-        padding: 0.5rem 1rem;
-        font-size: 0.95rem;
-      }
+    .icon-circle {
+      width: 56px;
+      height: 56px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
 
-      .spacer {
-        flex: 1;
-      }
+    .badge-pill {
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.7rem;
+      letter-spacing: 0.03em;
+    }
 
-      .btn-secondary {
-        background: transparent;
-        border: 1px solid #c1c7d5;
-        border-radius: 999px;
-        padding: 0.65rem 1.6rem;
-        font-weight: 600;
-        color: #334155;
-        cursor: pointer;
-      }
+    .btn-outline {
+      padding: 0.5rem 1rem;
+      background: transparent;
+      color: #374151;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
 
-      .operations {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-      }
+    .btn-outline:hover {
+      background: #f3f4f6;
+    }
 
-      .operation-card {
-        background: white;
-        border-radius: 1.5rem;
-        padding: 1.4rem 1.6rem;
-        box-shadow: 0 25px 45px rgba(15, 23, 42, 0.15);
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-      }
+    .btn-action {
+      padding: 0.5rem 1rem;
+      background: #fbbf24;
+      color: #1f2937;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+    }
 
-      .operation-main {
-        display: flex;
-        gap: 1rem;
-        align-items: flex-start;
-      }
-
-      .icon-circle {
-        width: 56px;
-        height: 56px;
-        border-radius: 999px;
-        display: grid;
-        place-items: center;
-      }
-
-      .operation-heading {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-      }
-
-      .operation-heading h2 {
-        margin: 0;
-        font-size: 1.3rem;
-        font-weight: 700;
-      }
-
-      .badge {
-        padding: 0.2rem 0.9rem;
-        border-radius: 999px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        color: #0f172a;
-      }
-
-      .operation-route {
-        margin: 0.3rem 0;
-        color: #475569;
-        font-size: 0.95rem;
-      }
-
-      .operation-meta {
-        display: flex;
-        gap: 1.4rem;
-        flex-wrap: wrap;
-        color: #6b7280;
-        font-size: 0.9rem;
-      }
-
-      .operation-meta .meta-item {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.25rem;
-      }
-
-      .operation-detail {
-        margin: 0;
-        color: #4b5563;
-        font-size: 0.9rem;
-      }
-
-      .operation-actions {
-        display: flex;
-        gap: 0.6rem;
-      }
-
-      .btn-border, .btn-yellow {
-        flex: 1;
-        border-radius: 999px;
-        padding: 0.75rem 1.2rem;
-        border: 1px solid transparent;
-        font-weight: 600;
-        cursor: pointer;
-      }
-
-      .btn-border {
-        background: transparent;
-        border-color: #c1c7d5;
-        color: #334155;
-      }
-
-      .btn-yellow {
-        background: #f7c948;
-        color: #1c1c1c;
-        box-shadow: 0 15px 30px rgba(248, 177, 56, 0.25);
-      }
-
-      .loading-placeholder {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-      }
-
-      .skeleton {
-        height: 110px;
-        border-radius: 1rem;
-        background: linear-gradient(90deg, #e5e7eb, #f3f4f6, #e5e7eb);
-        animation: shimmer 1.2s infinite;
-      }
-
-      @keyframes shimmer {
-        0% {
-          background-position: -200px 0;
-        }
-        100% {
-          background-position: 200px 0;
-        }
-      }
-
-      @media (max-width: 900px) {
-        .filters {
-          flex-direction: column;
-          align-items: stretch;
-        }
-
-        .operation-meta {
-          flex-direction: column;
-        }
-
-        .btn-primary {
-          width: 100%;
-          justify-content: center;
-        }
-      }
-    `
-  ]
+    .btn-action:hover {
+      background: #f59e0b;
+      transform: translateY(-1px);
+    }
+  `]
 })
 export class LogisticaComponent implements OnInit {
   stats: LogisticaStatDto | null = null;
