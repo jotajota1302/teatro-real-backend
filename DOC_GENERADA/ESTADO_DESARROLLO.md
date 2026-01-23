@@ -6,16 +6,16 @@
 |--------|--------|----------|----------------------|
 | **Sprint 0: Setup** | Completado | 100% | 2025-12-11 |
 | **Sprint 1: Auth + Layout** | Completado | 95% | 2025-01-23 |
-| **Sprint 2: TEMPO** | Casi Completado | 80% | 2025-01-23 |
+| **Sprint 2: TEMPO** | Completado | 95% | 2026-01-23 |
 | **Sprint 2: Logística** | En Progreso | 30% | 2025-01-23 |
 | **Sprint 3: TOPS** | En Progreso | 15% | 2025-01-23 |
-| **Sprint 4: Integraciones** | Parcial | 25% | 2025-01-23 |
+| **Sprint 4: Integraciones** | Parcial | 35% | 2026-01-23 |
 | **Sprint 5: Testing + Deploy** | En Progreso | 30% | 2025-01-23 |
 
-> **Logística:** Ahora incluido en planificación (v1.3). Frontend básico existe (30%),
-> falta calendario y backend completo.
+> **TEMPO:** Cartelería digital completada (global + por sala).
+> **Logística:** Frontend básico existe (30%), falta calendario y backend completo.
 
-**Progreso Global: ~50%**
+**Progreso Global: ~55%**
 
 ---
 
@@ -105,7 +105,7 @@
 
 ---
 
-## Sprint 2: Módulo TEMPO - COMPLETADO 80%
+## Sprint 2: Módulo TEMPO - COMPLETADO 95%
 
 ### Backend
 
@@ -124,7 +124,7 @@
 | TemporadaService + Controller | [x] Completado | service/tempo/, controller/ |
 | DepartamentoService + Controller | [x] Completado | service/, controller/ |
 | NotificacionController | [x] Completado | controller/tempo/ |
-| SignageService | [x] Completado | service/tempo/ |
+| SignageService + Controller | [x] Completado | service/tempo/, controller/tempo/ |
 | DashboardService + Controller | [x] Completado | service/dashboard/, controller/dashboard/ |
 | Filtros y búsqueda actividades | [x] Completado | |
 | Tests TEMPO | [ ] Pendiente | |
@@ -380,6 +380,7 @@ teatro-real-backend/src/main/java/com/teatroreal/
 │   ├── tempo/ActividadDocumentoController.java
 │   ├── tempo/EspacioController.java
 │   ├── tempo/NotificacionController.java
+│   ├── tempo/SignageController.java
 │   ├── tempo/TipoActividadController.java
 │   ├── tops/ActoController.java
 │   ├── tops/ElementoGuionController.java
@@ -530,8 +531,9 @@ npm test         # Tests
 | 2025-01-23 | Merge ramas Fran + Sandra → JJ | JJ |
 | 2025-01-23 | Identificado módulo Logística no planificado | Claude |
 | 2025-01-23 | Identificado que TOPS frontend está sin implementar | Claude |
+| 2026-01-23 | Implementado SignageController + Cartelería completa (global + sala) | Claude |
 
 ---
 
-*Última actualización: 2025-01-23*
+*Última actualización: 2026-01-23*
 *Progreso Global: ~55%*
