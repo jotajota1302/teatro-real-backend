@@ -1,0 +1,832 @@
+[Un hombre y una mujer al lado de una computadora Descripción generada
+automáticamente con confianza baja]
+
+Tipo de información: Restringida
+
+Compañía: NTT DATA Spain
+
+Propietario de la información: Global Delivery Network Evolve
+
+Requisitos Generales
+
+Proyecto Teatro Real
+
++-----------------------------------------------------------------------------------------------------------------------+
+| Resumen                                                                                                               |
++-----------------------------------------------------------------------------------------------------------------------+
+| Este documento describe los requerimientos generales del cliente para el proyecto Teatro Real, el cual incluye:       |
+|                                                                                                                       |
+| 1.  Introducción (antecedentes, justificación, objetivos)                                                             |
+|                                                                                                                       |
+| 2.  Requisitos generales (TOPS, TEMPO, administración)                                                                |
+|                                                                                                                       |
+| Registro de modificaciones                                                                                            |
++==============+==============+:=============+:============:+:============:+:============:+=============:+==============+
+| [A red and black logo with  | Proyecto: Teatro Real                                     | []                          |
+| a crown AI-generated        |                                                           |                             |
+| content may be incorrect.]  | Requisitos Generales                                      |                             |
++--------------+--------------+--------------+--------------+--------------+--------------+--------------+--------------+
+| Versión      | Descripción [o descripción  | Autor        | Fecha        | Aprobado por                | Fecha        |
+|              | de cambios]                 |              | creación     |                             | aprobación   |
++--------------+-----------------------------+--------------+--------------+-----------------------------+--------------+
+| 1.0          | Versión inicial             | Dimas Ulacio | 17/11/2025   |                             |              |
++--------------+-----------------------------+--------------+--------------+-----------------------------+--------------+
+| 1.1          | Incorporar últimas          | Dimas Ulacio | 26/11/2025   |                             |              |
+|              | aclaratorias:               |              |              |                             |              |
+|              |                             |              |              |                             |              |
+|              | - Reunión del día           |              |              |                             |              |
+|              |   21/11/2025                |              |              |                             |              |
+|              |                             |              |              |                             |              |
+|              | - Correo del 21/11/2025,    |              |              |                             |              |
+|              |   código de colores de      |              |              |                             |              |
+|              |   TEMPO                     |              |              |                             |              |
+|              |                             |              |              |                             |              |
+|              | - Correo de 25/11/2025,     |              |              |                             |              |
+|              |   actividades de Almacenes  |              |              |                             |              |
+|              |   de Arganda                |              |              |                             |              |
++--------------+-----------------------------+--------------+--------------+-----------------------------+--------------+
+| 1.2          | Incorporar últimas          | Dimas Ulacio | 26/11/2025   |                             |              |
+|              | aclaratorias:               |              |              |                             |              |
+|              |                             |              |              |                             |              |
+|              | - Correo del 26/11/2025     |              |              |                             |              |
++--------------+-----------------------------+--------------+--------------+-----------------------------+--------------+
+| 1.3          | Incorporar últimas          | Dimas Ulacio | 19/12/2025   |                             |              |
+|              | aclaratorias:               |              |              |                             |              |
+|              |                             |              |              |                             |              |
+|              | - Reunión del día           |              |              |                             |              |
+|              |   12/12/2025                |              |              |                             |              |
+|              |                             |              |              |                             |              |
+|              | - Reunión del día           |              |              |                             |              |
+|              |   17/12/2025                |              |              |                             |              |
++--------------+-----------------------------+--------------+--------------+-----------------------------+--------------+
+
+CONTENIDO
+
+1. Introducción 4
+
+1.1. Antecedentes 4
+
+1.2. Justificación 4
+
+1.3. Objetivos de Proyectos 5
+
+2. Requisitos Funcionales 6
+
+2.1. Funcionalidades Módulo TEMPO – Planificación y Gestión de
+Actividades 6
+
+2.2. Funcionalidades Módulo TOPS – Coordinación Técnica y Escénica 12
+
+2.3. Administración del Sistema y Gestión de Usuarios 16
+
+Introducción
+
+Antecedentes
+
+El Teatro Real de Madrid, como institución de referencia en la
+producción y exhibición de ópera, ballet y otras artes escénicas,
+gestiona cada temporada una amplia diversidad de actividades que
+implican la coordinación de equipos artísticos, técnicos y
+administrativos.
+
+Actualmente, esta planificación y control operativo se realiza a través
+de herramientas ofimáticas independientes (principalmente hojas de
+cálculo Excel y bases de datos Access), así como mediante el uso de
+Google Calendar para la difusión de la programación interna.
+
+Esta situación genera duplicidades de información, limitaciones en la
+integración entre departamentos y dificultades para disponer de una
+visión unificada y actualizada de todas las actividades que se
+desarrollan en el teatro, tanto a nivel técnico como artístico y
+administrativo.
+
+Además, los procesos asociados a la regiduría —como la gestión de los
+Tops (puntos de sincronización técnica) y la elaboración de guiones
+técnicos— se mantienen en formatos no centralizados, dificultando su
+trazabilidad y la colaboración entre los equipos involucrados.
+
+Justificación
+
+El proyecto surge de la necesidad del Teatro Real de modernizar y
+digitalizar su gestión interna, con el fin de optimizar la
+planificación, coordinación y comunicación entre todas las áreas
+implicadas en la producción escénica.
+
+La inexistencia de una plataforma integrada provoca ineficiencias
+operativas, riesgo de pérdida de información y una alta dependencia de
+procesos manuales.
+
+La nueva solución permitirá:
+
+- Consolidar en un único sistema la información que actualmente se
+  encuentra dispersa (Excel, Access, Google Calendar).
+
+- Mejorar la trazabilidad, control de cambios y acceso a los datos en
+  tiempo real.
+
+- Facilitar la colaboración entre departamentos técnicos, artísticos y
+  administrativos.
+
+- Aumentar la eficiencia operativa y la fiabilidad de la información
+  durante todas las fases de una producción (preparación, ensayo y
+  función).
+
+En este sentido, el proyecto se enmarca dentro del compromiso del Teatro
+Real con la innovación tecnológica y la transformación digital de sus
+procesos internos, reforzando su posición como institución cultural de
+referencia en España y Europa.
+
+Objetivos de Proyectos
+
+Objetivo general
+
+Desarrollar una plataforma integral de Gestión Interna del Teatro Real,
+que unifique en un único entorno la planificación de actividades
+(TEMPO), la gestión técnica y escénica (TOPS) y la elaboración de
+guiones técnicos, favoreciendo la coordinación entre las distintas áreas
+del teatro.
+
+Objetivos específicos
+
+1.  Centralizar toda la información operativa, técnica y artística en
+    una base de datos común, eliminando la fragmentación actual de
+    herramientas.
+
+2.  Digitalizar y automatizar los procesos de regiduría y coordinación
+    técnica, permitiendo la gestión de Tops, guiones y calendarios de
+    manera colaborativa y trazable.
+
+Requisitos Funcionales
+
+Funcionalidades Módulo TEMPO – Planificación y Gestión de Actividades
+
+Objetivo general
+
+Centralizar en una única herramienta toda la planificación de
+actividades, ensayos, producciones y eventos del Teatro Real,
+sustituyendo el Excel actual y mejorando su integración con Google
+Calendar y otros sistemas internos.
+
+Requerimientos funcionales identificados
+
+- Gestión de Actividades
+
+  - Registrar toda actividad que ocurre en el Teatro (óperas, ballets,
+    conciertos, recitales, ensayos, montajes, desmontajes, eventos
+    institucionales o privados, logística en almacenes, etc.).
+
+  - La información de cada producción o evento se debe poder consultar
+    desde TEMPO
+
+  - El sistema debe permitir configurar los espacios disponibles en el
+    Teatro. Los espacios del teatro se dividen en 2 tipos:
+
+    - Sala – corresponde a espacios físicos dentro del Teatro, tales
+      como salas o salones, donde se realizan actividades
+
+    - Almacen – corresponde a espacios físicos externos al Teatro donde
+      se realizan actividades logísticas (e.g. entradas y salidas de
+      material de producciones)
+
+  - El sistema debe permitir administrar los espacios (Salas o
+    Almacenes), que incluye crear, modificar, ver o eliminar espacios.
+
+  - Los atributos de los espacios incluye:
+
+    - Nombre del espacio
+
+    - Tipo de espacio (i.e. Sala, Almacén)
+
+    - Color (opcional)
+
+    - Capacidad (opcional)
+
+    - Dimensiones (opcional)
+
+  - El sistema debe permitir administrar los departamentos del Teatro
+    que estarán involucrados en las actividades, que incluye crear,
+    modificar, ver o eliminar departamentos. Ejemplo de departamentos:
+    Técnico, Artístico, Administración, etc
+
+  - Los atributos de los departamentos incluye:
+
+    - Nombre del departamento
+
+    - Descripción del departamento
+
+    - Jefe de departamento (i.e. usuario)
+
+    - Personal del departamento (i.e. usuarios que perteneces al
+      departamento)
+
+  - Todas las actividades que ocurren en cada espacio del Teatro se
+    registrarán y agendarán en el sistema
+
+  - Cada actividad debe incluir:
+
+    - Título o nombre de la actividad o evento
+
+    - Temporada
+
+    - Descripción de la actividad o evento
+
+    - Tipo de actividad
+
+    - Espacio (Principal, SEPE, Ballet, Orquesta, Gayarre, Coro,
+      Arganda-Campa, Arganda-Nave, etc.)
+
+    - Fecha
+
+    - Horas de inicio y fin
+
+    - Departamento responsable (Técnico, Artístico, Administración, etc)
+
+    - Documentación asociada (planos de la producción, dossier técnico,
+      partitura, horarios de camiones, imágenes, etc.)
+
+  - Con relación a la “Documentación asociada”, el sistema debe permitir
+    adjuntar uno o varios documentos relevantes a la actividad. Los
+    archivos podrán adjuntarse de 2 fuentes posible:
+
+    - Un “drive” accesible desde la intranet del Teatro, en las carpetas
+      correspondientes. El usuario correspondiente tendrá acceso a este
+      “drive” y tendrá permisos para poder adjuntar los archivos
+
+    - Una carpeta local en el dispositivo del usuario
+
+  - El tipo de actividad tiene asociado un color específico. Este código
+    de colores debe poder configurarse en el sistema. Por ejemplo:
+
+    - Para tipo de espacios “Sala”:
+
+      - Naranja – Nocturnas
+
+      - Morado – Visitas
+
+      - Amarillo – Cargas y descargas
+
+      - Blanco – Actividad en el escenario
+
+      - Gris – Pauta técnica
+
+      - Salmon – Montaje
+
+      - Verde - Ensayo
+
+      - Azul – Función
+
+      - Rosa – Cursos
+
+      - Rosa oscuro - Eventos
+
+      - Rojo – Rueda de prensa
+
+      - Morado claro – Flamenco real
+
+    - Para tipo de espacios “Almacen”:
+
+      - Verde – Recogida de producciones
+
+      - Rosa – Salida de producciones
+
+  - Los espacios serían inicialmente:
+
+    - Tipo Sala:
+
+      - Sala Principal - Escenario
+
+      - Sala S.E.P.E.
+
+      - Sala de Ballet
+
+      - Sala de Orquesta
+
+      - Sala Gayarre
+
+      - Sala del Coro
+
+      - Salon de Baile
+
+      - Salas de Cuerda
+
+      - Salas de Cantantes
+
+      - Otros Salones: Falla, Felipe, Arrieta, Carlos, Vergara.
+
+    - Tipo Almacen:
+
+      - Arganda-Campa
+
+      - Arganda-Nave
+
+  - Además de registrar la logística del Teatro, el TEMPO también debe
+    permitir registrar la logística en los almacenes. Las actividades en
+    los espacios del tipo “Almacen” registran información adicional a la
+    indicada anteriormente:
+
+    - Para el tipo de actividad “Recogida de producciones”:
+
+      - Fecha de recogida (en lugar de solo “Fecha”)
+
+      - Numero de camiones
+
+      - Lugar de recogida
+
+      - Lugar de llegada. Pueden ser 2 opciones:
+
+        - Arganda-Campa
+
+        - Arganda-Nave
+
+    - Para el tipo de actividad “Salida de producciones”:
+
+      - Fecha de salida (en lugar de solo “Fecha”)
+
+      - Numero de camiones
+
+      - Lugar de envío
+
+      - Lugar de salida. Pueden ser 2 opciones:
+
+        - Arganda-Campa
+
+        - Arganda-Nave
+
+    - El estado de las actividades logísticas de los espacios de tipo
+      “Almacen” se regirán por un flujo básico de 3 estados:
+
+      - Pendiente inicio – estado por defecto cuando se crea la
+        actividad
+
+      - En tránsito – activado por el usuario por medio de un botón,
+        cuando se inicia el traslado del material
+
+      - Completado - activado por el usuario por medio de un botón,
+        cuando el material ha llegado a destino
+
+  - Las actividades de los espacios, tanto de Salas como Almacenes,
+    deben poder copiarse o clonarse a días, semanas o meses distintos,
+    para agilizar el trabajo reutilizando información existente.
+
+  - Debe permitir realizar filtros de búsqueda por temporada, por año,
+    por semana, por día por evento, tipo de espacio, espacio, etc. Esto
+    aplica tanto a espacios de tipo Sala como Almacen.
+
+- Alertas y notificaciones
+
+  - El sistema debe mostrar en pantalla una sección de “alertas y
+    notificaciones”. Estas alertas y notificaciones serán relevantes
+    para el contexto del usuario, tales como: recordatorios de próximas
+    actividades a las que está vinculado, cambio en la programación de
+    próximas actividades a las que está vinculado, etc.
+
+- Integración con Google Workspace
+
+  - Integración y sincronización con Google Calendar. Todas la
+    actividades del TEMPO deben poder estar suscritas a calendarios de
+    Google
+
+  - Cada sala del Teatro tiene asociada actualmente a un calendario en
+    Google. Cuando las actividades del TEMPO de una sala se actualicen
+    en el sistema, el calendario de Google respectivo deberá ser
+    actualizado automáticamente. Esto incluye:
+
+    - Creación de nuevas actividades en la sala
+
+    - Modificación de actividades existentes en la sala
+
+    - Eliminación de actividades existentes en la sala
+
+  - El registro de la actividad en Google Calendar debe incluir toda la
+    información relevante a la actividad registrada en el sistema. Esto
+    incluye el acceso a los documentos anexados a la tarea
+
+- Visulización
+
+  - La aplicación web debe ser “responsive”. Es decir, debe poder
+    accederse a ella desde dispositivos móviles (e.g. tablets, móviles).
+    Los usuarios con permiso de consulta deben poder ver la información
+    desde dispositivos móviles a la que tenga acceso. Los usuarios con
+    permisos de edición pueden actualizar los datos de Tempo desde sus
+    dispositivos móviles. En formato móvil, la aplicación habilitará un
+    teclado virtual en pantalla para los campos de búsqueda o edición de
+    datos.
+
+  - Visualización adaptada por perfil (consulta, edición o
+    administración).
+
+  - Posibilidad de mostrar un “modo cartelería digital” en pantallas
+    internas del teatro. Cada espacio puede tener una cartelera digital
+    (i.e. pantalla o monitor). Desde la cartelera digital de un espacio
+    se debe poder acceder a una URL a una página en la aplicación que
+    despliegue la información programada para este espacio en el día
+    actual. El contenido debería actualizarse automáticamente. El
+    sistema debo poder generar las siguientes vistas de cartelería
+    digital:
+
+    - Global – Vista de las actividades de todas los espacios de tipo
+      “Sala” del teatro del día actual, en una misma pantalla. Todas las
+      salas y sus actividades de hoy deben mostrarse en una sola
+      pantalla, de manera limpia y visible
+
+    - Por Sala - Vista de las actividades de cada sala del teatro del
+      día actual. Cada sala tendría su propia cartelera digital
+      independiente
+
+  - El “landing page” de usuarios con acceso a Tempo debe ser el
+    calendario semanal de actividades del Teatro en los espacios de tipo
+    “Sala”, que debe seguir un formato similar a la hoja de Excel que se
+    utiliza actualmente para registrar las actividades de Tempo.
+    Características de esta vista:
+
+    - Debe mostrarse la semana actual completa, de lunes a domingo
+
+    - La primera columna corresponde al día de la semana y fecha
+
+    - La segunda columna corresponde a las franjas horarias del día
+
+    - A partir de la tercera columna, corresponde a cada sala del
+      Teatro. Sobre la columna de cada sala, se mostrará las actividades
+      programadas en cada día, en cada franja horaria. Cada actividad se
+      mostrará utilizando el código de colores correspondiente
+
+    - Debe existir la posibilidad de crear filtros de búsqueda por
+      salas, nombre del eventos/actividad/obra, tipo de actividad
+
+    - Debe permitir navegar entre semanas o meses distintos
+
+    - Al pinchar sobre una actividad en el calendario, se debe desplegar
+      todos los detalles de esta actividad
+
+  - La visualización del calendario de actividades de almacen debe
+    indicar claramente:
+
+    - Las actividades por almacen
+
+    - Las actividades por tipo: recogidas de producciones, salidas de
+      producciones
+
+    - Visualización por mes, semana y día
+
+- Importar información
+
+  - EVALUAR: importar información del formato de Excel actual a la base
+    de datos del sistema, de manera de que pueda aprovecharse el trabajo
+    que está hecho. Aspectos a considerar en el análisis:
+
+    - Diferencias del formato en el que se representa la información.
+      Los diferentes tipos de formato deben ser lo más previsibles
+      posible para minimizar errores
+
+    - Además de leer la información, validar el color de las celdas para
+      poder interpretar el tipo de actividad que corresponde
+
+    - En algunos casos se agrupan celdas, mientras que en otros se
+      mantienen desagrupadas
+
+    - Algunas columnas corresponden a varias salas, por lo que en la
+      misma celda agrupada pueden listarse actividades para una sala u
+      otra
+
+- Funcionalidades Candidatas a Fase 2
+
+  - Reservas de Espacios – Salas
+
+    - El sistema debe permitir que cualquier usuario con acceso a Tempo
+      tenga la posibilidad de solicitar la reserva de cualquier espacio
+      de tipo “Sala” del Teatro. En la solicitud, el usuario debe
+      completar la siguiente información:
+
+      - Sala
+
+      - Fecha
+
+      - Hora inicio y fin
+
+      - Título de la actividad o evento
+
+      - Descripción de la actividad o evento
+
+      - Tipo de actividad
+
+      - Departamento responsable
+
+    - La petición le llegará a usuarios con permisos de edición en
+      Tempo. El usuario validará la petición y tomará una de 2
+      decisiones:
+
+      - Rechazar la petición. En este caso, se envía una notificación al
+        usuario solicitante y se descarta la solicitud
+
+      - Aceptar la petición. En este caso, se envía una notificación al
+        usuario solicitante y se crea automáticamente la actividad en el
+        calendario
+
+Funcionalidades Módulo TOPS – Coordinación Técnica y Escénica
+
+Objetivo general
+
+Digitalizar la gestión de los “Tops” (puntos de sincronización técnica)
+actualmente gestionados en Access, facilitando la coordinación de los
+equipos técnicos durante ensayos y funciones.
+
+Requerimientos funcionales identificados
+
+- Gestión del Guion (Guion técnico completo)
+
+  - El sistema deberá permitir registrar, editar y consultar el guion
+    asociado a cada producción o ensayo
+
+  - La experiencia de usuario para la edición del Guion debe emular lo
+    más cercano posible al formato del documento Word que se utiliza
+    hoy. Debe permitir agregar fácilmente el encabezado del guion,
+    actos, pasadas, escenas, tops, acciones, etc manteniendo el mismo
+    formato de tablas que se utiliza hoy. Se debe mantener la estructura
+    preestablecida de columnas y filas en cada sección del documento.
+
+  - Elementos del encabezado del guion:
+
+    - Nombre de la obra (e.g. Carmen)
+
+    - Compañía productora (e.g. Teatro Real)
+
+    - Nombre del productor
+
+    - Nombre de responsable de edición
+
+    - Director de escena
+
+    - Director musical
+
+  - Los departamentos responsables de cada actividad en el guion debe
+    seguir una codificación establecida:
+
+    - M.E.: Mecánica Escénica
+
+    - MAQ.: Maquinaria
+
+    - Útil.: Utilería
+
+    - Elec.: Electricidad
+
+    - A/V.: Audio-Visuales
+
+    - Sast: Sastrería
+
+    - Carac: Caracterización
+
+    - Otros: Otros
+
+  - El guion de una obra se subdivide en actos. Por ejemplo: Acto I,
+    Acto II, etc,
+
+  - Cada acto debe iniciar con la subsección “Pasada”, que engloba lo
+    que tiene que ocurrir antes que empiece el acto. Por ejemplo: Pasada
+    Acto I, Pasada Acto II, etc.
+
+  - Cada elemento de la subsección “Pasada” incluye los siguientes
+    elementos:
+
+    - Identificación de pasada (e.g. Pasada Acto I)
+
+    - Departamento (M.E., MAQ., Útil., Elec., A/V., Sast., Carac.,
+      Otros)
+
+    - Lugar (e.g. Escena, Varas, Plataf., Fosos, etc)
+
+    - Descripción detallada (incluye texto descriptivo e imágenes de
+      soporte)
+
+  - Después de la sección “Pasada”, el guion continúa con las
+    subsecciones de cada Acto. Cada acto a su vez se sub-divide en
+    varias escenas. Cada escena se identifica con un numero de escena y
+    un título de escena. Por ejemplo:
+
+    - PRÉLUDE (C. 4’)
+
+    - N°1: INTRODUCTION: “SUR LA PLACE, CHACUN PASSE…” (C. 6’)
+
+    - N°2: MARCHE ET CHOEUR DES GAMINS: “AVEC LA GARDE MONTANTE…” (C.
+      3’)
+
+  - La escena agrupa una lista de acciones secuenciadas que diferentes
+    departamentos deben realizar durante la escena. Estas acciones
+    pueden ser de 2 tipos:
+
+    - Tipo “Tops” - representa una orden técnica sincronizada (punto de
+      acción escénica) que puede involucrar uno o varios departamentos
+
+    - Tipo “Otras acciones” – otras acciones, tales como Entradas (E),
+      Mutis (M), Internos (INT), o Avisos (Avs)
+
+  - Cada elemento de una escena incluye los siguientes atributos:
+
+    - Localización en la partitura (debe incluir página, línea, compás o
+      timecode)
+
+    - Código de elemento de guion, que puede ser:
+
+      - En caso de Top 🡺 Numero de TOP (e.g. 22, 23, 23.1, 23.2, etc)
+
+      - En caso de otras acciones 🡺 Código de tipo de acción:
+
+        - Entradas (E)
+
+        - Mutis (M)
+
+        - Internos (INT)
+
+        - Avisos (Avs)
+
+    - Departamento (M.E., MAQ., Útil., Elec., A/V., Sast., Carac.,
+      Otros)
+
+    - Quien / Que: Descripción detallada de la acción a realizar. Puede
+      incluir imágenes de soporte.
+
+    - Observaciones: datos, instrucciones u observaciones adicionales.
+      Puede incluir imágenes de soporte
+
+  - Los elementos de un guion debe seguir una codificación por color.
+    Este código de colores debe poder ser configurable en el sistema
+
+  - Colaboración y control de edición
+
+    - Garantizar que solo un usuario pueda editar simultáneamente el
+      guion técnico de una obra, bloqueando todo el guion durante la
+      edición
+
+- Gestión de Tops
+
+  - Cada Top en el guion representa una orden técnica sincronizada
+    (punto de acción escénica) que puede involucrar uno o varios
+    departamentos.
+
+  - Tal como se define en el guion, los Tops estarán vinculados a la
+    partitura (por página, línea, compás o timecode) y a la escena o
+    acto correspondiente.
+
+  - Bajo un mismo número de Top podrán existir sub-acciones o
+    instrucciones diferenciadas por departamento.
+
+  - El sistema deberá mantener la relación 1:N entre Top principal y
+    sub-Tops (p. ej. Top 23 → 23.1, 23.2) para incorporar cambios sin
+    alterar la numeración existente.
+
+  - Cada Top deberá incluir los siguientes atributos:
+
+    - número de Top (definido por el usuario, debe ser único dentro de
+      la producción),
+
+    - referencia de partitura (página/línea/compás/timecode),
+
+    - Departamentos implicados y responsables (i.e. M.E., MAQ., Útil.,
+      Elec., A/V., Sast., Carac., Otros).
+
+    - Quien / Que: Descripción detallada de la acción a realizar. Puede
+      incluir imágenes de soporte.
+
+    - Observaciones: datos, instrucciones u observaciones adicionales.
+      Puede incluir imágenes de soporte.
+
+  - Debe permitir establecer enlaces entre Tops y recursos adjuntos:
+    planos, fotos, partitura escaneada o documentación técnica.
+
+- Visualización
+
+  - Los guiones deben poder asociarse y organizarse por temporadas. EL
+    usuario debe poder utilizar la temporada como criterio para buscar o
+    filtrar los guiones
+
+  - El “landing page” de usuarios con acceso a TOPS debe incluir:
+
+    - Lista de todos los Guiones en curso
+
+    - Lista de los Guiones en los que estoy involucrado como usuario
+
+  - El sistema debe ofrecer 3 vistas de la información:
+
+    - Global Guion: todos los elementos del guion de la producción.
+
+    - Global Tops: todos los Tops del guion de la producción
+
+    - Departamento Tops: filtra solo los Tops que afectan a un área
+      técnica específica.
+
+  - Exportar vista de guion a documento externo:
+
+    - El sistema debe permitir la exportación de cualquiera de las 3
+      vistas del guion a un documento externo (i.e. Global Guion, Global
+      Tops, Departamento Tops). El formato deseado es Word.
+
+  - Historial de cambios
+
+    - Todos los cambios sobre TOP y Guión serán visibles a todos los
+      usuarios con permisos de lectura una vez los cambios se hayan
+      confirmado
+
+  - Dispositivos y entorno
+
+    - La aplicación web debe ser “responsive”. Es decir, debe poder
+      visualizarse desde tablets en talleres o salas técnicas, en modo
+      lectura.
+
+  - Visualizar en pantallas del escenario
+
+    - EVALUAR: la ejecución del guion debe poder proyectarse en
+      pantallas dentro del teatro en tiempo real, durante un ensayo. El
+      regidor debe controlar desde una Tablet la ejecución secuencial de
+      los TOPs, y debe poder proyectarse en las pantallas:
+
+      - El TOP actual que ha llamado
+
+      - Los TOPs recientemente llamados
+
+      - Los TOPs próximos a ser llamados
+
+Administración del Sistema y Gestión de Usuarios
+
+Objetivo general
+
+Controlar los accesos, perfiles, integraciones y mantenimiento de la
+aplicación.
+
+Requerimientos funcionales identificados:
+
+Requerimientos funcionales identificados
+
+- Gestión de usuarios y roles
+
+  - El Sistema debe permitir crear, editar, desactivar usuarios.
+
+  - Roles definidos:
+
+    - Administrador: acceso total al sistema (i.e. superusuario). Max 1
+      usuario
+
+    - Gestor: puede crear y editar actividades o Tops. Aprox 2-3
+      usuarios
+
+    - Operador: puede visualizar la información y editar su propio
+      trabajo o las tareas asignadas
+
+    - Visualizador (Opcional): Acceso de "solo lectura" para auditorías
+      o reportes
+
+  - Posibilidad de asignar permisos específicos por módulo (i.g. TEMPO,
+    TOPS). Es decir, un usuario de tipo Gestor, Operador o Visualizador
+    puede tener acceso solo a TEMPO o solo a TOPS, o a ambos,
+    dependiendo de cómo esté configurado su perfil de acceso
+
+- Autenticación y seguridad
+
+  - El sistema debe permitir gestión de acceso seguro a los usuarios.
+    Cada usuario ingresará al sistema con sus credenciales de Google
+    (i.e. Gmail) y se validará el acceso por medio del protocolo de
+    autenticación de Google (i.e. OAuth 2.0). La funcionalidades y
+    permisos a los que tiene acceso el usuario dependerán del perfil
+    asignado
+
+- Infraestructura y entornos
+
+  - Alojamiento preferente en Google Cloud (actual plataforma del Teatro
+    Real). Sin embargo, NTT DATA podrá recomendar la infraestructura que
+    mejor se adapte a la aplicación
+
+  - Si es necesaria Tecnología de hosting on premise, la que se
+    recomiende NTT DATA, pues actualmente el Teatro se adapta a
+    cualquier servicio
+
+  - Entornos previstos: Desarrollo (DEV) y Producción (PROD).
+
+- Lenguaje de programación y otras tecnologías a emplear
+
+  - Los que NTT DATA considere más adecuados al proyecto
+
+- Integraciones externas
+
+  - Google Calendar para la sincronización de actividades registradas en
+    TEMPO
+
+  - Gmail para gestionar credenciales de acceso al sistema
+
+  - Drive de almacenamiento de documentos en la intranet para poder
+    adjuntar documentos, imágenes y otros tipos de archivos a
+    actividades de TEMPO y guiones.
+
+- Mantenimiento y soporte
+
+  - NTT DATA dará soporte inicial para la implantación al personal
+    técnico de Teatro Real, incluyendo las sesiones formativas para
+    operar el sistema
+
+  - NTT DATA hará la transferencia de la tecnología al personal técnico
+    de Teatro Real para que puedan operar el sistema de manera
+    independiente
+
+  - El personal técnico del Teatro Real realizará la divulgación y
+    soporte de incidencias y formativas al personal, especialmente a las
+    que tendrán acceso en solo modo lectura
+
+[Un hombre y una mujer al lado de una computadora Descripción generada
+automáticamente con confianza baja]

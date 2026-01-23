@@ -32,7 +32,7 @@ export interface TempoEspacioDto {
 export class EspacioService {
   private espaciosSignal = signal<Espacio[]>([]);
   private loadingSignal = signal(false);
-  private readonly baseUrl = '/api/v1/espacios';
+  private readonly baseUrl = '/api/espacios';
   private readonly fallbackEspacios: TempoEspacioDto[] = [
     {
       nombre: 'Escenario Principal',
