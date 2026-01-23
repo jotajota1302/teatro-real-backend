@@ -53,6 +53,11 @@
       <artifactId>postgresql</artifactId>
       <scope>runtime</scope>
     </dependency>
+    <!-- Flyway (migraciones de BD) -->
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+    </dependency>
     <!-- Spring Security -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
