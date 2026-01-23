@@ -156,18 +156,24 @@ teatro-real-frontend/
 │   │   │   │   ├── tipos-actividad/
 │   │   │   │       ├── tipo-list/
 │   │   │   │       └── tipo-form/
-│   │   │   │   └── logistica/                 # NUEVO: Módulo Logística (almacén)
-│   │   │   │       ├── logistica.component.ts    # Dashboard con estadísticas
+│   │   │   │   └── logistica/                 # Módulo Logística (requisitos v1.3)
+│   │   │   │       ├── logistica.component.ts    # Landing con calendario
 │   │   │   │       ├── logistica.component.html
 │   │   │   │       ├── logistica.component.scss
 │   │   │   │       ├── services/
-│   │   │   │       │   └── logistica.service.ts  # CRUD operaciones + filtros
+│   │   │   │       │   └── logistica.service.ts  # CRUD + calendario + estados
 │   │   │   │       ├── models/
-│   │   │   │       │   ├── operacion-logistica.model.ts
-│   │   │   │       │   └── camion.model.ts
-│   │   │   │       ├── operacion-list/           # Lista operaciones con filtros
-│   │   │   │       ├── operacion-form/           # Dialog crear/editar operación
-│   │   │   │       └── camion-management/        # Gestión de camiones
+│   │   │   │       │   ├── operacion-logistica.model.ts  # Campos v1.3
+│   │   │   │       │   └── almacen.model.ts              # Arganda-Campa/Nave
+│   │   │   │       ├── calendario/                  # NUEVO: Vista calendario (v1.3)
+│   │   │   │       │   ├── logistica-calendario.component.ts
+│   │   │   │       │   ├── logistica-calendario.component.html
+│   │   │   │       │   └── logistica-calendario.component.scss
+│   │   │   │       ├── operacion-list/              # Lista con filtros por almacén
+│   │   │   │       ├── operacion-form/              # Dialog con campos v1.3
+│   │   │   │       │   └── operacion-form.component.ts  # nºcamiones, origen, destino
+│   │   │   │       └── estado-buttons/              # NUEVO: Botones transición estado
+│   │   │   │           └── estado-buttons.component.ts  # Pendiente→Tránsito→Completado
 │   │   │   │
 │   │   │   ├── tops/                      # Módulo TOPS
 │   │   │   │   ├── tops.routes.ts
@@ -608,51 +614,97 @@ export interface CalendarioFilter {
 }
 ```
 
-### 3.2.1 Modelos Logística (Nuevo)
+### 3.2.1 Modelos Logística (Actualizado según requisitos v1.3)
 
 ```typescript
 // features/tempo/logistica/models/operacion-logistica.model.ts
 
+/**
+ * Requisitos v1.3:
+ * - Tipos: RECOGIDA (verde), SALIDA (rosa)
+ * - Estados: PENDIENTE_INICIO → EN_TRANSITO → COMPLETADO (botones)
+ * - Almacenes: Arganda-Campa, Arganda-Nave
+ * - Vista calendario: mes, semana, día
+ */
+
 export type TipoOperacion = 'RECOGIDA' | 'SALIDA';
-export type EstadoOperacion = 'PROGRAMADO' | 'EN_TRANSITO' | 'COMPLETADO' | 'CANCELADO';
+export type EstadoOperacion = 'PENDIENTE_INICIO' | 'EN_TRANSITO' | 'COMPLETADO';
+export type AlmacenDestino = 'ARGANDA_CAMPA' | 'ARGANDA_NAVE';
+
+// Colores según requisitos v1.3
+export const COLORES_OPERACION: Record<TipoOperacion, string> = {
+  RECOGIDA: '#22c55e',  // Verde
+  SALIDA: '#ec4899'     // Rosa
+};
 
 export interface OperacionLogistica {
   id: number;
-  nombre: string;
-  tipo: TipoOperacion;
-  estado: EstadoOperacion;
-  origen: string;           // Ubicación de origen
-  destino: string;          // Ubicación de destino
-  fechaProgramada: string;  // ISO date
-  fechaEjecucion?: string;  // ISO date (cuando se completó)
-  camiones: Camion[];
+  nombre: string;                    // Título/nombre de la operación
+  tipo: TipoOperacion;               // RECOGIDA o SALIDA
+  estado: EstadoOperacion;           // Flujo: PENDIENTE → EN_TRANSITO → COMPLETADO
+
+  // Campos específicos según tipo (v1.3)
+  fechaProgramada: string;           // Fecha de recogida/salida
+  numeroCamiones: number;            // Número de camiones
+
+  // Para RECOGIDA: lugarRecogida → almacenLlegada (Arganda-Campa/Nave)
+  // Para SALIDA: almacenSalida (Arganda-Campa/Nave) → lugarEnvio
+  lugarOrigen: string;               // Lugar de recogida o almacén de salida
+  lugarDestino: string;              // Almacén de llegada o lugar de envío
+  almacenId: number;                 // FK al espacio tipo ALMACEN
+  almacen?: Almacen;                 // Objeto almacén relacionado
+
+  // Timestamps
+  fechaInicioTransito?: string;      // Cuando pasa a EN_TRANSITO
+  fechaCompletado?: string;          // Cuando pasa a COMPLETADO
+
+  // Relación opcional con actividad TEMPO
+  actividadId?: number;
+  actividad?: { id: number; nombre: string };
+
+  // Metadatos
   descripcion?: string;
   responsable?: string;
-  actividadId?: number;     // Relación opcional con actividad
   createdAt: string;
   updatedAt: string;
 }
 
-export interface Camion {
+export interface Almacen {
   id: number;
-  matricula: string;
-  capacidad: number;        // En m³ o kg
-  conductor?: string;
-  estado: 'DISPONIBLE' | 'EN_RUTA' | 'MANTENIMIENTO';
+  nombre: string;                    // "Arganda-Campa" o "Arganda-Nave"
+  codigo: AlmacenDestino;            // ARGANDA_CAMPA o ARGANDA_NAVE
+  direccion?: string;
+  activo: boolean;
 }
 
 export interface LogisticaStats {
-  programados: number;
-  enTransito: number;
-  completados: number;
-  camionesHoy: number;
+  pendientes: number;                // PENDIENTE_INICIO
+  enTransito: number;                // EN_TRANSITO
+  completados: number;               // COMPLETADO (hoy)
+  totalCamionesHoy: number;          // Suma de numeroCamiones del día
 }
 
 export interface LogisticaFilter {
   tipo?: TipoOperacion;
   estado?: EstadoOperacion;
+  almacenId?: number;                // Filtro por almacén
   fechaInicio?: string;
   fechaFin?: string;
+  temporadaId?: number;              // Filtro por temporada
+}
+
+// Para el calendario (FullCalendar)
+export interface LogisticaCalendarEvent {
+  id: string;
+  title: string;
+  start: string;
+  end?: string;
+  color: string;                     // Verde o Rosa según tipo
+  extendedProps: {
+    operacion: OperacionLogistica;
+    tipo: TipoOperacion;
+    estado: EstadoOperacion;
+  };
 }
 ```
 
@@ -1190,18 +1242,21 @@ export class ActividadService {
 }
 ```
 
-### 5.1.1 LogisticaService (Nuevo)
+### 5.1.1 LogisticaService (Actualizado según requisitos v1.3)
 
 ```typescript
 // features/tempo/logistica/services/logistica.service.ts
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, map } from 'rxjs';
 import { ApiService } from '../../../../core/services/api.service';
 import {
   OperacionLogistica,
   LogisticaStats,
   LogisticaFilter,
-  Camion
+  Almacen,
+  LogisticaCalendarEvent,
+  COLORES_OPERACION,
+  EstadoOperacion
 } from '../models/operacion-logistica.model';
 
 @Injectable({ providedIn: 'root' })
@@ -1210,18 +1265,22 @@ export class LogisticaService {
 
   // Signals
   private operacionesSignal = signal<OperacionLogistica[]>([]);
+  private almacenesSignal = signal<Almacen[]>([]);
   private statsSignal = signal<LogisticaStats>({
-    programados: 0,
+    pendientes: 0,
     enTransito: 0,
     completados: 0,
-    camionesHoy: 0
+    totalCamionesHoy: 0
   });
   private filterSignal = signal<LogisticaFilter>({});
+  private vistaCalendarioSignal = signal<'mes' | 'semana' | 'dia'>('semana');
 
-  // Public computed
+  // Public readonly
   readonly operaciones = this.operacionesSignal.asReadonly();
+  readonly almacenes = this.almacenesSignal.asReadonly();
   readonly stats = this.statsSignal.asReadonly();
   readonly filter = this.filterSignal.asReadonly();
+  readonly vistaCalendario = this.vistaCalendarioSignal.asReadonly();
 
   // Operaciones filtradas
   readonly operacionesFiltradas = computed(() => {
@@ -1231,14 +1290,38 @@ export class LogisticaService {
     return ops.filter(op => {
       if (f.tipo && op.tipo !== f.tipo) return false;
       if (f.estado && op.estado !== f.estado) return false;
+      if (f.almacenId && op.almacenId !== f.almacenId) return false;
       return true;
     });
   });
 
-  // API calls
-  loadOperaciones(): Observable<OperacionLogistica[]> {
-    return this.api.get<OperacionLogistica[]>('/logistica/operaciones').pipe(
+  // Eventos para FullCalendar (con colores según tipo)
+  readonly calendarEvents = computed<LogisticaCalendarEvent[]>(() => {
+    return this.operacionesFiltradas().map(op => ({
+      id: op.id.toString(),
+      title: `${op.tipo}: ${op.nombre} (${op.numeroCamiones} cam.)`,
+      start: op.fechaProgramada,
+      color: COLORES_OPERACION[op.tipo],  // Verde=RECOGIDA, Rosa=SALIDA
+      extendedProps: {
+        operacion: op,
+        tipo: op.tipo,
+        estado: op.estado
+      }
+    }));
+  });
+
+  // ============ API CALLS ============
+
+  loadOperaciones(filter?: LogisticaFilter): Observable<OperacionLogistica[]> {
+    const params = filter ? this.buildQueryParams(filter) : {};
+    return this.api.get<OperacionLogistica[]>('/logistica/operaciones', { params }).pipe(
       tap(data => this.operacionesSignal.set(data))
+    );
+  }
+
+  loadAlmacenes(): Observable<Almacen[]> {
+    return this.api.get<Almacen[]>('/logistica/almacenes').pipe(
+      tap(data => this.almacenesSignal.set(data))
     );
   }
 
@@ -1248,34 +1331,81 @@ export class LogisticaService {
     );
   }
 
+  // Calendario por rango de fechas
+  loadCalendario(fechaInicio: string, fechaFin: string, almacenId?: number): Observable<OperacionLogistica[]> {
+    const params: any = { fechaInicio, fechaFin };
+    if (almacenId) params.almacenId = almacenId;
+    return this.api.get<OperacionLogistica[]>('/logistica/calendario', { params });
+  }
+
   createOperacion(data: Partial<OperacionLogistica>): Observable<OperacionLogistica> {
-    return this.api.post<OperacionLogistica>('/logistica/operaciones', data);
+    return this.api.post<OperacionLogistica>('/logistica/operaciones', data).pipe(
+      tap(() => this.loadStats().subscribe())
+    );
   }
 
   updateOperacion(id: number, data: Partial<OperacionLogistica>): Observable<OperacionLogistica> {
     return this.api.put<OperacionLogistica>(`/logistica/operaciones/${id}`, data);
   }
 
-  updateEstado(id: number, estado: string): Observable<OperacionLogistica> {
-    return this.api.put<OperacionLogistica>(`/logistica/operaciones/${id}/estado`, { estado });
+  // ============ TRANSICIONES DE ESTADO (v1.3) ============
+  // Flujo: PENDIENTE_INICIO → EN_TRANSITO → COMPLETADO (botones)
+
+  iniciarTransito(id: number): Observable<OperacionLogistica> {
+    return this.api.put<OperacionLogistica>(`/logistica/operaciones/${id}/estado`, {
+      estado: 'EN_TRANSITO'
+    }).pipe(
+      tap(() => this.loadStats().subscribe())
+    );
+  }
+
+  completarOperacion(id: number): Observable<OperacionLogistica> {
+    return this.api.put<OperacionLogistica>(`/logistica/operaciones/${id}/estado`, {
+      estado: 'COMPLETADO'
+    }).pipe(
+      tap(() => this.loadStats().subscribe())
+    );
+  }
+
+  // Validar si se puede hacer la transición
+  canTransitionTo(operacion: OperacionLogistica, nuevoEstado: EstadoOperacion): boolean {
+    const transitions: Record<EstadoOperacion, EstadoOperacion[]> = {
+      'PENDIENTE_INICIO': ['EN_TRANSITO'],
+      'EN_TRANSITO': ['COMPLETADO'],
+      'COMPLETADO': []
+    };
+    return transitions[operacion.estado]?.includes(nuevoEstado) ?? false;
   }
 
   deleteOperacion(id: number): Observable<void> {
-    return this.api.delete<void>(`/logistica/operaciones/${id}`);
+    return this.api.delete<void>(`/logistica/operaciones/${id}`).pipe(
+      tap(() => this.loadStats().subscribe())
+    );
   }
 
-  // Camiones
-  loadCamiones(): Observable<Camion[]> {
-    return this.api.get<Camion[]>('/logistica/camiones');
-  }
+  // ============ FILTROS ============
 
-  // Filtros
   setFilter(filter: LogisticaFilter): void {
     this.filterSignal.set(filter);
   }
 
+  setVistaCalendario(vista: 'mes' | 'semana' | 'dia'): void {
+    this.vistaCalendarioSignal.set(vista);
+  }
+
   clearFilter(): void {
     this.filterSignal.set({});
+  }
+
+  private buildQueryParams(filter: LogisticaFilter): Record<string, string> {
+    const params: Record<string, string> = {};
+    if (filter.tipo) params['tipo'] = filter.tipo;
+    if (filter.estado) params['estado'] = filter.estado;
+    if (filter.almacenId) params['almacenId'] = filter.almacenId.toString();
+    if (filter.fechaInicio) params['fechaInicio'] = filter.fechaInicio;
+    if (filter.fechaFin) params['fechaFin'] = filter.fechaFin;
+    if (filter.temporadaId) params['temporadaId'] = filter.temporadaId.toString();
+    return params;
   }
 }
 ```

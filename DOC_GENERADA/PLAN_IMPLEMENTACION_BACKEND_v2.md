@@ -398,10 +398,17 @@ public class Notificacion {
 }
 ```
 
-### 2.2.1 Módulo Logística (NUEVO)
+### 2.2.1 Módulo Logística (Actualizado según requisitos v1.3)
+
+> **Requisitos v1.3:**
+> - Almacenes: Arganda-Campa, Arganda-Nave (espacios tipo ALMACEN)
+> - Tipos: RECOGIDA (verde), SALIDA (rosa)
+> - Estados: PENDIENTE_INICIO → EN_TRANSITO → COMPLETADO (botones)
+> - Campos específicos: nº camiones, lugar origen/destino
+> - Vista calendario: mes, semana, día
 
 ```java
-// OperacionLogistica.java - NUEVO
+// OperacionLogistica.java - Según requisitos v1.3
 @Entity
 @Table(name = "operaciones_logistica")
 public class OperacionLogistica {
@@ -410,82 +417,125 @@ public class OperacionLogistica {
     private Long id;
 
     @Column(nullable = false)
-    private String nombre;
+    private String nombre;  // Título de la operación
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TipoOperacion tipo;  // RECOGIDA, SALIDA
+    private TipoOperacion tipo;  // RECOGIDA (verde), SALIDA (rosa)
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private EstadoOperacion estado = EstadoOperacion.PROGRAMADO;
+    private EstadoOperacion estado = EstadoOperacion.PENDIENTE_INICIO;
 
+    // Fecha de recogida/salida
     @Column(nullable = false)
-    private String origen;
-
-    @Column(nullable = false)
-    private String destino;
-
     private LocalDate fechaProgramada;
-    private LocalDateTime fechaEjecucion;
+
+    // Número de camiones (v1.3)
+    @Column(nullable = false)
+    private Integer numeroCamiones = 1;
+
+    // Para RECOGIDA: lugarOrigen=externo, lugarDestino=Arganda
+    // Para SALIDA: lugarOrigen=Arganda, lugarDestino=externo
+    @Column(nullable = false)
+    private String lugarOrigen;
+
+    @Column(nullable = false)
+    private String lugarDestino;
+
+    // Relación con Espacio tipo ALMACEN (Arganda-Campa o Arganda-Nave)
+    @ManyToOne
+    @JoinColumn(name = "almacen_id", nullable = false)
+    private Espacio almacen;
+
+    // Timestamps de transición de estado
+    private LocalDateTime fechaInicioTransito;  // Cuando pasa a EN_TRANSITO
+    private LocalDateTime fechaCompletado;      // Cuando pasa a COMPLETADO
 
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
     private String responsable;
 
+    // Relación opcional con actividad TEMPO
     @ManyToOne
     @JoinColumn(name = "actividad_id")
     private Actividad actividad;
-
-    @ManyToMany
-    @JoinTable(
-        name = "operacion_camion",
-        joinColumns = @JoinColumn(name = "operacion_id"),
-        inverseJoinColumns = @JoinColumn(name = "camion_id")
-    )
-    private Set<Camion> camiones = new HashSet<>();
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    // Métodos de transición de estado (v1.3)
+    public void iniciarTransito() {
+        if (this.estado != EstadoOperacion.PENDIENTE_INICIO) {
+            throw new IllegalStateException("Solo se puede iniciar tránsito desde PENDIENTE_INICIO");
+        }
+        this.estado = EstadoOperacion.EN_TRANSITO;
+        this.fechaInicioTransito = LocalDateTime.now();
+    }
+
+    public void completar() {
+        if (this.estado != EstadoOperacion.EN_TRANSITO) {
+            throw new IllegalStateException("Solo se puede completar desde EN_TRANSITO");
+        }
+        this.estado = EstadoOperacion.COMPLETADO;
+        this.fechaCompletado = LocalDateTime.now();
+    }
 }
 
 public enum TipoOperacion {
-    RECOGIDA, SALIDA
+    RECOGIDA,  // Color verde (#22c55e)
+    SALIDA     // Color rosa (#ec4899)
 }
 
 public enum EstadoOperacion {
-    PROGRAMADO, EN_TRANSITO, COMPLETADO, CANCELADO
+    PENDIENTE_INICIO,  // Estado inicial
+    EN_TRANSITO,       // Material en camino
+    COMPLETADO         // Material llegó a destino
 }
 
-// Camion.java - NUEVO
-@Entity
-@Table(name = "camiones")
-public class Camion {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+// Nota: Los almacenes se gestionan como Espacio con tipo=ALMACEN
+// No se necesita entidad Camion separada, solo numeroCamiones en OperacionLogistica
+```
 
-    @Column(nullable = false, unique = true)
-    private String matricula;
+**Migración SQL para espacios tipo ALMACEN:**
+```sql
+-- V4__add_logistica.sql
 
-    private Integer capacidad;  // En m³ o kg
+-- Añadir tipo de espacio si no existe
+ALTER TABLE espacios ADD COLUMN IF NOT EXISTS tipo_espacio VARCHAR(20) DEFAULT 'SALA';
 
-    private String conductor;
+-- Insertar almacenes (v1.3)
+INSERT INTO espacios (nombre, tipo_espacio, color, activo) VALUES
+    ('Arganda-Campa', 'ALMACEN', '#6b7280', true),
+    ('Arganda-Nave', 'ALMACEN', '#6b7280', true);
 
-    @Enumerated(EnumType.STRING)
-    private EstadoCamion estado = EstadoCamion.DISPONIBLE;
+-- Crear tabla operaciones_logistica
+CREATE TABLE operaciones_logistica (
+    id BIGSERIAL PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    tipo VARCHAR(20) NOT NULL,  -- RECOGIDA, SALIDA
+    estado VARCHAR(20) NOT NULL DEFAULT 'PENDIENTE_INICIO',
+    fecha_programada DATE NOT NULL,
+    numero_camiones INTEGER NOT NULL DEFAULT 1,
+    lugar_origen VARCHAR(255) NOT NULL,
+    lugar_destino VARCHAR(255) NOT NULL,
+    almacen_id BIGINT NOT NULL REFERENCES espacios(id),
+    fecha_inicio_transito TIMESTAMP,
+    fecha_completado TIMESTAMP,
+    descripcion TEXT,
+    responsable VARCHAR(255),
+    actividad_id BIGINT REFERENCES actividades(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-    @ManyToMany(mappedBy = "camiones")
-    private Set<OperacionLogistica> operaciones = new HashSet<>();
-}
-
-public enum EstadoCamion {
-    DISPONIBLE, EN_RUTA, MANTENIMIENTO
-}
+CREATE INDEX idx_operaciones_fecha ON operaciones_logistica(fecha_programada);
+CREATE INDEX idx_operaciones_almacen ON operaciones_logistica(almacen_id);
+CREATE INDEX idx_operaciones_estado ON operaciones_logistica(estado);
 ```
 
 ### 2.3 Módulo TOPS (ACTUALIZADO)
@@ -743,20 +793,23 @@ CREATE INDEX IF NOT EXISTS idx_actividades_estado ON actividades(estado);
 | PUT | `/api/notificaciones/{id}/read` | Marcar como leída |
 | PUT | `/api/notificaciones/read-all` | Marcar todas como leídas |
 
-### 4.5.1 Logística (NUEVO)
+### 4.5.1 Logística (Actualizado según requisitos v1.3)
+
+> **Requisitos v1.3:** Vista calendario (mes/semana/día), almacenes (Arganda-Campa, Arganda-Nave),
+> colores (RECOGIDA=verde, SALIDA=rosa), transiciones de estado con botones
+
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
-| GET | `/api/logistica/operaciones` | Listar operaciones (filtros: tipo, estado, fecha) |
+| GET | `/api/logistica/operaciones` | Listar operaciones (filtros: tipo, estado, almacenId, fecha) |
 | GET | `/api/logistica/operaciones/{id}` | Detalle operación |
-| POST | `/api/logistica/operaciones` | Crear operación |
+| POST | `/api/logistica/operaciones` | Crear operación (campos v1.3: nºcamiones, lugarOrigen, lugarDestino) |
 | PUT | `/api/logistica/operaciones/{id}` | Actualizar operación |
-| PUT | `/api/logistica/operaciones/{id}/estado` | Cambiar estado (PROGRAMADO → EN_TRANSITO → COMPLETADO) |
 | DELETE | `/api/logistica/operaciones/{id}` | Eliminar operación |
-| GET | `/api/logistica/stats` | Estadísticas (programados, en tránsito, completados, camiones) |
-| GET | `/api/logistica/camiones` | Listar camiones |
-| POST | `/api/logistica/camiones` | Crear camión |
-| PUT | `/api/logistica/camiones/{id}` | Actualizar camión |
-| PUT | `/api/logistica/camiones/{id}/estado` | Cambiar estado camión |
+| **GET** | `/api/logistica/calendario` | **Vista calendario (params: fechaInicio, fechaFin, almacenId)** |
+| GET | `/api/logistica/stats` | Estadísticas (pendientes, enTransito, completados, totalCamionesHoy) |
+| GET | `/api/logistica/almacenes` | Listar almacenes (Arganda-Campa, Arganda-Nave) |
+| **PUT** | `/api/logistica/operaciones/{id}/iniciar-transito` | **Botón: PENDIENTE_INICIO → EN_TRANSITO** |
+| **PUT** | `/api/logistica/operaciones/{id}/completar` | **Botón: EN_TRANSITO → COMPLETADO** |
 
 ### 4.6 TOPS - Guiones (ACTUALIZADO v2)
 | Método | Endpoint | Descripción |
@@ -889,7 +942,7 @@ public class NotificacionService {
 }
 ```
 
-### 5.2.1 LogisticaService (NUEVO - Logística)
+### 5.2.1 LogisticaService (Actualizado según requisitos v1.3)
 
 ```java
 @Service
@@ -897,7 +950,9 @@ public class NotificacionService {
 public class LogisticaService {
 
     private final OperacionLogisticaRepository operacionRepository;
-    private final CamionRepository camionRepository;
+    private final EspacioRepository espacioRepository;
+
+    // ============ CONSULTAS ============
 
     public List<OperacionLogistica> findAll() {
         return operacionRepository.findAll();
@@ -906,78 +961,136 @@ public class LogisticaService {
     public List<OperacionLogistica> findByFilter(
             TipoOperacion tipo,
             EstadoOperacion estado,
+            Long almacenId,
             LocalDate fechaInicio,
             LocalDate fechaFin) {
-        // Filtrado dinámico con Specification o Query
-        return operacionRepository.findByFilters(tipo, estado, fechaInicio, fechaFin);
+        return operacionRepository.findByFilters(tipo, estado, almacenId, fechaInicio, fechaFin);
     }
 
+    // Para vista calendario (v1.3: mes, semana, día)
+    public List<OperacionLogistica> findByCalendario(
+            LocalDate fechaInicio,
+            LocalDate fechaFin,
+            Long almacenId) {
+        if (almacenId != null) {
+            return operacionRepository.findByFechaProgramadaBetweenAndAlmacenId(
+                fechaInicio, fechaFin, almacenId);
+        }
+        return operacionRepository.findByFechaProgramadaBetween(fechaInicio, fechaFin);
+    }
+
+    // Estadísticas (v1.3)
     public LogisticaStatsDTO getStats() {
+        LocalDate hoy = LocalDate.now();
         return LogisticaStatsDTO.builder()
-            .programados(operacionRepository.countByEstado(EstadoOperacion.PROGRAMADO))
+            .pendientes(operacionRepository.countByEstado(EstadoOperacion.PENDIENTE_INICIO))
             .enTransito(operacionRepository.countByEstado(EstadoOperacion.EN_TRANSITO))
-            .completados(operacionRepository.countByEstado(EstadoOperacion.COMPLETADO))
-            .camionesHoy(camionRepository.countByEstado(EstadoCamion.EN_RUTA))
+            .completados(operacionRepository.countByEstadoAndFechaCompletadoDate(
+                EstadoOperacion.COMPLETADO, hoy))
+            .totalCamionesHoy(operacionRepository.sumNumeroCamionesByFecha(hoy))
             .build();
     }
 
+    // Lista de almacenes (Arganda-Campa, Arganda-Nave)
+    public List<Espacio> findAlmacenes() {
+        return espacioRepository.findByTipoEspacio("ALMACEN");
+    }
+
+    // ============ CRUD ============
+
     public OperacionLogistica create(OperacionLogisticaDTO dto) {
+        Espacio almacen = espacioRepository.findById(dto.getAlmacenId())
+            .orElseThrow(() -> new NotFoundException("Almacén no encontrado"));
+
+        if (!"ALMACEN".equals(almacen.getTipoEspacio())) {
+            throw new BusinessException("El espacio seleccionado no es un almacén");
+        }
+
         OperacionLogistica op = new OperacionLogistica();
         op.setNombre(dto.getNombre());
         op.setTipo(dto.getTipo());
-        op.setEstado(EstadoOperacion.PROGRAMADO);
-        op.setOrigen(dto.getOrigen());
-        op.setDestino(dto.getDestino());
+        op.setEstado(EstadoOperacion.PENDIENTE_INICIO);  // Estado inicial v1.3
         op.setFechaProgramada(dto.getFechaProgramada());
+        op.setNumeroCamiones(dto.getNumeroCamiones());
+        op.setLugarOrigen(dto.getLugarOrigen());
+        op.setLugarDestino(dto.getLugarDestino());
+        op.setAlmacen(almacen);
         op.setDescripcion(dto.getDescripcion());
         op.setResponsable(dto.getResponsable());
+
         return operacionRepository.save(op);
     }
 
-    public OperacionLogistica updateEstado(Long id, EstadoOperacion nuevoEstado) {
+    public OperacionLogistica update(Long id, OperacionLogisticaDTO dto) {
         OperacionLogistica op = operacionRepository.findById(id)
             .orElseThrow(() -> new NotFoundException("Operación no encontrada"));
 
-        // Validar transición de estados
-        validarTransicionEstado(op.getEstado(), nuevoEstado);
+        op.setNombre(dto.getNombre());
+        op.setFechaProgramada(dto.getFechaProgramada());
+        op.setNumeroCamiones(dto.getNumeroCamiones());
+        op.setLugarOrigen(dto.getLugarOrigen());
+        op.setLugarDestino(dto.getLugarDestino());
+        op.setDescripcion(dto.getDescripcion());
+        op.setResponsable(dto.getResponsable());
 
-        op.setEstado(nuevoEstado);
-        if (nuevoEstado == EstadoOperacion.COMPLETADO) {
-            op.setFechaEjecucion(LocalDateTime.now());
-        }
         return operacionRepository.save(op);
     }
 
-    private void validarTransicionEstado(EstadoOperacion actual, EstadoOperacion nuevo) {
-        // PROGRAMADO -> EN_TRANSITO -> COMPLETADO
-        // Cualquier estado -> CANCELADO
-        if (nuevo == EstadoOperacion.CANCELADO) return;
+    // ============ TRANSICIONES DE ESTADO (v1.3) ============
+    // Flujo: PENDIENTE_INICIO → EN_TRANSITO → COMPLETADO (botones)
 
-        if (actual == EstadoOperacion.PROGRAMADO && nuevo != EstadoOperacion.EN_TRANSITO) {
-            throw new BusinessException("Solo puede pasar a EN_TRANSITO");
-        }
-        if (actual == EstadoOperacion.EN_TRANSITO && nuevo != EstadoOperacion.COMPLETADO) {
-            throw new BusinessException("Solo puede pasar a COMPLETADO");
-        }
+    public OperacionLogistica iniciarTransito(Long id) {
+        OperacionLogistica op = operacionRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("Operación no encontrada"));
+
+        op.iniciarTransito();  // Valida y actualiza estado
+        return operacionRepository.save(op);
+    }
+
+    public OperacionLogistica completar(Long id) {
+        OperacionLogistica op = operacionRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException("Operación no encontrada"));
+
+        op.completar();  // Valida y actualiza estado
+        return operacionRepository.save(op);
     }
 
     public void delete(Long id) {
         operacionRepository.deleteById(id);
     }
+}
+```
 
-    // Camiones
-    public List<Camion> findAllCamiones() {
-        return camionRepository.findAll();
-    }
+**Repository con queries para calendario:**
+```java
+public interface OperacionLogisticaRepository extends JpaRepository<OperacionLogistica, Long> {
 
-    public Camion createCamion(CamionDTO dto) {
-        Camion c = new Camion();
-        c.setMatricula(dto.getMatricula());
-        c.setCapacidad(dto.getCapacidad());
-        c.setConductor(dto.getConductor());
-        c.setEstado(EstadoCamion.DISPONIBLE);
-        return camionRepository.save(c);
-    }
+    // Para calendario
+    List<OperacionLogistica> findByFechaProgramadaBetween(LocalDate inicio, LocalDate fin);
+    List<OperacionLogistica> findByFechaProgramadaBetweenAndAlmacenId(
+        LocalDate inicio, LocalDate fin, Long almacenId);
+
+    // Para estadísticas
+    long countByEstado(EstadoOperacion estado);
+
+    @Query("SELECT COUNT(o) FROM OperacionLogistica o " +
+           "WHERE o.estado = :estado AND DATE(o.fechaCompletado) = :fecha")
+    long countByEstadoAndFechaCompletadoDate(EstadoOperacion estado, LocalDate fecha);
+
+    @Query("SELECT COALESCE(SUM(o.numeroCamiones), 0) FROM OperacionLogistica o " +
+           "WHERE o.fechaProgramada = :fecha")
+    int sumNumeroCamionesByFecha(LocalDate fecha);
+
+    // Filtros dinámicos
+    @Query("SELECT o FROM OperacionLogistica o WHERE " +
+           "(:tipo IS NULL OR o.tipo = :tipo) AND " +
+           "(:estado IS NULL OR o.estado = :estado) AND " +
+           "(:almacenId IS NULL OR o.almacen.id = :almacenId) AND " +
+           "(:fechaInicio IS NULL OR o.fechaProgramada >= :fechaInicio) AND " +
+           "(:fechaFin IS NULL OR o.fechaProgramada <= :fechaFin)")
+    List<OperacionLogistica> findByFilters(
+        TipoOperacion tipo, EstadoOperacion estado, Long almacenId,
+        LocalDate fechaInicio, LocalDate fechaFin);
 }
 ```
 

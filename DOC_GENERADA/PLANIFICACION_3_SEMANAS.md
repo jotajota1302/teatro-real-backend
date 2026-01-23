@@ -146,41 +146,51 @@
 
 **Entregable:** CRUD actividades completo con estados y clone
 
-### Jueves S2 (Logística)
+### Jueves S2 (Logística - según requisitos v1.3)
 
 | Dev | Tarea | Horas | Con Agente |
 |-----|-------|-------|------------|
-| **Fran** | Entidad OperacionLogistica (tipo: RECOGIDA/SALIDA, estado, origen, destino) | 2h | Con enums |
-| **Fran** | Entidad CamionLogistica (matrícula, capacidad, estado) | 1h | |
-| **Fran** | LogisticaRepository + LogisticaService | 3h | CRUD + filtros |
-| **Sandra** | LogisticaComponent (dashboard con estadísticas) | 3h | Stats: programados, en tránsito, completados |
-| **Sandra** | LogisticaService frontend (con filtros tipo/estado) | 2h | Signals |
+| **Fran** | Entidad OperacionLogistica completa (campos v1.3) | 3h | Ver nota campos |
+| **Fran** | Entidad Almacen (Arganda-Campa, Arganda-Nave) | 1h | Tipo espacio=ALMACEN |
+| **Fran** | LogisticaRepository + LogisticaService | 3h | CRUD + filtros + estados |
+| **Sandra** | LogisticaComponent (landing con calendario) | 4h | Vista mes/semana/día |
+| **Sandra** | LogisticaService frontend (filtros completos) | 2h | Signals |
 | **Sergio** | Review: Flujos logística | 1h | EOD |
 
-**Entregable:** Dashboard Logística con operaciones y estadísticas
+> **Campos OperacionLogistica (v1.3):**
+> - tipo: RECOGIDA (verde) / SALIDA (rosa)
+> - fechaProgramada, numeroCamiones
+> - lugarOrigen, lugarDestino (para recogida: origen externo → Arganda-Campa/Nave)
+> - estado: PENDIENTE_INICIO → EN_TRANSITO → COMPLETADO
+> - actividadId (relación opcional con actividad TEMPO)
+
+**Entregable:** Landing Logística con calendario por almacén
 
 ### Viernes S2
 
 | Dev | Tarea | Horas | Con Agente |
 |-----|-------|-------|------------|
-| **Fran** | LogisticaController (CRUD + filtros por tipo/estado/fecha) | 3h | REST endpoints |
-| **Fran** | Admin: CRUD Espacios (con campos v2) | 2h | Controller completo |
-| **Fran** | Admin: CRUD TiposActividad | 2h | Controller completo |
-| **Sandra** | Lista Operaciones Logística (tabla con filtros) | 3h | Material table |
-| **Sandra** | Dialog Operación Logística (crear/editar) | 2h | Material Dialog |
-| **Sandra** | Admin: Lista + Form Espacios, TiposActividad, Departamentos | 3h | Material components |
+| **Fran** | LogisticaController (CRUD + filtros + cambio estado) | 3h | REST endpoints |
+| **Fran** | Admin: CRUD Espacios (tipo SALA/ALMACEN) | 2h | Controller completo |
+| **Fran** | Admin: CRUD TiposActividad (con colores) | 2h | Controller completo |
+| **Sandra** | Calendario Logística (FullCalendar para almacenes) | 4h | Colores: verde/rosa |
+| **Sandra** | Dialog Operación Logística (crear/editar con campos v1.3) | 3h | Material Dialog |
+| **Sandra** | Botones transición estado (Pendiente→Tránsito→Completado) | 2h | Con confirmación |
+| **Sandra** | Admin: Lista + Form Espacios, TiposActividad, Departamentos | 2h | Material components |
 | **Sergio** | **SPRINT REVIEW S2** | 2h | Demo TEMPO + Logística |
 
 ### Entregables Semana 2 ✓
 - [ ] Landing TEMPO con vista semanal Excel
-- [ ] Calendario FullCalendar integrado
+- [ ] Calendario FullCalendar integrado (TEMPO)
 - [ ] CRUD actividades con estados almacén
 - [ ] Clonar actividades funcionando
-- [ ] **Dashboard Logística con estadísticas (programados, en tránsito, completados)**
-- [ ] **CRUD operaciones logística (recogidas/salidas)**
-- [ ] **Filtros logística por tipo y estado**
-- [ ] **Gestión camiones**
-- [ ] Admin: Espacios, Tipos, Departamentos
+- [ ] **Landing Logística con calendario (mes/semana/día)**
+- [ ] **Calendario Logística por almacén (Arganda-Campa, Arganda-Nave)**
+- [ ] **CRUD operaciones logística (RECOGIDA verde/SALIDA rosa)**
+- [ ] **Campos v1.3: nº camiones, lugar origen/destino**
+- [ ] **Botones transición: Pendiente → En tránsito → Completado**
+- [ ] **Filtros: por almacén, tipo, temporada, fecha**
+- [ ] Admin: Espacios (SALA/ALMACEN), Tipos, Departamentos
 - [ ] Filtros por temporada operativos
 
 ---

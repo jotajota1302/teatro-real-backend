@@ -7,12 +7,15 @@
 | **Sprint 0: Setup** | Completado | 100% | 2025-12-11 |
 | **Sprint 1: Auth + Layout** | Completado | 95% | 2025-01-23 |
 | **Sprint 2: TEMPO** | Casi Completado | 80% | 2025-01-23 |
+| **Sprint 2: Logística** | En Progreso | 30% | 2025-01-23 |
 | **Sprint 3: TOPS** | En Progreso | 15% | 2025-01-23 |
 | **Sprint 4: Integraciones** | Parcial | 25% | 2025-01-23 |
 | **Sprint 5: Testing + Deploy** | En Progreso | 30% | 2025-01-23 |
-| **EXTRA: Logística** | Implementado | 70% | 2025-01-23 |
 
-**Progreso Global: ~55%**
+> **Logística:** Ahora incluido en planificación (v1.3). Frontend básico existe (30%),
+> falta calendario y backend completo.
+
+**Progreso Global: ~50%**
 
 ---
 
@@ -284,39 +287,64 @@
 
 ---
 
-## MÓDULO EXTRA: Logística - NO PLANIFICADO ORIGINALMENTE
+## Módulo Logística - INCLUIDO EN PLANIFICACIÓN (Requisitos v1.3)
 
-> **NOTA:** Este módulo fue implementado pero NO estaba en la planificación original.
-> Debe añadirse formalmente al plan de desarrollo.
+> **ACTUALIZACIÓN 2025-01-23:** Módulo ahora incluido formalmente en la planificación.
+> Ver: PLANIFICACION_3_SEMANAS.md (Semana 2), PLAN_IMPLEMENTACION_FRONTEND/BACKEND_v2.md
 
-### Frontend - IMPLEMENTADO 70%
+### Requisitos según TR-Requisitos Generales v1.3
+
+| Requisito | Estado | Descripción |
+|-----------|--------|-------------|
+| Almacenes | [ ] Pendiente | Arganda-Campa, Arganda-Nave (espacios tipo ALMACEN) |
+| Tipos operación | [~] Parcial | RECOGIDA (verde), SALIDA (rosa) |
+| Estados | [~] Parcial | PENDIENTE_INICIO → EN_TRANSITO → COMPLETADO |
+| **Vista calendario** | [ ] Pendiente | **Vista mes, semana, día (como TEMPO)** |
+| Campos v1.3 | [ ] Pendiente | Nº camiones, lugar origen/destino |
+| Botones transición | [ ] Pendiente | Botones para cambiar estado |
+| Filtros | [~] Parcial | Por almacén, tipo, temporada, fecha |
+
+### Frontend - IMPLEMENTADO 50% (falta calendario y campos v1.3)
 
 | Tarea | Estado | Notas |
 |-------|--------|-------|
-| LogisticaComponent | [x] Completado | features/tempo/logistica/ |
+| LogisticaComponent (landing) | [x] Completado | features/tempo/logistica/ |
 | LogisticaService | [x] Completado | features/tempo/logistica/ |
 | Vista con estadísticas | [x] Completado | Programados, En tránsito, Completados |
 | Filtros por tipo/estado | [x] Completado | |
 | Lista de operaciones | [x] Completado | |
 | MovimientosListComponent | [x] Completado | features/tempo/movimientos/ |
 | ProduccionesListComponent | [x] Completado | features/tempo/producciones/ |
-| Crear nuevo movimiento | [ ] Pendiente | Botón existe pero no funcional |
+| **Calendario Logística (FullCalendar)** | [ ] **PENDIENTE** | **Vista mes/semana/día (v1.3)** |
+| **Colores calendario** | [ ] **PENDIENTE** | **Verde=RECOGIDA, Rosa=SALIDA** |
+| **Dialog crear operación (campos v1.3)** | [ ] **PENDIENTE** | **Nº camiones, origen, destino, almacén** |
+| **Botones transición estado** | [ ] **PENDIENTE** | **Pendiente→Tránsito→Completado** |
 | Ver detalle operación | [ ] Pendiente | |
-| Iniciar operación | [ ] Pendiente | |
 
-### Backend - PENDIENTE
+### Backend - PENDIENTE 0%
 
 | Tarea | Estado | Notas |
 |-------|--------|-------|
-| Entidad Operacion/Movimiento | [ ] Pendiente | |
-| Repository | [ ] Pendiente | |
-| Service | [ ] Pendiente | |
-| Controller | [ ] Pendiente | |
+| Entidad OperacionLogistica (v1.3) | [ ] Pendiente | Campos: numeroCamiones, lugarOrigen, lugarDestino |
+| Migración SQL (espacios ALMACEN) | [ ] Pendiente | Arganda-Campa, Arganda-Nave |
+| OperacionLogisticaRepository | [ ] Pendiente | Con queries para calendario |
+| LogisticaService | [ ] Pendiente | CRUD + transiciones estado |
+| LogisticaController | [ ] Pendiente | Endpoints v1.3 |
+| GET /api/logistica/calendario | [ ] Pendiente | Para FullCalendar |
+| PUT /api/.../iniciar-transito | [ ] Pendiente | Botón PENDIENTE→EN_TRANSITO |
+| PUT /api/.../completar | [ ] Pendiente | Botón EN_TRANSITO→COMPLETADO |
 
 ### Rutas Configuradas
 
-- `/tempo/movimientos` → LogisticaComponent
+- `/tempo/movimientos` → LogisticaComponent (landing con estadísticas)
 - `/tempo/producciones` → ProduccionesListComponent
+
+### Próximos Pasos (Semana 2)
+
+1. **Backend:** Crear entidades, migración, service y controller
+2. **Frontend:** Añadir vista calendario con FullCalendar
+3. **Frontend:** Crear dialog con campos v1.3 (nºcamiones, origen, destino)
+4. **Frontend:** Implementar botones de transición de estado
 
 ---
 
