@@ -6,6 +6,7 @@ import com.teatroreal.service.tempo.EspacioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/espacios")
 @RequiredArgsConstructor
+@Tag(name = "Espacios TEMPO", description = "Endpoints de gestión de espacios para TEMPO")
 public class EspacioController {
 
     private final EspacioService espacioService;
