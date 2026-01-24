@@ -1,4 +1,4 @@
-import { Component, signal, inject, DestroyRef, computed } from '@angular/core';
+import { Component, signal, inject, DestroyRef, computed, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -36,16 +36,29 @@ interface DashboardStats {
   styles: [`
     :host {
       display: block;
+      height: 100%;
     }
 
-    .page {
-      padding: 2rem;
-      min-height: 100vh;
+    .page-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
       transition: background-color 0.3s;
     }
 
     .page-light { background: #f2f4f7; }
     .page-dark { background: transparent; }
+
+    .fixed-header {
+      flex-shrink: 0;
+      padding: 1.5rem 2rem 0 2rem;
+    }
+
+    .scrollable-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 2rem 2rem 2rem;
+    }
 
     .card {
       border-radius: 1rem;
@@ -233,7 +246,7 @@ interface DashboardStats {
     .modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.6);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -244,14 +257,24 @@ interface DashboardStats {
     }
 
     .modal-content {
-      background: white;
       border-radius: 16px;
       padding: 1.5rem;
       width: calc(100% - 2rem);
       max-width: 560px;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
       margin: 1rem;
       overflow: visible;
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    .modal-light {
+      background: white;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-dark {
+      background: #1e1e2d;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .modal-header {
@@ -260,14 +283,18 @@ interface DashboardStats {
       align-items: center;
       margin-bottom: 1rem;
       padding-bottom: 0.75rem;
-      border-bottom: 1px solid #e5e7eb;
     }
+
+    .modal-header-light { border-bottom: 1px solid #e5e7eb; }
+    .modal-header-dark { border-bottom: 1px solid #3d3d4d; }
 
     .modal-title {
       font-size: 1.125rem;
       font-weight: 600;
-      color: #1f2937;
     }
+
+    .modal-title-light { color: #1f2937; }
+    .modal-title-dark { color: #ffffff; }
 
     .btn-close {
       width: 32px;
@@ -276,13 +303,15 @@ interface DashboardStats {
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #f3f4f6;
       border: none;
       cursor: pointer;
       transition: all 0.2s;
     }
 
-    .btn-close:hover { background: #e5e7eb; }
+    .btn-close-light { background: #f3f4f6; color: #374151; }
+    .btn-close-light:hover { background: #e5e7eb; }
+    .btn-close-dark { background: #2d2d3d; color: #9ca3af; }
+    .btn-close-dark:hover { background: #3d3d4d; }
 
     .form-group { margin-bottom: 0.875rem; }
 
@@ -290,42 +319,41 @@ interface DashboardStats {
       display: block;
       font-size: 0.75rem;
       font-weight: 600;
-      color: #6b7280;
       margin-bottom: 0.35rem;
       text-transform: uppercase;
       letter-spacing: 0.025em;
     }
 
-    .form-input {
+    .form-label-light { color: #6b7280; }
+    .form-label-dark { color: #9ca3af; }
+
+    .form-input, .form-select {
       width: 100%;
       padding: 0.5rem 0.75rem;
-      border: 1px solid #d1d5db;
       border-radius: 6px;
       font-size: 0.875rem;
       transition: all 0.2s;
     }
 
-    .form-input:focus {
-      outline: none;
-      border-color: #CF102D;
-      box-shadow: 0 0 0 2px rgba(207, 16, 45, 0.1);
-    }
-
-    .form-select {
-      width: 100%;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      font-size: 0.875rem;
+    .form-input-light, .form-select-light {
       background: white;
-      cursor: pointer;
+      border: 1px solid #d1d5db;
+      color: #1f2937;
     }
 
-    .form-select:focus {
+    .form-input-dark, .form-select-dark {
+      background: #2d2d3d;
+      border: 1px solid #3d3d4d;
+      color: #ffffff;
+    }
+
+    .form-input:focus, .form-select:focus {
       outline: none;
       border-color: #CF102D;
-      box-shadow: 0 0 0 2px rgba(207, 16, 45, 0.1);
+      box-shadow: 0 0 0 2px rgba(207, 16, 45, 0.2);
     }
+
+    .form-select { cursor: pointer; }
 
     .form-checkbox {
       display: flex;
@@ -339,10 +367,9 @@ interface DashboardStats {
       accent-color: #CF102D;
     }
 
-    .form-checkbox label {
-      font-size: 0.875rem;
-      color: #374151;
-    }
+    .form-checkbox label { font-size: 0.875rem; }
+    .form-checkbox-light label { color: #374151; }
+    .form-checkbox-dark label { color: #d1d5db; }
 
     .modal-actions {
       display: flex;
@@ -350,14 +377,13 @@ interface DashboardStats {
       gap: 0.5rem;
       margin-top: 1rem;
       padding-top: 1rem;
-      border-top: 1px solid #e5e7eb;
     }
+
+    .modal-actions-light { border-top: 1px solid #e5e7eb; }
+    .modal-actions-dark { border-top: 1px solid #3d3d4d; }
 
     .btn-cancel {
       padding: 0.5rem 1rem;
-      background: #f3f4f6;
-      color: #374151;
-      border: 1px solid #d1d5db;
       border-radius: 6px;
       font-weight: 500;
       font-size: 0.875rem;
@@ -365,7 +391,19 @@ interface DashboardStats {
       transition: all 0.2s;
     }
 
-    .btn-cancel:hover { background: #e5e7eb; }
+    .btn-cancel-light {
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #d1d5db;
+    }
+    .btn-cancel-light:hover { background: #e5e7eb; }
+
+    .btn-cancel-dark {
+      background: #2d2d3d;
+      color: #d1d5db;
+      border: 1px solid #3d3d4d;
+    }
+    .btn-cancel-dark:hover { background: #3d3d4d; }
 
     .btn-save {
       padding: 0.5rem 1rem;
@@ -383,8 +421,6 @@ interface DashboardStats {
 
     .btn-delete {
       padding: 0.5rem 1rem;
-      background: white;
-      color: #dc2626;
       border: 1px solid #dc2626;
       border-radius: 6px;
       font-weight: 500;
@@ -394,24 +430,26 @@ interface DashboardStats {
       margin-right: auto;
     }
 
-    .btn-delete:hover {
-      background: #dc2626;
-      color: white;
-    }
+    .btn-delete-light { background: white; color: #dc2626; }
+    .btn-delete-dark { background: transparent; color: #f87171; border-color: #f87171; }
+    .btn-delete:hover { background: #dc2626; color: white; border-color: #dc2626; }
 
     .color-preview {
       width: 32px;
       height: 32px;
       border-radius: 6px;
-      border: 1px solid #e5e7eb;
       cursor: pointer;
     }
+
+    .color-preview-light { border: 1px solid #e5e7eb; }
+    .color-preview-dark { border: 1px solid #3d3d4d; }
   `],
   template: `
-    <div class="page" [class]="isDark() ? 'page-dark' : 'page-light'">
-      <div class="space-y-6">
+    <div class="page-container" [class]="isDark() ? 'page-dark' : 'page-light'">
+      <!-- Zona fija: Header + Stats + Filters -->
+      <div class="fixed-header">
         <!-- Header -->
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
           <div>
             <h1 class="text-3xl font-semibold" [class]="isDark() ? 'text-title-dark' : 'text-title-light'">Gestión de Espacios</h1>
             <p [class]="isDark() ? 'text-subtitle-dark' : 'text-subtitle-light'">Configuración de salas, almacenes y espacios del Teatro Real</p>
@@ -423,7 +461,7 @@ interface DashboardStats {
         </div>
 
         <!-- Stats -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           <article class="stat-card" [class]="isDark() ? 'stat-card-dark' : 'stat-card-light'">
             <p class="text-sm uppercase tracking-wide" [class]="isDark() ? 'text-subtitle-dark' : 'text-subtitle-light'">Total Espacios</p>
             <p class="text-3xl font-semibold mt-1" [class]="isDark() ? 'text-title-dark' : 'text-title-light'">{{ stats().total }}</p>
@@ -439,7 +477,7 @@ interface DashboardStats {
         </div>
 
         <!-- Filters -->
-        <div class="filters flex flex-wrap gap-3 pt-2">
+        <div class="filters flex flex-wrap gap-3 pb-4">
           <button
             *ngFor="let option of filters"
             type="button"
@@ -454,8 +492,10 @@ interface DashboardStats {
             {{ option }}
           </button>
         </div>
+      </div>
 
-        <!-- Content -->
+      <!-- Zona scrollable: Solo las tarjetas -->
+      <div class="scrollable-content">
         <ng-container *ngIf="!loading(); else loadingTemplate">
           <div class="space-y-8">
             <section *ngFor="let section of seccionesFiltradas()" class="space-y-4">
@@ -509,10 +549,10 @@ interface DashboardStats {
 
     <!-- Modal de edición/creación -->
     <div class="modal-overlay" *ngIf="showModal()" (click)="closeModal()">
-      <div class="modal-content" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-          <h2 class="modal-title">{{ editingEspacio() ? 'Editar Espacio' : 'Nuevo Espacio' }}</h2>
-          <button class="btn-close" (click)="closeModal()">
+      <div class="modal-content" [class]="isDark() ? 'modal-dark' : 'modal-light'" (click)="$event.stopPropagation()">
+        <div class="modal-header" [class]="isDark() ? 'modal-header-dark' : 'modal-header-light'">
+          <h2 class="modal-title" [class]="isDark() ? 'modal-title-dark' : 'modal-title-light'">{{ editingEspacio() ? 'Editar Espacio' : 'Nuevo Espacio' }}</h2>
+          <button class="btn-close" [class]="isDark() ? 'btn-close-dark' : 'btn-close-light'" (click)="closeModal()">
             <span class="material-icons text-lg">close</span>
           </button>
         </div>
@@ -520,27 +560,25 @@ interface DashboardStats {
         <form (ngSubmit)="saveEspacio()">
           <!-- Fila 1: Nombre -->
           <div class="form-group">
-            <label class="form-label">Nombre *</label>
-            <input type="text" class="form-input" [(ngModel)]="formData.nombre" name="nombre" required placeholder="Ej: Sala Principal">
+            <label class="form-label" [class]="isDark() ? 'form-label-dark' : 'form-label-light'">Nombre *</label>
+            <input type="text" class="form-input" [class]="isDark() ? 'form-input-dark' : 'form-input-light'" [(ngModel)]="formData.nombre" name="nombre" required placeholder="Ej: Sala Principal">
           </div>
 
           <!-- Fila 2: Tipo y Categoría -->
           <div class="grid grid-cols-2 gap-3">
             <div class="form-group">
-              <label class="form-label">Tipo *</label>
-              <select class="form-select" [(ngModel)]="formData.tipo" name="tipo" required>
+              <label class="form-label" [class]="isDark() ? 'form-label-dark' : 'form-label-light'">Tipo *</label>
+              <select class="form-select" [class]="isDark() ? 'form-select-dark' : 'form-select-light'" [(ngModel)]="formData.tipo" name="tipo" required>
                 <option value="">Seleccionar...</option>
-                <option value="Escenario">Escenario</option>
-                <option value="Sala de ensayos">Sala de ensayos</option>
-                <option value="Reuniones">Reuniones</option>
-                <option value="Conferencias">Conferencias</option>
-                <option value="Taller">Taller</option>
-                <option value="Almacén">Almacén</option>
+                <option value="SALA">Sala</option>
+                <option value="ALMACEN">Almacén</option>
+                <option value="TALLER">Taller</option>
+                <option value="CAMERINO">Camerino</option>
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Categoría *</label>
-              <select class="form-select" [(ngModel)]="formData.categoria" name="categoria" required>
+              <label class="form-label" [class]="isDark() ? 'form-label-dark' : 'form-label-light'">Categoría *</label>
+              <select class="form-select" [class]="isDark() ? 'form-select-dark' : 'form-select-light'" [(ngModel)]="formData.categoria" name="categoria" required>
                 <option value="">Seleccionar...</option>
                 <option value="Salas">Salas</option>
                 <option value="Ensayo">Ensayo</option>
@@ -553,25 +591,25 @@ interface DashboardStats {
 
           <!-- Fila 3: Descripción -->
           <div class="form-group">
-            <label class="form-label">Descripción</label>
-            <input type="text" class="form-input" [(ngModel)]="formData.descripcion" name="descripcion" placeholder="Descripción breve del espacio">
+            <label class="form-label" [class]="isDark() ? 'form-label-dark' : 'form-label-light'">Descripción</label>
+            <input type="text" class="form-input" [class]="isDark() ? 'form-input-dark' : 'form-input-light'" [(ngModel)]="formData.descripcion" name="descripcion" placeholder="Descripción breve del espacio">
           </div>
 
           <!-- Fila 4: Capacidad, Dimensiones, Icono -->
           <div class="grid grid-cols-3 gap-3">
             <div class="form-group">
-              <label class="form-label">Capacidad</label>
-              <input type="text" class="form-input" [(ngModel)]="formData.capacidad" name="capacidad" placeholder="200 PERS.">
+              <label class="form-label" [class]="isDark() ? 'form-label-dark' : 'form-label-light'">Capacidad</label>
+              <input type="text" class="form-input" [class]="isDark() ? 'form-input-dark' : 'form-input-light'" [(ngModel)]="formData.capacidad" name="capacidad" placeholder="200 PERS.">
             </div>
             <div class="form-group">
-              <label class="form-label">Dimensiones</label>
-              <input type="text" class="form-input" [(ngModel)]="formData.dimensiones" name="dimensiones" placeholder="20M X 15M">
+              <label class="form-label" [class]="isDark() ? 'form-label-dark' : 'form-label-light'">Dimensiones</label>
+              <input type="text" class="form-input" [class]="isDark() ? 'form-input-dark' : 'form-input-light'" [(ngModel)]="formData.dimensiones" name="dimensiones" placeholder="20M X 15M">
             </div>
             <div class="form-group">
-              <label class="form-label">Icono</label>
+              <label class="form-label" [class]="isDark() ? 'form-label-dark' : 'form-label-light'">Icono</label>
               <div class="flex items-center gap-2">
                 <span class="material-icons text-xl" [style.color]="formData.accentColor">{{ formData.icon }}</span>
-                <select class="form-select flex-1" [(ngModel)]="formData.icon" name="icon">
+                <select class="form-select flex-1" [class]="isDark() ? 'form-select-dark' : 'form-select-light'" [(ngModel)]="formData.icon" name="icon">
                   <option value="theater_comedy">🎭 Teatro</option>
                   <option value="music_note">🎵 Música</option>
                   <option value="mic">🎤 Micrófono</option>
@@ -596,19 +634,19 @@ interface DashboardStats {
           <!-- Fila 5: Color y Checkboxes -->
           <div class="flex items-end gap-4">
             <div class="form-group" style="flex: 0 0 auto;">
-              <label class="form-label">Color</label>
+              <label class="form-label" [class]="isDark() ? 'form-label-dark' : 'form-label-light'">Color</label>
               <div class="flex items-center gap-2">
-                <input type="color" [(ngModel)]="formData.accentColor" name="accentColor" class="color-preview">
-                <input type="text" class="form-input" style="width: 90px;" [(ngModel)]="formData.accentColor" name="accentColorText">
+                <input type="color" [(ngModel)]="formData.accentColor" name="accentColor" class="color-preview" [class]="isDark() ? 'color-preview-dark' : 'color-preview-light'">
+                <input type="text" class="form-input" [class]="isDark() ? 'form-input-dark' : 'form-input-light'" style="width: 90px;" [(ngModel)]="formData.accentColor" name="accentColorText">
               </div>
             </div>
             <div class="form-group flex-1">
               <div class="flex items-center gap-4">
-                <div class="form-checkbox">
+                <div class="form-checkbox" [class]="isDark() ? 'form-checkbox-dark' : 'form-checkbox-light'">
                   <input type="checkbox" [(ngModel)]="formData.disponible" name="disponible" id="disponible">
                   <label for="disponible">Disponible</label>
                 </div>
-                <div class="form-checkbox">
+                <div class="form-checkbox" [class]="isDark() ? 'form-checkbox-dark' : 'form-checkbox-light'">
                   <input type="checkbox" [(ngModel)]="formData.necesitaCalendario" name="necesitaCalendario" id="necesitaCalendario">
                   <label for="necesitaCalendario">Calendario</label>
                 </div>
@@ -616,11 +654,11 @@ interface DashboardStats {
             </div>
           </div>
 
-          <div class="modal-actions">
-            <button type="button" class="btn-delete" *ngIf="editingEspacio()" (click)="deleteEspacio()">
+          <div class="modal-actions" [class]="isDark() ? 'modal-actions-dark' : 'modal-actions-light'">
+            <button type="button" class="btn-delete" [class]="isDark() ? 'btn-delete-dark' : 'btn-delete-light'" *ngIf="editingEspacio()" (click)="deleteEspacio()">
               Eliminar
             </button>
-            <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
+            <button type="button" class="btn-cancel" [class]="isDark() ? 'btn-cancel-dark' : 'btn-cancel-light'" (click)="closeModal()">Cancelar</button>
             <button type="submit" class="btn-save">{{ editingEspacio() ? 'Guardar' : 'Crear' }}</button>
           </div>
         </form>
@@ -632,6 +670,7 @@ export class EspaciosDashboardComponent {
   private espacioService = inject(EspacioService);
   private destroyRef = inject(DestroyRef);
   private theme = inject(ThemeService);
+  private cdr = inject(ChangeDetectorRef);
 
   isDark = this.theme.isDark;
 
@@ -645,7 +684,7 @@ export class EspaciosDashboardComponent {
   // Modal state
   showModal = signal(false);
   editingEspacio = signal<TempoEspacioDto | null>(null);
-  formData: Partial<TempoEspacioDto> = this.getEmptyForm();
+  formData: Partial<TempoEspacioDto> = {};
 
   constructor() {
     this.cargarEspacios();
@@ -653,6 +692,7 @@ export class EspaciosDashboardComponent {
 
   getEmptyForm(): Partial<TempoEspacioDto> {
     return {
+      id: undefined,
       nombre: '',
       tipo: '',
       categoria: 'Salas',
@@ -701,11 +741,26 @@ export class EspaciosDashboardComponent {
   openModal(espacio?: TempoEspacioDto): void {
     if (espacio) {
       this.editingEspacio.set(espacio);
-      this.formData = { ...espacio };
+      // Crear nuevo objeto con los datos
+      this.formData = {
+        id: espacio.id,
+        nombre: espacio.nombre || '',
+        tipo: espacio.tipo || '',
+        categoria: espacio.categoria || 'Salas',
+        icon: espacio.icon || 'meeting_room',
+        disponible: espacio.disponible ?? true,
+        descripcion: espacio.descripcion || '',
+        capacidad: espacio.capacidad || '',
+        dimensiones: espacio.dimensiones || '',
+        accentColor: espacio.accentColor || '#0D2C54',
+        necesitaCalendario: espacio.necesitaCalendario ?? false
+      };
     } else {
       this.editingEspacio.set(null);
       this.formData = this.getEmptyForm();
     }
+    // Forzar detección de cambios y luego mostrar modal
+    this.cdr.detectChanges();
     this.showModal.set(true);
   }
 
@@ -721,37 +776,96 @@ export class EspaciosDashboardComponent {
     }
 
     const espacioData = this.formData as TempoEspacioDto;
+    const editing = this.editingEspacio();
 
-    if (this.editingEspacio()) {
-      // Actualizar en la lista local (mock - en producción llamaría al API)
-      const espacios = this.espacios();
-      const index = espacios.findIndex(e => e.nombre === this.editingEspacio()!.nombre);
-      if (index !== -1) {
-        espacios[index] = espacioData;
-        this.espacios.set([...espacios]);
-        this.actualizarEstadisticas(espacios);
-        this.groupedSections.set(this.agruparPorCategoria(espacios));
-      }
+    if (editing && editing.id) {
+      // Actualizar via API
+      this.espacioService.updateFromDto(editing.id, espacioData)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (updated) => {
+            const espacios = this.espacios().map(e =>
+              e.id === editing.id ? updated : e
+            );
+            this.espacios.set(espacios);
+            this.actualizarEstadisticas(espacios);
+            this.groupedSections.set(this.agruparPorCategoria(espacios));
+            this.closeModal();
+          },
+          error: (err) => {
+            console.error('Error actualizando espacio:', err);
+            // Actualización local como fallback
+            const espacios = this.espacios();
+            const index = espacios.findIndex(e => e.id === editing.id || e.nombre === editing.nombre);
+            if (index !== -1) {
+              espacios[index] = espacioData;
+              this.espacios.set([...espacios]);
+              this.actualizarEstadisticas(espacios);
+              this.groupedSections.set(this.agruparPorCategoria(espacios));
+            }
+            this.closeModal();
+          }
+        });
     } else {
-      // Añadir nuevo espacio (mock)
-      const espacios = [...this.espacios(), espacioData];
-      this.espacios.set(espacios);
-      this.actualizarEstadisticas(espacios);
-      this.groupedSections.set(this.agruparPorCategoria(espacios));
+      // Crear nuevo via API
+      this.espacioService.createFromDto(espacioData)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (created) => {
+            const espacios = [...this.espacios(), created];
+            this.espacios.set(espacios);
+            this.actualizarEstadisticas(espacios);
+            this.groupedSections.set(this.agruparPorCategoria(espacios));
+            this.closeModal();
+          },
+          error: (err) => {
+            console.error('Error creando espacio:', err);
+            // Creación local como fallback
+            const espacios = [...this.espacios(), espacioData];
+            this.espacios.set(espacios);
+            this.actualizarEstadisticas(espacios);
+            this.groupedSections.set(this.agruparPorCategoria(espacios));
+            this.closeModal();
+          }
+        });
     }
-
-    this.closeModal();
   }
 
   deleteEspacio(): void {
-    if (!this.editingEspacio()) return;
+    const editing = this.editingEspacio();
+    if (!editing) return;
 
     if (confirm('¿Estás seguro de que quieres eliminar este espacio?')) {
-      const espacios = this.espacios().filter(e => e.nombre !== this.editingEspacio()!.nombre);
-      this.espacios.set(espacios);
-      this.actualizarEstadisticas(espacios);
-      this.groupedSections.set(this.agruparPorCategoria(espacios));
-      this.closeModal();
+      if (editing.id) {
+        // Eliminar via API
+        this.espacioService.delete(editing.id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              const espacios = this.espacios().filter(e => e.id !== editing.id);
+              this.espacios.set(espacios);
+              this.actualizarEstadisticas(espacios);
+              this.groupedSections.set(this.agruparPorCategoria(espacios));
+              this.closeModal();
+            },
+            error: (err) => {
+              console.error('Error eliminando espacio:', err);
+              // Eliminación local como fallback
+              const espacios = this.espacios().filter(e => e.nombre !== editing.nombre);
+              this.espacios.set(espacios);
+              this.actualizarEstadisticas(espacios);
+              this.groupedSections.set(this.agruparPorCategoria(espacios));
+              this.closeModal();
+            }
+          });
+      } else {
+        // Eliminación local (espacio sin ID = fallback data)
+        const espacios = this.espacios().filter(e => e.nombre !== editing.nombre);
+        this.espacios.set(espacios);
+        this.actualizarEstadisticas(espacios);
+        this.groupedSections.set(this.agruparPorCategoria(espacios));
+        this.closeModal();
+      }
     }
   }
 

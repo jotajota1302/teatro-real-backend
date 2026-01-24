@@ -6,13 +6,14 @@ import { ApiService } from '../../../core/services/api.service';
 import { TipoActividad } from '../models/actividad.model';
 
 // Fallback de tipos de actividad cuando el backend no está disponible
+// Los IDs deben coincidir con los del seed (V3__seed_espacios_tipoactividad.sql)
 const FALLBACK_TIPOS: TipoActividad[] = [
-  { id: 1, nombre: 'Función', colorHex: '#1E3A5F', descripcion: 'Funciones de ópera y ballet', aplicaA: 'SALA', orden: 1 },
-  { id: 2, nombre: 'Ensayo', colorHex: '#2E7D32', descripcion: 'Ensayos generales y parciales', aplicaA: 'SALA', orden: 2 },
-  { id: 3, nombre: 'Montaje', colorHex: '#E57373', descripcion: 'Montaje de escenografía', aplicaA: 'AMBOS', orden: 3 },
-  { id: 4, nombre: 'Desmontaje', colorHex: '#FFB74D', descripcion: 'Desmontaje de producción', aplicaA: 'AMBOS', orden: 4 },
-  { id: 5, nombre: 'Mantenimiento', colorHex: '#9E9E9E', descripcion: 'Tareas de mantenimiento', aplicaA: 'AMBOS', orden: 5 },
-  { id: 6, nombre: 'Evento', colorHex: '#7B1FA2', descripcion: 'Eventos especiales', aplicaA: 'SALA', orden: 6 }
+  { id: 'ta-funcion-001', nombre: 'Función', colorHex: '#DC2626', descripcion: 'Funciones de ópera y ballet', aplicaA: 'SALA', orden: 1 },
+  { id: 'ta-ensayo-general-002', nombre: 'Ensayo General', colorHex: '#2563EB', descripcion: 'Ensayos generales y parciales', aplicaA: 'SALA', orden: 2 },
+  { id: 'ta-montaje-008', nombre: 'Montaje', colorHex: '#EA580C', descripcion: 'Montaje de escenografía', aplicaA: 'AMBOS', orden: 3 },
+  { id: 'ta-desmontaje-009', nombre: 'Desmontaje', colorHex: '#F97316', descripcion: 'Desmontaje de producción', aplicaA: 'AMBOS', orden: 4 },
+  { id: 'ta-mantenimiento-015', nombre: 'Mantenimiento', colorHex: '#6B7280', descripcion: 'Tareas de mantenimiento', aplicaA: 'AMBOS', orden: 5 },
+  { id: 'ta-evento-012', nombre: 'Evento', colorHex: '#F472B6', descripcion: 'Eventos especiales', aplicaA: 'SALA', orden: 6 }
 ];
 
 /**
@@ -34,16 +35,26 @@ export class TipoActividadService {
    */
   loadTiposActividad(): Observable<TipoActividad[]> {
     this.loadingSignal.set(true);
-    return this.api.get<TipoActividad[]>('/tipo-actividades').pipe(
+    // El backend devuelve directamente un array de TipoActividadResponse
+    return this.api.get<TipoActividad[]>('/api/tipo-actividades').pipe(
       tap(tipos => {
-        this.tiposSignal.set(tipos);
+        // Mapear los campos del backend preservando el ID original
+        const mapped = tipos.map((t: any, index: number) => ({
+          id: t.id, // Preservar el ID original del backend (UUID string)
+          nombre: t.nombre,
+          colorHex: t.colorHex,
+          descripcion: t.descripcion || '',
+          aplicaA: t.aplicaA || 'AMBOS',
+          orden: t.orden || index + 1
+        }));
+        this.tiposSignal.set(mapped);
         this.loadingSignal.set(false);
       }),
-      catchError(() => {
+      catchError((err) => {
         // Fallback a datos estáticos cuando no hay backend
         this.tiposSignal.set(FALLBACK_TIPOS);
         this.loadingSignal.set(false);
-        console.warn('[TipoActividadService] Usando tipos de actividad por defecto');
+        console.warn('[TipoActividadService] Usando tipos de actividad por defecto:', err?.message || err);
         return of(FALLBACK_TIPOS);
       })
     );
@@ -52,15 +63,15 @@ export class TipoActividadService {
   /**
    * Devuelve tipo de actividad por ID.
    */
-  getById(id: number): Observable<TipoActividad> {
-    return this.api.get<TipoActividad>(`/tipo-actividades/${id}`);
+  getById(id: string | number): Observable<TipoActividad> {
+    return this.api.get<TipoActividad>(`/api/tipo-actividades/${id}`);
   }
 
   /**
    * Crea nuevo tipo de actividad.
    */
   create(data: Partial<TipoActividad>): Observable<TipoActividad> {
-    return this.api.post<TipoActividad>('/tipo-actividades', data).pipe(
+    return this.api.post<TipoActividad>('/api/tipo-actividades', data).pipe(
       tap(nuevo => {
         this.tiposSignal.update(list => [...list, nuevo]);
       })
@@ -70,8 +81,8 @@ export class TipoActividadService {
   /**
    * Actualiza un tipo de actividad existente.
    */
-  update(id: number, data: Partial<TipoActividad>): Observable<TipoActividad> {
-    return this.api.put<TipoActividad>(`/tipo-actividades/${id}`, data).pipe(
+  update(id: string | number, data: Partial<TipoActividad>): Observable<TipoActividad> {
+    return this.api.put<TipoActividad>(`/api/tipo-actividades/${id}`, data).pipe(
       tap(updated => {
         this.tiposSignal.update(list =>
           list.map(t => t.id === id ? updated : t)
@@ -83,8 +94,8 @@ export class TipoActividadService {
   /**
    * Elimina un tipo de actividad.
    */
-  delete(id: number): Observable<void> {
-    return this.api.delete<void>(`/tipo-actividades/${id}`).pipe(
+  delete(id: string | number): Observable<void> {
+    return this.api.delete<void>(`/api/tipo-actividades/${id}`).pipe(
       tap(() => {
         this.tiposSignal.update(list => list.filter(t => t.id !== id));
       })

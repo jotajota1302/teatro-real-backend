@@ -5,13 +5,22 @@ import { Observable, of, catchError, map, tap } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { Espacio } from '../models/actividad.model';
 
-interface ApiResponse<T> {
-  success: boolean;
-  message?: string;
-  data?: T;
+// Respuesta del backend (EspacioResponse.java)
+interface EspacioBackend {
+  id: number;
+  nombre: string;
+  tipo: string;
+  googleCalendarId?: string;
+  color?: string;
+  capacidad?: number;
+  dimensiones?: string;
+  ubicacion?: string;
+  activo: boolean;
+  orden?: number;
 }
 
 export interface TempoEspacioDto {
+  id?: number;
   nombre: string;
   tipo: string;
   categoria: 'Salas' | 'Ensayo' | 'Talleres' | 'Almacenes' | 'Espacios';
@@ -150,21 +159,60 @@ export class EspacioService {
   constructor(private api: ApiService) {}
 
   /**
+   * Mapea la respuesta del backend al formato TempoEspacioDto del frontend.
+   */
+  private mapBackendToDto(e: EspacioBackend): TempoEspacioDto {
+    // Determinar categoría según el tipo
+    const tipoUpper = (e.tipo || '').toUpperCase();
+    let categoria: TempoEspacioDto['categoria'] = 'Espacios';
+    let icon = 'meeting_room';
+
+    if (tipoUpper === 'SALA' || tipoUpper.includes('SALA')) {
+      categoria = 'Salas';
+      icon = 'theater_comedy';
+    } else if (tipoUpper === 'ALMACEN' || tipoUpper.includes('ALMACEN')) {
+      categoria = 'Almacenes';
+      icon = 'inventory_2';
+    } else if (tipoUpper === 'TALLER' || tipoUpper.includes('TALLER')) {
+      categoria = 'Talleres';
+      icon = 'construction';
+    } else if (tipoUpper === 'CAMERINO' || tipoUpper.includes('CAMERINO')) {
+      categoria = 'Ensayo';
+      icon = 'checkroom';
+    }
+
+    return {
+      id: e.id,
+      nombre: e.nombre,
+      tipo: e.tipo,
+      categoria,
+      icon,
+      disponible: e.activo ?? true,
+      descripcion: e.ubicacion || '',
+      capacidad: e.capacidad ? `${e.capacidad} PERS.` : '',
+      dimensiones: e.dimensiones || '',
+      accentColor: e.color || '#0D2C54',
+      necesitaCalendario: !!e.googleCalendarId
+    };
+  }
+
+  /**
    * Carga todos los espacios disponibles.
    */
   loadEspacios(): Observable<Espacio[]> {
     this.loadingSignal.set(true);
-    return this.api.get<ApiResponse<Espacio[]>>(this.baseUrl).pipe(
-      map(response => response.data ?? []),
+    // El backend devuelve directamente un array, no un wrapper
+    return this.api.get<EspacioBackend[]>(this.baseUrl).pipe(
+      map(espacios => espacios as unknown as Espacio[]),
+      tap(espacios => {
+        this.espaciosSignal.set(espacios);
+        this.loadingSignal.set(false);
+      }),
       catchError(() => {
         const fallback = this.fallbackEspacios as unknown as Espacio[];
         this.espaciosSignal.set(fallback);
         this.loadingSignal.set(false);
         return of(fallback);
-      }),
-      tap(espacios => {
-        this.espaciosSignal.set(espacios);
-        this.loadingSignal.set(false);
       })
     );
   }
@@ -173,8 +221,14 @@ export class EspacioService {
    * Recupera los espacios diseñados para el nuevo dashboard TEMPO.
    */
   obtenerEspaciosResumen(): Observable<TempoEspacioDto[]> {
-    return this.api.get<ApiResponse<TempoEspacioDto[]>>(this.baseUrl).pipe(
-      map(result => (result.data && result.data.length ? result.data : this.fallbackEspacios)),
+    // El backend devuelve directamente un array de EspacioBackend
+    return this.api.get<EspacioBackend[]>(this.baseUrl).pipe(
+      map(espacios => {
+        if (espacios && espacios.length > 0) {
+          return espacios.map(e => this.mapBackendToDto(e));
+        }
+        return this.fallbackEspacios;
+      }),
       catchError(() => of(this.fallbackEspacios))
     );
   }
@@ -218,6 +272,52 @@ export class EspacioService {
       tap(() => {
         this.espaciosSignal.update(list => list.filter(e => e.id !== id));
       })
+    );
+  }
+
+  /**
+   * Mapea TempoEspacioDto al formato del backend (EspacioRequest)
+   */
+  private mapDtoToBackend(dto: Partial<TempoEspacioDto>): Partial<EspacioBackend> {
+    // Extraer número de capacidad (ej: "200 PERS." -> 200)
+    let capacidad: number | undefined;
+    if (dto.capacidad) {
+      const match = dto.capacidad.match(/(\d+)/);
+      capacidad = match ? parseInt(match[1], 10) : undefined;
+    }
+
+    // Usar el tipo directamente (ya viene en formato backend: SALA, ALMACEN, TALLER, CAMERINO)
+    const tipo = dto.tipo || 'SALA';
+
+    return {
+      nombre: dto.nombre,
+      tipo,
+      color: dto.accentColor,
+      capacidad,
+      dimensiones: dto.dimensiones,
+      ubicacion: dto.descripcion,
+      activo: dto.disponible ?? true,
+      googleCalendarId: dto.necesitaCalendario ? 'pending' : undefined
+    };
+  }
+
+  /**
+   * Crea un espacio desde TempoEspacioDto y devuelve TempoEspacioDto.
+   */
+  createFromDto(dto: TempoEspacioDto): Observable<TempoEspacioDto> {
+    const backendData = this.mapDtoToBackend(dto);
+    return this.api.post<EspacioBackend>(this.baseUrl, backendData).pipe(
+      map(created => this.mapBackendToDto(created))
+    );
+  }
+
+  /**
+   * Actualiza un espacio desde TempoEspacioDto y devuelve TempoEspacioDto.
+   */
+  updateFromDto(id: number, dto: TempoEspacioDto): Observable<TempoEspacioDto> {
+    const backendData = this.mapDtoToBackend(dto);
+    return this.api.put<EspacioBackend>(`${this.baseUrl}/${id}`, backendData).pipe(
+      map(updated => this.mapBackendToDto(updated))
     );
   }
 }

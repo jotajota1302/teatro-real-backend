@@ -47,9 +47,15 @@ public class ActividadService {
         List<Actividad> result = actividadRepository.findAll();
 
         if (espacioId != null && !espacioId.isEmpty()) {
-            result = result.stream()
-                    .filter(a -> a.getEspacio() != null && Objects.equals(a.getEspacio().getId(), espacioId))
-                    .collect(Collectors.toList());
+            try {
+                Long espacioIdLong = Long.valueOf(espacioId);
+                result = result.stream()
+                        .filter(a -> a.getEspacio() != null && Objects.equals(a.getEspacio().getId(), espacioIdLong))
+                        .collect(Collectors.toList());
+            } catch (NumberFormatException e) {
+                // ID inválido, devolver lista vacía
+                return Collections.emptyList();
+            }
         }
         if (tipoActividadId != null && !tipoActividadId.isEmpty()) {
             result = result.stream()
