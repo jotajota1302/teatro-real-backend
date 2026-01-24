@@ -28,6 +28,18 @@ export interface OperacionLogisticaDto {
   produccionNombre?: string;
 }
 
+export interface CrearOperacionDto {
+  tipoMovimiento: 'ENTRADA' | 'SALIDA' | 'INTERNO';
+  produccionNombre: string;
+  lugarOrigen: string;
+  lugarDestino: string;
+  fecha: string;
+  horaInicio: string;
+  horaFin: string;
+  numCamiones: number;
+  descripcion?: string;
+}
+
 // Respuesta del backend (ActividadResponse)
 interface ActividadResponse {
   id: string;
@@ -88,6 +100,12 @@ export class LogisticaService {
 
   reiniciar(id: string): Observable<OperacionLogisticaDto> {
     return this.http.put<ActividadResponse>(`${this.baseUrl}/operaciones/${id}/reiniciar`, {}).pipe(
+      map(op => this.mapToOperacion(op))
+    );
+  }
+
+  crear(operacion: CrearOperacionDto): Observable<OperacionLogisticaDto> {
+    return this.http.post<ActividadResponse>(`${this.baseUrl}/operaciones`, operacion).pipe(
       map(op => this.mapToOperacion(op))
     );
   }
