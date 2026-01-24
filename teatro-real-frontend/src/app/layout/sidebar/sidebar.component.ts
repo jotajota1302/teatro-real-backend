@@ -49,7 +49,7 @@ import { ThemeService } from '../../core/services/theme.service';
               </a>
             </li>
             <li>
-              <a routerLink="/carteleria/global" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
+              <a routerLink="/tempo/carteleria" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
                 <mat-icon class="nav-icon">tv</mat-icon>
                 <span>Cartelería</span>
               </a>

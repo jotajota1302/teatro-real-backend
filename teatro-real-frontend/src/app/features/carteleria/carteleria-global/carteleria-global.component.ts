@@ -126,7 +126,7 @@ interface SignageEntry {
   `,
   styles: [`
     .carteleria-global {
-      font-family: 'Inter', system-ui, sans-serif;
+      font-family: 'Montserrat', system-ui, sans-serif;
     }
     .sala-card {
       min-height: 200px;
@@ -181,32 +181,7 @@ export class CarteleriaGlobalComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.loading.set(false);
-        // Datos de fallback para demo
-        this.espacios.set([
-          {
-            espacioId: 1,
-            espacioNombre: 'Escenario Principal',
-            espacioColor: '#CF102D',
-            actividades: [
-              { id: '1', titulo: 'La Traviata - Ensayo General', horaInicio: '10:00', horaFin: '13:00', fecha: '', tipoActividadNombre: 'Ensayo', tipoActividadColor: '#22c55e' },
-              { id: '2', titulo: 'La Traviata - Función', horaInicio: '20:00', horaFin: '23:00', fecha: '', tipoActividadNombre: 'Función', tipoActividadColor: '#3b82f6' }
-            ]
-          },
-          {
-            espacioId: 2,
-            espacioNombre: 'Sala Gayarre',
-            espacioColor: '#0F5A33',
-            actividades: [
-              { id: '3', titulo: 'Coro - Ensayo', horaInicio: '09:00', horaFin: '12:00', fecha: '', tipoActividadNombre: 'Ensayo Coro', tipoActividadColor: '#8b5cf6' }
-            ]
-          },
-          {
-            espacioId: 3,
-            espacioNombre: 'Sala S.E.P.E.',
-            espacioColor: '#7A1FDE',
-            actividades: []
-          }
-        ]);
+        this.espacios.set([]);
       }
     });
   }

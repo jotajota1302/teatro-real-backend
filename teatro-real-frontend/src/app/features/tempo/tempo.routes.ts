@@ -46,4 +46,9 @@ export const TEMPO_ROUTES: Routes = [
     loadComponent: () => import('./tipos-actividad/tipo-list/tipo-list.component').then(m => m.TipoListComponent),
     title: 'Tipos de Actividad'
   },
+  {
+    path: 'carteleria',
+    loadComponent: () => import('./carteleria/carteleria-dashboard.component').then(m => m.CarteleriaDashboardComponent),
+    title: 'Cartelería Digital'
+  },
 ];
