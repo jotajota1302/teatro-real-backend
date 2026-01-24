@@ -11,19 +11,20 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { CalendarOptions, EventInput } from '@fullcalendar/core';
 
 import { LogisticaService, OperacionLogisticaDto } from './logistica.service';
+import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'app-logistica-calendario',
   standalone: true,
   imports: [CommonModule, FullCalendarModule, RouterLink],
   template: `
-    <div class="page">
+    <div class="page" [class]="isDark() ? 'page-dark' : 'page-light'">
       <!-- Header compacto -->
       <div class="header-section">
         <div class="flex items-center justify-between">
-          <h1 class="text-2xl font-semibold text-gray-800">Calendario Logística</h1>
+          <h1 class="text-2xl font-semibold" [class]="isDark() ? 'text-white' : 'text-gray-800'">Calendario Logística</h1>
           <div class="flex gap-2">
-            <a routerLink="/tempo/movimientos" class="btn-secondary-sm">
+            <a routerLink="/tempo/movimientos" [class]="isDark() ? 'btn-secondary-sm-dark' : 'btn-secondary-sm'">
               <span class="material-icons text-base">list</span>
               Lista
             </a>
@@ -36,28 +37,28 @@ import { LogisticaService, OperacionLogisticaDto } from './logistica.service';
       </div>
 
       <!-- Filtros compactos -->
-      <div class="filters-section">
+      <div class="filters-section" [class]="isDark() ? 'filters-dark' : 'filters-light'">
         <div class="flex flex-wrap gap-3 items-center">
-          <select class="form-select-sm" [value]="selectedTipo()" (change)="onTipoChange($event)">
+          <select [class]="isDark() ? 'form-select-sm-dark' : 'form-select-sm'" [value]="selectedTipo()" (change)="onTipoChange($event)">
             <option value="">Todos los tipos</option>
             <option value="ENTRADA">Recogidas</option>
             <option value="SALIDA">Salidas</option>
             <option value="INTERNO">Transportes</option>
           </select>
-          <select class="form-select-sm" [value]="selectedEstado()" (change)="onEstadoChange($event)">
+          <select [class]="isDark() ? 'form-select-sm-dark' : 'form-select-sm'" [value]="selectedEstado()" (change)="onEstadoChange($event)">
             <option value="">Todos los estados</option>
             <option value="PENDIENTE">Pendiente</option>
             <option value="EN_TRANSITO">En tránsito</option>
             <option value="COMPLETADO">Completado</option>
           </select>
-          <button class="btn-sm-secondary" (click)="resetFiltros()">Limpiar</button>
+          <button [class]="isDark() ? 'btn-sm-secondary-dark' : 'btn-sm-secondary'" (click)="resetFiltros()">Limpiar</button>
         </div>
       </div>
 
       <!-- Calendario -->
-      <div class="calendar-wrapper">
+      <div class="calendar-wrapper" [class]="isDark() ? 'calendar-wrapper-dark' : 'calendar-wrapper-light'">
         @if (loading()) {
-          <div class="loading-overlay">
+          <div class="loading-overlay" [class]="isDark() ? 'loading-overlay-dark' : ''">
             <div class="animate-spin w-8 h-8 border-4 border-[#CF102D] border-t-transparent rounded-full"></div>
           </div>
         }
@@ -71,16 +72,24 @@ import { LogisticaService, OperacionLogisticaDto } from './logistica.service';
       display: block;
       height: 100%;
       overflow: hidden;
-      background: #f2f4f7;
     }
 
     .page {
       display: flex;
       flex-direction: column;
       height: 100%;
-      background: #f2f4f7;
       overflow: hidden;
       padding: 1rem 2rem;
+    }
+
+    .page-light {
+      background: #f2f4f7;
+    }
+
+    .page-dark {
+      background: #1a1a1a;
+      border-radius: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .header-section {
@@ -90,26 +99,44 @@ import { LogisticaService, OperacionLogisticaDto } from './logistica.service';
 
     .filters-section {
       flex-shrink: 0;
-      background: #ffffff;
       border-radius: 0.75rem;
       padding: 0.75rem 1rem;
       margin-bottom: 0.75rem;
+    }
+
+    .filters-light {
+      background: #ffffff;
       border: 1px solid rgba(15, 23, 42, 0.08);
       box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+    }
+
+    .filters-dark {
+      background: #1a1a1a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
     }
 
     .calendar-wrapper {
       flex: 1 1 0;
       min-height: 0;
-      background: #ffffff;
       border-radius: 0.75rem;
       padding: 0.75rem;
-      border: 1px solid rgba(15, 23, 42, 0.08);
-      box-shadow: 0 15px 30px rgba(15, 23, 42, 0.08);
       overflow: hidden;
       position: relative;
       display: flex;
       flex-direction: column;
+    }
+
+    .calendar-wrapper-light {
+      background: #ffffff;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 15px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    .calendar-wrapper-dark {
+      background: #1a1a1a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
     }
 
     .calendar-wrapper full-calendar {
@@ -125,6 +152,10 @@ import { LogisticaService, OperacionLogisticaDto } from './logistica.service';
       align-items: center;
       justify-content: center;
       z-index: 10;
+    }
+
+    .loading-overlay-dark {
+      background: rgba(26, 26, 26, 0.9);
     }
 
     .btn-nuevo-sm {
@@ -167,6 +198,26 @@ import { LogisticaService, OperacionLogisticaDto } from './logistica.service';
       background: #f3f4f6;
     }
 
+    .btn-secondary-sm-dark {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.75rem;
+      background: #262626;
+      color: #e5e7eb;
+      border: 1px solid #374151;
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-secondary-sm-dark:hover {
+      background: #333333;
+    }
+
     .form-select-sm {
       padding: 0.4rem 0.75rem;
       border: 1px solid #d1d5db;
@@ -184,6 +235,28 @@ import { LogisticaService, OperacionLogisticaDto } from './logistica.service';
       box-shadow: 0 0 0 2px rgba(207, 16, 45, 0.1);
     }
 
+    .form-select-sm-dark {
+      padding: 0.4rem 0.75rem;
+      border: 1px solid #374151;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      background: #262626;
+      color: #e5e7eb;
+      cursor: pointer;
+      min-width: 140px;
+    }
+
+    .form-select-sm-dark:focus {
+      outline: none;
+      border-color: #CF102D;
+      box-shadow: 0 0 0 2px rgba(207, 16, 45, 0.2);
+    }
+
+    .form-select-sm-dark option {
+      background: #262626;
+      color: #e5e7eb;
+    }
+
     .btn-sm-secondary {
       padding: 0.4rem 0.75rem;
       background: #f3f4f6;
@@ -196,6 +269,20 @@ import { LogisticaService, OperacionLogisticaDto } from './logistica.service';
 
     .btn-sm-secondary:hover {
       background: #e5e7eb;
+    }
+
+    .btn-sm-secondary-dark {
+      padding: 0.4rem 0.75rem;
+      background: #262626;
+      color: #e5e7eb;
+      border: 1px solid #374151;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .btn-sm-secondary-dark:hover {
+      background: #333333;
     }
 
     /* FullCalendar overrides - altura completa */
@@ -482,12 +569,73 @@ import { LogisticaService, OperacionLogisticaDto } from './logistica.service';
     :host ::ng-deep .fc-timegrid-now-indicator-arrow {
       border-color: #CF102D !important;
     }
+
+    /* ========================================= */
+    /* DARK MODE FULLCALENDAR OVERRIDES */
+    /* ========================================= */
+    :host ::ng-deep .calendar-wrapper-dark .fc {
+      color: #e5e7eb;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-toolbar-title {
+      color: #e5e7eb !important;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-scrollgrid {
+      border-color: #374151 !important;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-theme-standard td,
+    :host ::ng-deep .calendar-wrapper-dark .fc-theme-standard th {
+      border-color: #374151 !important;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-col-header-cell-cushion {
+      color: #9ca3af;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-daygrid-day-number {
+      color: #e5e7eb;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-day-other {
+      background: #0d0d0d !important;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-day-today {
+      background-color: rgba(207, 16, 45, 0.15) !important;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-daygrid-more-link {
+      color: #CF102D !important;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-timegrid-slot-label {
+      color: #9ca3af;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-button-primary {
+      background-color: #CF102D !important;
+      border-color: #CF102D !important;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-button-primary:hover {
+      background-color: #a80d25 !important;
+      border-color: #a80d25 !important;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-button-primary:not(:disabled).fc-button-active {
+      background-color: #8a0b1e !important;
+      border-color: #8a0b1e !important;
+    }
   `]
 })
 export class LogisticaCalendarioComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private logisticaService = inject(LogisticaService);
+  private themeService = inject(ThemeService);
 
+  isDark = this.themeService.isDark;
   operaciones = signal<OperacionLogisticaDto[]>([]);
   loading = signal(true);
   selectedTipo = signal('');
