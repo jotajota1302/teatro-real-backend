@@ -25,14 +25,15 @@ import { TemporadaService } from '../../../core/services/temporada.service';
   imports: [CommonModule, FullCalendarModule],
   template: `
     <div class="page">
-      <!-- Header compacto -->
+      <!-- Header - mismo estilo que Espacios -->
       <div class="header-section">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <h1 class="text-2xl font-semibold text-gray-800">Calendario de Actividades</h1>
+            <h1 class="text-3xl font-semibold text-gray-800">Calendario de Actividades</h1>
+            <p class="text-gray-500">Visualiza y gestiona todas las actividades del Teatro Real</p>
           </div>
-          <button class="btn-nueva-actividad" (click)="abrirModalNuevaActividad()">
-            <span class="material-icons text-sm">add</span>
+          <button class="btn-nuevo" (click)="abrirModalNuevaActividad()">
+            <span class="material-icons text-lg">add</span>
             Nueva Actividad
           </button>
         </div>
@@ -140,19 +141,21 @@ import { TemporadaService } from '../../../core/services/temporada.service';
       display: block;
       height: 100%;
       overflow: hidden;
+      background: #f2f4f7;
     }
 
     .page {
       display: flex;
       flex-direction: column;
       height: 100%;
-      background: transparent;
+      background: #f2f4f7;
       overflow: hidden;
+      padding: 1.5rem 2rem;
     }
 
     .header-section {
       flex-shrink: 0;
-      margin-bottom: 0.75rem;
+      margin-bottom: 1.5rem;
     }
 
     .stat-inline {
@@ -161,11 +164,12 @@ import { TemporadaService } from '../../../core/services/temporada.service';
 
     .filters-section {
       flex-shrink: 0;
-      background: white;
-      border-radius: 8px;
-      padding: 0.75rem 1rem;
-      margin-bottom: 0.75rem;
+      background: #ffffff;
+      border-radius: 0.9rem;
+      padding: 1.2rem;
+      margin-bottom: 1.5rem;
       border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 15px 30px rgba(15, 23, 42, 0.08);
     }
 
     .form-select-sm {
@@ -213,23 +217,28 @@ import { TemporadaService } from '../../../core/services/temporada.service';
       background: #e5e7eb;
     }
 
-    .btn-nueva-actividad {
+    .btn-nuevo {
       display: flex;
       align-items: center;
-      gap: 0.4rem;
-      padding: 0.5rem 1rem;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
       background: #CF102D;
       color: white;
       border: none;
       border-radius: 8px;
+      font-weight: 600;
       font-size: 0.875rem;
-      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(207, 16, 45, 0.3);
     }
 
-    .btn-nueva-actividad:hover {
+    .btn-nuevo:hover {
       background: #a80d25;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(207, 16, 45, 0.4);
     }
 
     /* Modal styles */
@@ -378,11 +387,11 @@ import { TemporadaService } from '../../../core/services/temporada.service';
     .calendar-wrapper {
       flex: 1 1 0;
       min-height: 0;
-      background: white;
-      border-radius: 12px;
-      padding: 1rem;
+      background: #ffffff;
+      border-radius: 1rem;
+      padding: 1.4rem;
       border: 1px solid rgba(15, 23, 42, 0.08);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      box-shadow: 0 20px 35px rgba(15, 23, 42, 0.1);
       position: relative;
       overflow: hidden;
       display: flex;

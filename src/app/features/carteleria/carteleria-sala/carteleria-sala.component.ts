@@ -138,7 +138,7 @@ interface SignageEntry {
   `,
   styles: [`
     .carteleria-sala {
-      font-family: 'Inter', system-ui, sans-serif;
+      font-family: 'Montserrat', system-ui, sans-serif;
     }
   `]
 })
@@ -210,17 +210,7 @@ export class CarteleriaSalaComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.loading.set(false);
-        // Fallback para demo
-        this.espacio.set({
-          espacioId: this.espacioId!,
-          espacioNombre: 'Escenario Principal',
-          espacioColor: '#CF102D',
-          actividades: [
-            { id: '1', titulo: 'La Traviata - Ensayo General', horaInicio: '10:00', horaFin: '13:00', fecha: '', tipoActividadNombre: 'Ensayo General', tipoActividadColor: '#22c55e', departamentoNombre: 'Producción' },
-            { id: '2', titulo: 'Preparación técnica', horaInicio: '15:00', horaFin: '18:00', fecha: '', tipoActividadNombre: 'Montaje', tipoActividadColor: '#f59e0b' },
-            { id: '3', titulo: 'La Traviata - Función', horaInicio: '20:00', horaFin: '23:00', fecha: '', tipoActividadNombre: 'Función', tipoActividadColor: '#3b82f6' }
-          ]
-        });
+        this.espacio.set(null);
       }
     });
   }
