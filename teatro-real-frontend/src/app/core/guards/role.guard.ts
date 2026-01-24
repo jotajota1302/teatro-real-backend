@@ -5,6 +5,13 @@ import { AuthService } from '../auth/auth.service';
 export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot): boolean | UrlTree => {
   const auth = inject(AuthService);
   const router = inject(Router);
+
+  // Si no hay autenticación, dejar que authGuard maneje la redirección
+  // Esto evita race conditions durante el logout
+  if (!auth.isAuthenticated()) {
+    return true; // authGuard se encargará de redirigir a login
+  }
+
   const roles = route.data['roles'] as string[] | undefined;
 
   if (!roles || !Array.isArray(roles) || roles.length === 0) {
