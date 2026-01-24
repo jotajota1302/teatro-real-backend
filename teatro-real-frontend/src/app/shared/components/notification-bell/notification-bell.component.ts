@@ -1,20 +1,24 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import { NotificationService } from '../../../core/services/notification.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-notification-bell',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatIconModule, MatButtonModule],
   template: `
     <div class="notification-wrapper">
-      <button class="bell-button"
-              (click)="toggleMenu()"
-              [class.has-unread]="notificationService.unreadCount() > 0"
-              aria-label="Notificaciones"
-              type="button">
-        <span class="material-icons">notifications</span>
+      <button
+        mat-icon-button
+        (click)="toggleMenu()"
+        [class]="bellButtonClass()"
+        aria-label="Notificaciones"
+        type="button">
+        <mat-icon [class]="iconClass()">notifications</mat-icon>
         @if (notificationService.unreadCount() > 0) {
           <span class="badge">{{ notificationService.unreadCount() > 9 ? '9+' : notificationService.unreadCount() }}</span>
         }
@@ -34,7 +38,7 @@ import { Router } from '@angular/router';
 
           @if (notificationService.notificaciones().length === 0) {
             <div class="empty-state">
-              <span class="material-icons empty-icon">notifications_none</span>
+              <mat-icon class="empty-icon">notifications_none</mat-icon>
               <p>No hay notificaciones</p>
             </div>
           } @else {
@@ -44,7 +48,7 @@ import { Router } from '@angular/router';
                      [class.unread]="!notif.leida"
                      (click)="onNotificationClick(notif)">
                   <div class="notif-icon" [class]="getIconClass(notif.tipo)">
-                    <span class="material-icons">{{ getIcon(notif.tipo) }}</span>
+                    <mat-icon>{{ getIcon(notif.tipo) }}</mat-icon>
                   </div>
                   <div class="notif-content">
                     <p class="notif-title">{{ notif.titulo }}</p>
@@ -64,45 +68,21 @@ import { Router } from '@angular/router';
       position: relative;
     }
 
-    .bell-button {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      position: relative;
-    }
-
-    .bell-button:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    .bell-button .material-icons {
-      font-size: 22px;
-    }
-
     .badge {
       position: absolute;
-      top: -4px;
-      right: -4px;
-      min-width: 18px;
-      height: 18px;
-      padding: 0 5px;
+      top: 4px;
+      right: 4px;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
       background: #CF102D;
       color: white;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
-      border-radius: 9px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 2px solid #1a1a2e;
     }
 
     .menu-overlay {
@@ -161,13 +141,16 @@ import { Router } from '@angular/router';
     }
 
     .empty-icon {
-      font-size: 40px;
+      font-size: 40px !important;
+      width: 40px !important;
+      height: 40px !important;
       margin-bottom: 8px;
       opacity: 0.5;
     }
 
     .empty-state p {
       font-size: 14px;
+      margin: 0;
     }
 
     .notification-list {
@@ -206,8 +189,10 @@ import { Router } from '@angular/router';
       flex-shrink: 0;
     }
 
-    .notif-icon .material-icons {
+    .notif-icon mat-icon {
       font-size: 20px;
+      width: 20px;
+      height: 20px;
     }
 
     .notif-icon.info {
@@ -265,8 +250,18 @@ import { Router } from '@angular/router';
 export class NotificationBellComponent {
   notificationService = inject(NotificationService);
   private router = inject(Router);
+  private theme = inject(ThemeService);
 
+  isDark = this.theme.isDark;
   isOpen = signal(false);
+
+  bellButtonClass = computed(() => {
+    return 'relative';
+  });
+
+  iconClass = computed(() => {
+    return this.isDark() ? 'text-gray-400' : 'text-gray-500';
+  });
 
   toggleMenu(): void {
     this.isOpen.update(v => !v);
@@ -306,7 +301,6 @@ export class NotificationBellComponent {
       this.notificationService.marcarLeida(notif.id).subscribe();
     }
     this.closeMenu();
-    // Navegación contextual según tipo
     if (notif.entidadTipo === 'GUION' && notif.entidadId) {
       this.router.navigate(['/tops/editor', notif.entidadId]);
     } else if (notif.entidadTipo === 'ACTIVIDAD' && notif.entidadId) {
