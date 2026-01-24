@@ -93,6 +93,11 @@ cd "C:/Users/Nitropc/Desktop/TEATRO REAL/teatro-real-backend" && "C:/Users/Nitro
 - **Auth:** JWT tokens, 4 roles (ADMIN, GESTOR, OPERADOR, VISUALIZADOR), module-based permissions
 - **Database:** Flyway migrations in `db/migration/` (V1__schema.sql, V2__seed.sql, etc.)
 
+### Coding Context (MUST READ)
+Before implementing features, read these documents for patterns and conventions:
+- **[CONTEXTO_FRONTEND.md](DOC_GENERADA/CONTEXTO_FRONTEND.md)** - Angular patterns, signals, services, components structure
+- **[CONTEXTO_BACKEND.md](DOC_GENERADA/CONTEXTO_BACKEND.md)** - Spring Boot patterns, controllers, services, DTOs, entities
+
 ## Module Status
 
 | Module | Backend | Frontend | Notes |
