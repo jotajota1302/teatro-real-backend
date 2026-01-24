@@ -85,10 +85,10 @@
 | **Sergio** | **SPRINT REVIEW S1** | 2h | Demo + feedback |
 
 ### Entregables Semana 1 ✓
-- [ ] Autenticación JWT con 4 roles funcionando
-- [ ] Login/logout operativo
-- [ ] Header con selector temporada y notificaciones
-- [ ] Entidades base creadas (Usuario, Rol, Departamento, Temporada, PermisoModulo)
+- [x] Autenticación JWT con 4 roles funcionando
+- [x] Login/logout operativo
+- [x] Header con selector temporada y notificaciones
+- [x] Entidades base creadas (Usuario, Rol, Departamento, Temporada, PermisoModulo)
 - [ ] Tests básicos auth
 
 ---
@@ -180,18 +180,20 @@
 | **Sergio** | **SPRINT REVIEW S2** | 2h | Demo TEMPO + Logística |
 
 ### Entregables Semana 2 ✓
-- [ ] Landing TEMPO con vista semanal Excel
-- [ ] Calendario FullCalendar integrado (TEMPO)
-- [ ] CRUD actividades con estados almacén
-- [ ] Clonar actividades funcionando
+- [x] Landing TEMPO con vista semanal Excel
+- [x] Calendario FullCalendar integrado (TEMPO) - mes/semana/día sin scroll
+- [x] Modal "Nueva Actividad" en calendario
+- [x] CRUD actividades con estados almacén
+- [x] Clonar actividades funcionando
 - [ ] **Landing Logística con calendario (mes/semana/día)**
 - [ ] **Calendario Logística por almacén (Arganda-Campa, Arganda-Nave)**
 - [ ] **CRUD operaciones logística (RECOGIDA verde/SALIDA rosa)**
 - [ ] **Campos v1.3: nº camiones, lugar origen/destino**
 - [ ] **Botones transición: Pendiente → En tránsito → Completado**
 - [ ] **Filtros: por almacén, tipo, temporada, fecha**
-- [ ] Admin: Espacios (SALA/ALMACEN), Tipos, Departamentos
-- [ ] Filtros por temporada operativos
+- [x] Admin: Espacios (SALA/ALMACEN) - Dashboard completo
+- [x] Admin: Tipos, Departamentos
+- [x] Filtros por temporada operativos
 
 ---
 

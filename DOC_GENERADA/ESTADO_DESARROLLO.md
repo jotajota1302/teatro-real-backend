@@ -6,7 +6,7 @@
 |--------|--------|----------|----------------------|
 | **Sprint 0: Setup** | Completado | 100% | 2025-12-11 |
 | **Sprint 1: Auth + Layout** | Completado | 95% | 2025-01-23 |
-| **Sprint 2: TEMPO** | Completado | 95% | 2026-01-23 |
+| **Sprint 2: TEMPO** | Completado | 98% | 2026-01-24 |
 | **Sprint 2: Logística** | En Progreso | 30% | 2025-01-23 |
 | **Sprint 3: TOPS** | En Progreso | 15% | 2025-01-23 |
 | **Sprint 4: Integraciones** | Parcial | 35% | 2026-01-23 |
@@ -156,16 +156,18 @@
 
 ### Verificación Sprint 2
 
-- [x] Calendario visual con actividades
+- [x] Calendario visual con actividades (mes/semana/día sin scroll)
 - [x] Crear/editar/eliminar actividades
+- [x] Modal "Nueva Actividad" desde calendario
 - [x] Clonar actividades
 - [x] Estados de almacén (PENDIENTE, EN_TRANSITO, COMPLETADO)
 - [x] Vista semanal tipo Excel
-- [x] Filtros por espacio y tipo
-- [x] CRUD de espacios
+- [x] Filtros por espacio, tipo y temporada
+- [x] CRUD de espacios (dashboard completo)
 - [x] CRUD de tipos de actividad
 - [x] CRUD de departamentos
 - [x] Cartelería global y por sala
+- [x] Layout responsive con altura completa
 - [ ] Tests unitarios pendientes
 
 ---
@@ -532,8 +534,11 @@ npm test         # Tests
 | 2025-01-23 | Identificado módulo Logística no planificado | Claude |
 | 2025-01-23 | Identificado que TOPS frontend está sin implementar | Claude |
 | 2026-01-23 | Implementado SignageController + Cartelería completa (global + sala) | Claude |
+| 2026-01-24 | Calendario TEMPO: vistas mes/semana/día con altura completa sin scroll | Claude |
+| 2026-01-24 | Añadido modal "Nueva Actividad" en calendario TEMPO | Claude |
+| 2026-01-24 | Limpieza UI: quitados contadores redundantes del header calendario | Claude |
 
 ---
 
-*Última actualización: 2026-01-23*
-*Progreso Global: ~55%*
+*Última actualización: 2026-01-24*
+*Progreso Global: ~58%*
