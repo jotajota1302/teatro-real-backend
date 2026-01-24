@@ -27,6 +27,11 @@ export const TEMPO_ROUTES: Routes = [
     title: 'Logística – Teatro Real'
   },
   {
+    path: 'movimientos/calendario',
+    loadComponent: () => import('./logistica/logistica-calendario.component').then(m => m.LogisticaCalendarioComponent),
+    title: 'Calendario Logística – Teatro Real'
+  },
+  {
     path: 'calendario',
     loadComponent: () => import('./calendario/calendario.component').then(m => m.CalendarioComponent),
     title: 'Calendario'

@@ -78,9 +78,13 @@ cd "C:/Users/Nitropc/Desktop/TEATRO REAL/teatro-real-backend" && "C:/Users/Nitro
 │   ├── guards/      # roleGuard, modulePermissionGuard
 │   └── services/    # ApiService, NotificationService, TemporadaService
 ├── features/
-│   ├── tempo/       # Calendar, spaces, activities, logistics (COMPLETE)
+│   ├── tempo/       # TEMPO module (4 submódulos):
+│   │   ├── calendario/     # FullCalendar views (✅ complete)
+│   │   ├── espacios/       # Spaces dashboard (✅ complete)
+│   │   ├── logistica/      # Warehouse logistics (⏳ backend pending)
+│   │   └── landing/        # Weekly Excel view (✅ complete)
+│   ├── carteleria/  # Digital signage - part of TEMPO (✅ complete)
 │   ├── tops/        # Technical scripts editor (PLACEHOLDER ONLY)
-│   ├── carteleria/  # Digital signage (global + per-room)
 │   ├── dashboard/   # Overview with stats
 │   └── admin/       # User/role management (placeholder)
 ├── layout/          # MainLayout, Sidebar, Header
@@ -102,11 +106,13 @@ Before implementing features, read these documents for patterns and conventions:
 
 | Module | Backend | Frontend | Notes |
 |--------|---------|----------|-------|
-| TEMPO | 95% | 95% | Calendar, spaces, activities complete |
-| TOPS | 40% | 5% | Entities exist, GuionService/Controller missing, frontend is placeholder |
-| Logística | 0% | 30% | Frontend exists, backend not implemented |
+| **TEMPO** | 95% | 95% | Incluye 4 submódulos (ver abajo) |
+| ├─ Calendario/Actividades | 95% | 95% | Calendar, spaces, activities complete |
+| ├─ Espacios | 100% | 100% | CRUD espacios, tipos, departamentos |
+| ├─ Cartelería | 100% | 100% | Global and per-room signage complete |
+| └─ Logística | 100% | 90% | Backend complete, falta dialog crear/editar |
+| TOPS | 40% | 5% | Entities exist, GuionService/Controller missing, frontend placeholder |
 | Admin | 20% | 5% | Basic controllers, UI is placeholder |
-| Cartelería | 100% | 100% | Global and per-room signage complete |
 
 ## Design System
 

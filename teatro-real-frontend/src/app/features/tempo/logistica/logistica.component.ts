@@ -2,6 +2,7 @@
 
 import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   LogisticaService,
@@ -10,12 +11,17 @@ import {
 } from '../logistica/logistica.service';
 
 const TIPO_FILTROS = ['Todos', 'Cargas', 'Descargas', 'Transportes', 'Otros'];
-const ESTADOS_FILTROS = ['Todos', 'Programado', 'En tránsito', 'Completado', 'Pendiente'];
+const ESTADOS_FILTROS = ['Todos', 'PENDIENTE', 'EN_TRANSITO', 'COMPLETADO'];
+const ESTADO_LABELS: Record<string, string> = {
+  'PENDIENTE': 'Pendiente',
+  'EN_TRANSITO': 'En tránsito',
+  'COMPLETADO': 'Completado'
+};
 
 @Component({
   selector: 'app-logistica',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   template: `
     <div class="page">
       <div class="space-y-6">
@@ -25,10 +31,16 @@ const ESTADOS_FILTROS = ['Todos', 'Programado', 'En tránsito', 'Completado', 'P
             <h1 class="text-3xl font-semibold text-gray-800">Logística de Almacenes</h1>
             <p class="text-gray-500">Gestión de recogidas y salidas de producciones</p>
           </div>
-          <button class="btn-nuevo">
-            <span class="material-icons text-lg">add</span>
-            Nuevo Movimiento
-          </button>
+          <div class="flex gap-2">
+            <a routerLink="/tempo/movimientos/calendario" class="btn-calendario">
+              <span class="material-icons text-lg">calendar_month</span>
+              Ver Calendario
+            </a>
+            <button class="btn-nuevo">
+              <span class="material-icons text-lg">add</span>
+              Nuevo Movimiento
+            </button>
+          </div>
         </div>
 
         <!-- Stats -->
@@ -51,7 +63,9 @@ const ESTADOS_FILTROS = ['Todos', 'Programado', 'En tránsito', 'Completado', 'P
             <div>
               <label class="form-label">Estado</label>
               <select class="form-select" #estadoSelect [value]="selectedEstado" (change)="setEstado(estadoSelect.value)">
-                <option *ngFor="let option of estadoFiltros">{{ option }}</option>
+                <option *ngFor="let option of estadoFiltros" [value]="option">
+                  {{ option === 'Todos' ? option : getEstadoLabel(option) }}
+                </option>
               </select>
             </div>
             <button class="btn-secondary ml-auto">
@@ -72,7 +86,7 @@ const ESTADOS_FILTROS = ['Todos', 'Programado', 'En tránsito', 'Completado', 'P
                 <div class="flex items-center gap-3 mb-1">
                   <h2 class="text-lg font-semibold text-gray-900">{{ operacion.nombre }}</h2>
                   <span class="badge-pill" [style.background]="operacion.estadoColor + '22'" [style.color]="operacion.estadoColor">
-                    {{ operacion.estado }}
+                    {{ operacion.estadoLabel || getEstadoLabel(operacion.estado) }}
                   </span>
                 </div>
                 <p class="text-gray-600 mb-2">
@@ -91,8 +105,31 @@ const ESTADOS_FILTROS = ['Todos', 'Programado', 'En tránsito', 'Completado', 'P
                 <p class="text-sm text-gray-500 mt-2">{{ operacion.detalle }}</p>
               </div>
               <div class="flex flex-col gap-2">
-                <button class="btn-outline">Ver detalle</button>
-                <button class="btn-action">Iniciar</button>
+                <button class="btn-outline" (click)="verDetalle(operacion)">Ver detalle</button>
+                <button
+                  *ngIf="operacion.estado === 'PENDIENTE'"
+                  class="btn-transito"
+                  (click)="iniciarTransito(operacion)"
+                  [disabled]="procesando">
+                  <span class="material-icons text-sm">play_arrow</span>
+                  Iniciar Tránsito
+                </button>
+                <button
+                  *ngIf="operacion.estado === 'EN_TRANSITO'"
+                  class="btn-completar"
+                  (click)="completarOperacion(operacion)"
+                  [disabled]="procesando">
+                  <span class="material-icons text-sm">check</span>
+                  Completar
+                </button>
+                <button
+                  *ngIf="operacion.estado === 'COMPLETADO'"
+                  class="btn-secondary-small"
+                  (click)="reiniciarOperacion(operacion)"
+                  [disabled]="procesando">
+                  <span class="material-icons text-sm">replay</span>
+                  Reiniciar
+                </button>
               </div>
             </div>
           </article>
@@ -117,7 +154,7 @@ const ESTADOS_FILTROS = ['Todos', 'Programado', 'En tránsito', 'Completado', 'P
 
     .page {
       background: #f2f4f7;
-      padding: 2rem;
+      padding: 1.5rem 2rem;
       min-height: 100vh;
     }
 
@@ -162,6 +199,7 @@ const ESTADOS_FILTROS = ['Todos', 'Programado', 'En tránsito', 'Completado', 'P
       border-radius: 8px;
       font-size: 0.875rem;
       background: white;
+      color: #374151;
       cursor: pointer;
       min-width: 140px;
     }
@@ -194,6 +232,27 @@ const ESTADOS_FILTROS = ['Todos', 'Programado', 'En tránsito', 'Completado', 'P
       background: #a80d25;
       transform: translateY(-2px);
       box-shadow: 0 6px 16px rgba(207, 16, 45, 0.4);
+    }
+
+    .btn-calendario {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: white;
+      color: #374151;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-calendario:hover {
+      background: #f3f4f6;
+      transform: translateY(-2px);
     }
 
     .btn-secondary {
@@ -267,6 +326,82 @@ const ESTADOS_FILTROS = ['Todos', 'Programado', 'En tránsito', 'Completado', 'P
       background: #f59e0b;
       transform: translateY(-1px);
     }
+
+    .btn-transito {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.5rem 1rem;
+      background: #3B82F6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-transito:hover:not(:disabled) {
+      background: #2563EB;
+      transform: translateY(-1px);
+    }
+
+    .btn-transito:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-completar {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.5rem 1rem;
+      background: #34D399;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(52, 211, 153, 0.3);
+    }
+
+    .btn-completar:hover:not(:disabled) {
+      background: #10B981;
+      transform: translateY(-1px);
+    }
+
+    .btn-completar:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary-small {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.4rem 0.75rem;
+      background: #f3f4f6;
+      color: #6B7280;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary-small:hover:not(:disabled) {
+      background: #e5e7eb;
+    }
+
+    .btn-secondary-small:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
   `]
 })
 export class LogisticaComponent implements OnInit {
@@ -276,9 +411,11 @@ export class LogisticaComponent implements OnInit {
   stats: LogisticaStatDto | null = null;
   operaciones: OperacionLogisticaDto[] = [];
   loading = true;
+  procesando = false;
 
   tipoFiltros = TIPO_FILTROS;
   estadoFiltros = ESTADOS_FILTROS;
+  estadoLabels = ESTADO_LABELS;
   selectedTipo = TIPO_FILTROS[0];
   selectedEstado = ESTADOS_FILTROS[0];
 
@@ -326,5 +463,88 @@ export class LogisticaComponent implements OnInit {
       const estadoMatch = this.selectedEstado === 'Todos' || op.estado === this.selectedEstado;
       return tipoMatch && estadoMatch;
     });
+  }
+
+  getEstadoLabel(estado: string): string {
+    return this.estadoLabels[estado] || estado;
+  }
+
+  verDetalle(operacion: OperacionLogisticaDto): void {
+    console.log('Ver detalle:', operacion);
+    // TODO: Abrir dialog con detalle de operación
+  }
+
+  iniciarTransito(operacion: OperacionLogisticaDto): void {
+    if (this.procesando) return;
+    this.procesando = true;
+
+    this.logisticaService.iniciarTransito(operacion.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          this.updateOperacionInList(updated);
+          this.refreshStats();
+          this.procesando = false;
+        },
+        error: (err) => {
+          console.error('Error al iniciar tránsito:', err);
+          this.procesando = false;
+        }
+      });
+  }
+
+  completarOperacion(operacion: OperacionLogisticaDto): void {
+    if (this.procesando) return;
+    this.procesando = true;
+
+    this.logisticaService.completar(operacion.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          this.updateOperacionInList(updated);
+          this.refreshStats();
+          this.procesando = false;
+        },
+        error: (err) => {
+          console.error('Error al completar operación:', err);
+          this.procesando = false;
+        }
+      });
+  }
+
+  reiniciarOperacion(operacion: OperacionLogisticaDto): void {
+    if (this.procesando) return;
+    this.procesando = true;
+
+    this.logisticaService.reiniciar(operacion.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          this.updateOperacionInList(updated);
+          this.refreshStats();
+          this.procesando = false;
+        },
+        error: (err) => {
+          console.error('Error al reiniciar operación:', err);
+          this.procesando = false;
+        }
+      });
+  }
+
+  private updateOperacionInList(updated: OperacionLogisticaDto): void {
+    const index = this.operaciones.findIndex(op => op.id === updated.id);
+    if (index !== -1) {
+      this.operaciones[index] = updated;
+      this.operaciones = [...this.operaciones]; // Trigger change detection
+    }
+  }
+
+  private refreshStats(): void {
+    this.logisticaService.obtenerResumen()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: stats => (this.stats = stats),
+        error: () => {}
+      });
   }
 }

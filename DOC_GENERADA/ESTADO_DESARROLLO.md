@@ -6,14 +6,16 @@
 |--------|--------|----------|----------------------|
 | **Sprint 0: Setup** | Completado | 100% | 2025-12-11 |
 | **Sprint 1: Auth + Layout** | Completado | 95% | 2025-01-23 |
-| **Sprint 2: TEMPO** | Completado | 98% | 2026-01-24 |
-| **Sprint 2: Logística** | En Progreso | 30% | 2025-01-23 |
+| **Sprint 2: TEMPO** | En Progreso | 92% | 2026-01-24 |
 | **Sprint 3: TOPS** | En Progreso | 15% | 2025-01-23 |
 | **Sprint 4: Integraciones** | Parcial | 35% | 2026-01-23 |
 | **Sprint 5: Testing + Deploy** | En Progreso | 30% | 2025-01-23 |
 
-> **TEMPO:** Cartelería digital completada (global + por sala).
-> **Logística:** Frontend básico existe (30%), falta calendario y backend completo.
+> **TEMPO incluye 4 submódulos:**
+> - Calendario/Actividades (Salas): ✅ Completado 98%
+> - Espacios: ✅ Completado 100%
+> - Cartelería Digital: ✅ Completado 100%
+> - Logística (Almacenes): ✅ Completado 95% (falta dialog crear/editar operación)
 
 **Progreso Global: ~55%**
 
@@ -105,9 +107,19 @@
 
 ---
 
-## Sprint 2: Módulo TEMPO - COMPLETADO 95%
+## Sprint 2: Módulo TEMPO - EN PROGRESO 75%
 
-### Backend
+> **IMPORTANTE:** TEMPO incluye 4 submódulos según TR-Requisitos v1.3:
+> 1. **Calendario/Actividades** (espacios tipo Sala) - ✅ Completado
+> 2. **Espacios** (CRUD salas y almacenes) - ✅ Completado
+> 3. **Cartelería Digital** (global + por sala) - ✅ Completado
+> 4. **Logística** (espacios tipo Almacén: Arganda-Campa, Arganda-Nave) - ⏳ En Progreso
+
+---
+
+### Submódulo 1: Calendario/Actividades (Salas) - COMPLETADO 98%
+
+#### Backend
 
 | Tarea | Estado | Notas |
 |-------|--------|-------|
@@ -129,7 +141,7 @@
 | Filtros y búsqueda actividades | [x] Completado | |
 | Tests TEMPO | [ ] Pendiente | |
 
-### Frontend
+#### Frontend
 
 | Tarea | Estado | Notas |
 |-------|--------|-------|
@@ -154,21 +166,92 @@
 | Cartelería por Sala | [x] Completado | features/carteleria/carteleria-sala/ |
 | Tests TEMPO | [ ] Pendiente | |
 
-### Verificación Sprint 2
+#### Verificación Submódulo Calendario/Actividades
 
 - [x] Calendario visual con actividades (mes/semana/día sin scroll)
 - [x] Crear/editar/eliminar actividades
 - [x] Modal "Nueva Actividad" desde calendario
 - [x] Clonar actividades
-- [x] Estados de almacén (PENDIENTE, EN_TRANSITO, COMPLETADO)
 - [x] Vista semanal tipo Excel
 - [x] Filtros por espacio, tipo y temporada
+- [x] Layout responsive con altura completa
+- [ ] Tests unitarios pendientes
+
+---
+
+### Submódulo 2: Espacios - COMPLETADO 100%
+
 - [x] CRUD de espacios (dashboard completo)
 - [x] CRUD de tipos de actividad
 - [x] CRUD de departamentos
-- [x] Cartelería global y por sala
-- [x] Layout responsive con altura completa
-- [ ] Tests unitarios pendientes
+- [x] Espacios tipo Sala y tipo Almacén
+
+---
+
+### Submódulo 3: Cartelería Digital - COMPLETADO 100%
+
+- [x] Cartelería global (todas las salas del día)
+- [x] Cartelería por sala (actividades de una sala)
+- [x] SignageService + Controller backend
+- [x] Auto-refresh de contenido
+
+---
+
+### Submódulo 4: Logística (Almacenes) - COMPLETADO 95%
+
+> **Según TR-Requisitos v1.3:** Los espacios tipo "Almacén" (Arganda-Campa, Arganda-Nave)
+> tienen actividades logísticas especiales: RECOGIDA (verde) y SALIDA (rosa) de producciones.
+
+#### Backend - COMPLETADO 100%
+
+| Tarea | Estado | Notas |
+|-------|--------|-------|
+| Usa entidad Actividad existente | [x] Completado | Campos v1.3 ya existían en Actividad.java |
+| Migración V5 (Arganda-Campa, Nave) | [x] Completado | V5__logistica_almacenes_v1_3.sql |
+| ActividadRepository (queries logística) | [x] Completado | findOperacionesAlmacen, countByEstado |
+| LogisticaService | [x] Completado | CRUD + transiciones estado |
+| LogisticaController | [x] Completado | /api/logistica/* |
+| GET /api/logistica/summary | [x] Completado | Estadísticas para dashboard |
+| GET /api/logistica/calendario | [x] Completado | Para FullCalendar |
+| PUT /api/.../iniciar-transito | [x] Completado | PENDIENTE→EN_TRANSITO |
+| PUT /api/.../completar | [x] Completado | EN_TRANSITO→COMPLETADO |
+
+#### Frontend - COMPLETADO 90%
+
+| Tarea | Estado | Notas |
+|-------|--------|-------|
+| LogisticaComponent (landing) | [x] Completado | features/tempo/logistica/ |
+| LogisticaService | [x] Completado | Conectado a backend real |
+| Vista con estadísticas | [x] Completado | Programados, En tránsito, Completados |
+| Filtros por tipo/estado | [x] Completado | |
+| Lista de operaciones | [x] Completado | |
+| Calendario Logística (FullCalendar) | [x] Completado | logistica-calendario.component.ts |
+| Colores calendario | [x] Completado | Verde=RECOGIDA, Rosa=SALIDA, Amarillo=INTERNO |
+| Botones transición estado | [x] Completado | Pendiente→Tránsito→Completado |
+| **Dialog crear operación** | [ ] **PENDIENTE** | Campos v1.3 (nº camiones, origen, destino) |
+
+#### Requisitos v1.3 para Logística
+
+| Requisito | Estado | Descripción |
+|-----------|--------|-------------|
+| Almacenes | [x] Completado | Arganda-Campa, Arganda-Nave en V5 migration |
+| Tipos operación | [x] Completado | RECOGIDA (verde), SALIDA (rosa), INTERNO (amarillo) |
+| Estados | [x] Completado | PENDIENTE → EN_TRANSITO → COMPLETADO |
+| Vista calendario | [x] Completado | Vista mes, semana, día con FullCalendar |
+| Campos v1.3 | [x] Completado | Nº camiones, lugar origen/destino en entidad |
+| Botones transición | [x] Completado | Botones para cambiar estado en lista |
+| Filtros | [x] Completado | Por tipo movimiento y estado |
+
+#### Verificación Submódulo Logística
+
+- [x] Landing con estadísticas
+- [x] Lista de operaciones con filtros
+- [x] Calendario FullCalendar (mes/semana/día)
+- [x] Colores: verde=recogida, rosa=salida, amarillo=interno
+- [ ] Dialog con campos v1.3 (modal para crear/editar) - pendiente
+- [x] Botones de transición de estado
+- [x] Backend completo (service, controller, repository queries)
+- [ ] Tests unitarios
 
 ---
 
@@ -289,67 +372,6 @@
 
 ---
 
-## Módulo Logística - INCLUIDO EN PLANIFICACIÓN (Requisitos v1.3)
-
-> **ACTUALIZACIÓN 2025-01-23:** Módulo ahora incluido formalmente en la planificación.
-> Ver: PLANIFICACION_3_SEMANAS.md (Semana 2), PLAN_IMPLEMENTACION_FRONTEND/BACKEND_v2.md
-
-### Requisitos según TR-Requisitos Generales v1.3
-
-| Requisito | Estado | Descripción |
-|-----------|--------|-------------|
-| Almacenes | [ ] Pendiente | Arganda-Campa, Arganda-Nave (espacios tipo ALMACEN) |
-| Tipos operación | [~] Parcial | RECOGIDA (verde), SALIDA (rosa) |
-| Estados | [~] Parcial | PENDIENTE_INICIO → EN_TRANSITO → COMPLETADO |
-| **Vista calendario** | [ ] Pendiente | **Vista mes, semana, día (como TEMPO)** |
-| Campos v1.3 | [ ] Pendiente | Nº camiones, lugar origen/destino |
-| Botones transición | [ ] Pendiente | Botones para cambiar estado |
-| Filtros | [~] Parcial | Por almacén, tipo, temporada, fecha |
-
-### Frontend - IMPLEMENTADO 50% (falta calendario y campos v1.3)
-
-| Tarea | Estado | Notas |
-|-------|--------|-------|
-| LogisticaComponent (landing) | [x] Completado | features/tempo/logistica/ |
-| LogisticaService | [x] Completado | features/tempo/logistica/ |
-| Vista con estadísticas | [x] Completado | Programados, En tránsito, Completados |
-| Filtros por tipo/estado | [x] Completado | |
-| Lista de operaciones | [x] Completado | |
-| MovimientosListComponent | [x] Completado | features/tempo/movimientos/ |
-| ProduccionesListComponent | [x] Completado | features/tempo/producciones/ |
-| **Calendario Logística (FullCalendar)** | [ ] **PENDIENTE** | **Vista mes/semana/día (v1.3)** |
-| **Colores calendario** | [ ] **PENDIENTE** | **Verde=RECOGIDA, Rosa=SALIDA** |
-| **Dialog crear operación (campos v1.3)** | [ ] **PENDIENTE** | **Nº camiones, origen, destino, almacén** |
-| **Botones transición estado** | [ ] **PENDIENTE** | **Pendiente→Tránsito→Completado** |
-| Ver detalle operación | [ ] Pendiente | |
-
-### Backend - PENDIENTE 0%
-
-| Tarea | Estado | Notas |
-|-------|--------|-------|
-| Entidad OperacionLogistica (v1.3) | [ ] Pendiente | Campos: numeroCamiones, lugarOrigen, lugarDestino |
-| Migración SQL (espacios ALMACEN) | [ ] Pendiente | Arganda-Campa, Arganda-Nave |
-| OperacionLogisticaRepository | [ ] Pendiente | Con queries para calendario |
-| LogisticaService | [ ] Pendiente | CRUD + transiciones estado |
-| LogisticaController | [ ] Pendiente | Endpoints v1.3 |
-| GET /api/logistica/calendario | [ ] Pendiente | Para FullCalendar |
-| PUT /api/.../iniciar-transito | [ ] Pendiente | Botón PENDIENTE→EN_TRANSITO |
-| PUT /api/.../completar | [ ] Pendiente | Botón EN_TRANSITO→COMPLETADO |
-
-### Rutas Configuradas
-
-- `/tempo/movimientos` → LogisticaComponent (landing con estadísticas)
-- `/tempo/producciones` → ProduccionesListComponent
-
-### Próximos Pasos (Semana 2)
-
-1. **Backend:** Crear entidades, migración, service y controller
-2. **Frontend:** Añadir vista calendario con FullCalendar
-3. **Frontend:** Crear dialog con campos v1.3 (nºcamiones, origen, destino)
-4. **Frontend:** Implementar botones de transición de estado
-
----
-
 ## Módulo Admin - PLACEHOLDER 5%
 
 ### Estado Actual
@@ -439,44 +461,60 @@ teatro-real-frontend/src/app/
 
 ## Tareas Prioritarias - Próximos Pasos
 
-### ALTA PRIORIDAD (TOPS)
+### ALTA PRIORIDAD (TEMPO-Logística) - Esta Semana ✅ CASI COMPLETO
 
-1. [ ] **Backend: Crear GuionService.java**
+> Submódulo Logística de TEMPO prácticamente completado
+
+1. [x] **Backend: Usa entidad Actividad existente + migration V5**
+   - Campos v1.3 ya existían en Actividad.java
+   - V5__logistica_almacenes_v1_3.sql añade Arganda-Campa/Nave
+
+2. [x] **Backend: LogisticaService + Controller**
+   - Queries específicas para almacenes en ActividadRepository
+   - Transiciones de estado (PUT /iniciar-transito, /completar)
+   - GET /calendario para FullCalendar
+
+3. [x] **Frontend: Calendario Logística (FullCalendar)**
+   - Vista mes/semana/día
+   - Colores: verde=RECOGIDA, rosa=SALIDA, amarillo=INTERNO
+   - Ruta: /tempo/movimientos/calendario
+
+4. [ ] **Frontend: Dialog crear operación v1.3**
+   - Campos: nº camiones, origen, destino, almacén
+   - Validaciones (PENDIENTE)
+
+5. [x] **Frontend: Botones transición estado**
+   - Pendiente → En tránsito → Completado
+   - Actualización en tiempo real
+
+### MEDIA PRIORIDAD (TOPS) - Próxima Semana
+
+6. [ ] **Backend: Crear GuionService.java**
    - CRUD guiones
    - Lock/unlock para edición
    - Filtro por temporada
 
-2. [ ] **Backend: Crear GuionController.java**
-   - GET /api/guiones
-   - GET /api/guiones/{id}
-   - POST /api/guiones
-   - PUT /api/guiones/{id}
-   - DELETE /api/guiones/{id}
+7. [ ] **Backend: Crear GuionController.java**
+   - GET/POST/PUT/DELETE /api/guiones
    - POST /api/guiones/{id}/lock
    - POST /api/guiones/{id}/unlock
 
-3. [ ] **Frontend: Crear TOPS Landing**
+8. [ ] **Frontend: Crear TOPS Landing**
    - Lista guiones de temporada
    - Lista mis guiones
 
-4. [ ] **Frontend: Crear Editor TOPS**
+9. [ ] **Frontend: Crear Editor TOPS**
    - Panel actos expandible
    - Panel escenas
    - Elementos con colores
 
-### MEDIA PRIORIDAD
-
-5. [ ] **Documentar módulo Logística en plan**
-6. [ ] **Implementar backend Logística**
-7. [ ] **Admin: CRUD Usuarios**
-8. [ ] **Admin: Gestión permisos**
-
 ### BAJA PRIORIDAD
 
-9. [ ] Tests unitarios backend
-10. [ ] Tests unitarios frontend
-11. [ ] Google Calendar sync
-12. [ ] Export Word
+10. [ ] **Admin: CRUD Usuarios**
+11. [ ] **Admin: Gestión permisos**
+12. [ ] Tests unitarios backend/frontend
+13. [ ] Google Calendar sync
+14. [ ] Export Word
 
 ---
 
@@ -537,8 +575,11 @@ npm test         # Tests
 | 2026-01-24 | Calendario TEMPO: vistas mes/semana/día con altura completa sin scroll | Claude |
 | 2026-01-24 | Añadido modal "Nueva Actividad" en calendario TEMPO | Claude |
 | 2026-01-24 | Limpieza UI: quitados contadores redundantes del header calendario | Claude |
+| 2026-01-24 | Reestructurado: Logística y Cartelería son submódulos de TEMPO (no módulos separados) | Claude |
+| 2026-01-24 | TEMPO-Logística backend completo: LogisticaService, LogisticaController, migration V5 | Claude |
+| 2026-01-24 | TEMPO-Logística frontend: Calendario FullCalendar, botones transición estado | Claude |
 
 ---
 
 *Última actualización: 2026-01-24*
-*Progreso Global: ~58%*
+*Progreso Global: ~55%* (TEMPO 92% completado)
