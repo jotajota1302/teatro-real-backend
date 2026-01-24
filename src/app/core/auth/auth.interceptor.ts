@@ -71,9 +71,12 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
       }
 
       // Error de red (backend caído, sin conexión, etc.)
-      if (isNetworkError(error)) {
+      // NO reportar errores de logout (fire-and-forget, no debe afectar el estado)
+      if (isNetworkError(error) && !isLogoutRequest(req.url)) {
         backendStatus.reportError(error);
         // NO redirigir a login - simplemente reportar el error
+      }
+      if (isNetworkError(error)) {
         return throwError(() => error);
       }
 
@@ -142,4 +145,12 @@ function isHealthCheck(url: string): boolean {
  */
 function isAuthRequest(url: string): boolean {
   return url.includes('/api/auth/') || url.includes('/api/usuarios/me');
+}
+
+/**
+ * Verifica si es una petición de logout.
+ * El logout es fire-and-forget y no debe afectar el BackendStatusService.
+ */
+function isLogoutRequest(url: string): boolean {
+  return url.includes('/auth/logout');
 }

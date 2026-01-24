@@ -7,6 +7,12 @@ export const modulePermissionGuard: CanActivateFn = (route: ActivatedRouteSnapsh
   const auth = inject(AuthService);
   const router = inject(Router);
 
+  // Si no hay autenticación, dejar que authGuard maneje la redirección
+  // Esto evita race conditions durante el logout
+  if (!auth.isAuthenticated()) {
+    return true; // authGuard se encargará de redirigir a login
+  }
+
   const modulo = route.data['modulo'] as Modulo | undefined;
   if (!modulo) return true; // Si no se especifica el módulo, no bloquea
 

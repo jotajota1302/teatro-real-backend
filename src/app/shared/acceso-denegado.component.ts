@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { BackendStatusService } from '../core/services/backend-status.service';
 
 @Component({
   selector: 'app-acceso-denegado',
@@ -18,11 +19,13 @@ import { MatButtonModule } from '@angular/material/button';
 })
 export class AccesoDenegadoComponent {
   private router = inject(Router);
+  private backendStatus = inject(BackendStatusService);
 
   volverAlLogin(): void {
-    // Limpiar cualquier estado de auth antes de ir al login
+    // Limpiar cualquier estado de auth y backend antes de ir al login
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
+    this.backendStatus.reset();
     this.router.navigate(['/auth/login']);
   }
 }

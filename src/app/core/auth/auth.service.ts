@@ -72,6 +72,10 @@ export class AuthService {
               activo: true
             };
             this.setAuth(res.token, usuario);
+            // IMPORTANTE: Establecer permisos por defecto SÍNCRONAMENTE
+            // para que estén disponibles inmediatamente al navegar
+            this.setDefaultPermisos();
+            // Luego intentar cargar permisos reales del backend (asíncrono)
             this.loadPermisosModulo();
           })
         )
@@ -108,6 +112,7 @@ export class AuthService {
         };
         const devToken = 'dev-token-' + Date.now();
         this.setAuth(devToken, devUser);
+        this.setDefaultPermisos(); // Establecer permisos antes de navegar
         this.router.navigate(['/']);
       }
     });
@@ -143,21 +148,18 @@ export class AuthService {
     );
   }
 
-  // Logout: primero llama al backend, después limpia FE
+  // Logout: limpia FE inmediatamente, luego notifica al backend (fire-and-forget)
   logout(): void {
-    this.http.post(`${this.API_URL}/logout`, {}).subscribe({
-      next: () => {
-        this.clearAuth();
-        this.backendStatus.reset(); // Resetear estado para permitir nuevo login
-        this.router.navigate(['/auth/login']);
-      },
-      error: () => {
-        // Si da error, igual limpia estado y redirige
-        this.clearAuth();
-        this.backendStatus.reset(); // Resetear estado para permitir nuevo login
-        this.router.navigate(['/auth/login']);
-      }
-    });
+    // IMPORTANTE: Limpiar estado local PRIMERO para evitar race conditions
+    // y redirecciones a acceso-denegado por peticiones pendientes
+    this.clearAuth();
+    this.backendStatus.reset();
+
+    // Navegar al login inmediatamente
+    this.router.navigate(['/auth/login']);
+
+    // Notificar al backend de forma asíncrona (fire-and-forget)
+    this.http.post(`${this.API_URL}/logout`, {}).subscribe();
   }
 
   getToken(): string | null {
