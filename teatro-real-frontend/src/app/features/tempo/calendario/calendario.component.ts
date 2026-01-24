@@ -12,6 +12,7 @@ import { ActividadService } from '../services/actividad.service';
 import { EspacioService } from '../services/espacio.service';
 import { TipoActividadService } from '../services/tipo-actividad.service';
 import { TemporadaService } from '../../../core/services/temporada.service';
+import { ThemeService } from '../../../core/services/theme.service';
 
 /**
  * Componente Calendario con FullCalendar integrado.
@@ -24,13 +25,13 @@ import { TemporadaService } from '../../../core/services/temporada.service';
   standalone: true,
   imports: [CommonModule, FullCalendarModule],
   template: `
-    <div class="page">
+    <div class="page" [class]="isDark() ? 'page-dark' : 'page-light'">
       <!-- Header - mismo estilo que Espacios -->
       <div class="header-section">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div>
-            <h1 class="text-3xl font-semibold text-gray-800">Calendario de Actividades</h1>
-            <p class="text-gray-500">Visualiza y gestiona todas las actividades del Teatro Real</p>
+            <h1 class="text-3xl font-semibold" [class]="isDark() ? 'text-white' : 'text-gray-800'">Calendario de Actividades</h1>
+            <p [class]="isDark() ? 'text-gray-400' : 'text-gray-500'">Visualiza y gestiona todas las actividades del Teatro Real</p>
           </div>
           <button class="btn-nuevo" (click)="abrirModalNuevaActividad()">
             <span class="material-icons text-lg">add</span>
@@ -40,28 +41,28 @@ import { TemporadaService } from '../../../core/services/temporada.service';
       </div>
 
       <!-- Filtros compactos -->
-      <div class="filters-section">
+      <div class="filters-section" [class]="isDark() ? 'filters-dark' : 'filters-light'">
         <div class="flex flex-wrap gap-3 items-center">
-          <select class="form-select-sm" [value]="selectedEspacioId()" (change)="onEspacioChange($event)">
+          <select [class]="isDark() ? 'form-select-sm-dark' : 'form-select-sm'" [value]="selectedEspacioId()" (change)="onEspacioChange($event)">
             <option value="">Todos los espacios</option>
             <option *ngFor="let espacio of espacios()" [value]="espacio.id">{{ espacio.nombre }}</option>
           </select>
-          <select class="form-select-sm" [value]="selectedTipoId()" (change)="onTipoChange($event)">
+          <select [class]="isDark() ? 'form-select-sm-dark' : 'form-select-sm'" [value]="selectedTipoId()" (change)="onTipoChange($event)">
             <option value="">Todos los tipos</option>
             <option *ngFor="let tipo of tipos()" [value]="tipo.id">{{ tipo.nombre }}</option>
           </select>
-          <select class="form-select-sm" [value]="selectedTemporadaId()" (change)="onTemporadaChange($event)">
+          <select [class]="isDark() ? 'form-select-sm-dark' : 'form-select-sm'" [value]="selectedTemporadaId()" (change)="onTemporadaChange($event)">
             <option value="">Todas las temporadas</option>
             <option *ngFor="let temp of temporadas()" [value]="temp.id">{{ temp.nombre }}</option>
           </select>
-          <button class="btn-sm-secondary" (click)="resetFiltros()">Limpiar</button>
+          <button [class]="isDark() ? 'btn-sm-secondary-dark' : 'btn-sm-secondary'" (click)="resetFiltros()">Limpiar</button>
         </div>
       </div>
 
       <!-- Calendario - ocupa el resto del espacio -->
-      <div class="calendar-wrapper">
+      <div class="calendar-wrapper" [class]="isDark() ? 'calendar-wrapper-dark' : 'calendar-wrapper-light'">
         @if (actividadService.loading()) {
-          <div class="loading-overlay">
+          <div class="loading-overlay" [class]="isDark() ? 'loading-overlay-dark' : ''">
             <div class="animate-spin w-8 h-8 border-4 border-[#CF102D] border-t-transparent rounded-full"></div>
           </div>
         }
@@ -71,30 +72,30 @@ import { TemporadaService } from '../../../core/services/temporada.service';
       <!-- Modal Nueva Actividad -->
       @if (modalAbierto()) {
         <div class="modal-overlay" (click)="cerrarModal()">
-          <div class="modal-content" (click)="$event.stopPropagation()">
-            <div class="modal-header">
-              <h2>Nueva Actividad</h2>
-              <button class="modal-close" (click)="cerrarModal()">
+          <div [class]="isDark() ? 'modal-content modal-dark' : 'modal-content'" (click)="$event.stopPropagation()">
+            <div class="modal-header" [class]="isDark() ? 'modal-header-dark' : ''">
+              <h2 [class]="isDark() ? 'text-white' : ''">Nueva Actividad</h2>
+              <button class="modal-close" [class]="isDark() ? 'modal-close-dark' : ''" (click)="cerrarModal()">
                 <span class="material-icons">close</span>
               </button>
             </div>
             <div class="modal-body">
               <div class="form-group">
-                <label>Título *</label>
-                <input type="text" [value]="formData().titulo" (input)="updateForm('titulo', $event)" placeholder="Nombre de la actividad">
+                <label [class]="isDark() ? 'text-gray-300' : ''">Título *</label>
+                <input type="text" [class]="isDark() ? 'input-dark' : ''" [value]="formData().titulo" (input)="updateForm('titulo', $event)" placeholder="Nombre de la actividad">
               </div>
 
               <div class="form-row">
                 <div class="form-group">
-                  <label>Tipo de Actividad *</label>
-                  <select [value]="formData().tipoActividadId" (change)="updateForm('tipoActividadId', $event)">
+                  <label [class]="isDark() ? 'text-gray-300' : ''">Tipo de Actividad *</label>
+                  <select [class]="isDark() ? 'input-dark' : ''" [value]="formData().tipoActividadId" (change)="updateForm('tipoActividadId', $event)">
                     <option value="">Seleccionar tipo</option>
                     <option *ngFor="let tipo of tipos()" [value]="tipo.id">{{ tipo.nombre }}</option>
                   </select>
                 </div>
                 <div class="form-group">
-                  <label>Espacio *</label>
-                  <select [value]="formData().espacioId" (change)="updateForm('espacioId', $event)">
+                  <label [class]="isDark() ? 'text-gray-300' : ''">Espacio *</label>
+                  <select [class]="isDark() ? 'input-dark' : ''" [value]="formData().espacioId" (change)="updateForm('espacioId', $event)">
                     <option value="">Seleccionar espacio</option>
                     <option *ngFor="let esp of espacios()" [value]="esp.id">{{ esp.nombre }}</option>
                   </select>
@@ -102,28 +103,28 @@ import { TemporadaService } from '../../../core/services/temporada.service';
               </div>
 
               <div class="form-group">
-                <label>Fecha *</label>
-                <input type="date" [value]="formData().fecha" (input)="updateForm('fecha', $event)">
+                <label [class]="isDark() ? 'text-gray-300' : ''">Fecha *</label>
+                <input type="date" [class]="isDark() ? 'input-dark' : ''" [value]="formData().fecha" (input)="updateForm('fecha', $event)">
               </div>
 
               <div class="form-row">
                 <div class="form-group">
-                  <label>Hora Inicio *</label>
-                  <input type="time" [value]="formData().horaInicio" (input)="updateForm('horaInicio', $event)">
+                  <label [class]="isDark() ? 'text-gray-300' : ''">Hora Inicio *</label>
+                  <input type="time" [class]="isDark() ? 'input-dark' : ''" [value]="formData().horaInicio" (input)="updateForm('horaInicio', $event)">
                 </div>
                 <div class="form-group">
-                  <label>Hora Fin *</label>
-                  <input type="time" [value]="formData().horaFin" (input)="updateForm('horaFin', $event)">
+                  <label [class]="isDark() ? 'text-gray-300' : ''">Hora Fin *</label>
+                  <input type="time" [class]="isDark() ? 'input-dark' : ''" [value]="formData().horaFin" (input)="updateForm('horaFin', $event)">
                 </div>
               </div>
 
               <div class="form-group">
-                <label>Descripción</label>
-                <textarea rows="3" [value]="formData().descripcion" (input)="updateForm('descripcion', $event)" placeholder="Notas adicionales..."></textarea>
+                <label [class]="isDark() ? 'text-gray-300' : ''">Descripción</label>
+                <textarea rows="3" [class]="isDark() ? 'input-dark' : ''" [value]="formData().descripcion" (input)="updateForm('descripcion', $event)" placeholder="Notas adicionales..."></textarea>
               </div>
             </div>
-            <div class="modal-footer">
-              <button class="btn-cancel" (click)="cerrarModal()">Cancelar</button>
+            <div class="modal-footer" [class]="isDark() ? 'modal-footer-dark' : ''">
+              <button [class]="isDark() ? 'btn-cancel-dark' : 'btn-cancel'" (click)="cerrarModal()">Cancelar</button>
               <button class="btn-save" (click)="guardarActividad()" [disabled]="guardando()">
                 @if (guardando()) {
                   <span class="animate-spin mr-2">⏳</span>
@@ -141,16 +142,24 @@ import { TemporadaService } from '../../../core/services/temporada.service';
       display: block;
       height: 100%;
       overflow: hidden;
-      background: #f2f4f7;
     }
 
     .page {
       display: flex;
       flex-direction: column;
       height: 100%;
-      background: #f2f4f7;
       overflow: hidden;
       padding: 1.5rem 2rem;
+    }
+
+    .page-light {
+      background: #f2f4f7;
+    }
+
+    .page-dark {
+      background: #1a1a1a;
+      border-radius: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .header-section {
@@ -164,12 +173,21 @@ import { TemporadaService } from '../../../core/services/temporada.service';
 
     .filters-section {
       flex-shrink: 0;
-      background: #ffffff;
       border-radius: 0.9rem;
       padding: 1.2rem;
       margin-bottom: 1.5rem;
+    }
+
+    .filters-light {
+      background: #ffffff;
       border: 1px solid rgba(15, 23, 42, 0.08);
       box-shadow: 0 15px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    .filters-dark {
+      background: #1a1a1a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
     }
 
     .form-select-sm {
@@ -186,6 +204,27 @@ import { TemporadaService } from '../../../core/services/temporada.service';
     .form-select-sm:focus {
       outline: none;
       border-color: #CF102D;
+    }
+
+    .form-select-sm-dark {
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #374151;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      background: #262626;
+      color: #e5e7eb;
+      cursor: pointer;
+      min-width: 140px;
+    }
+
+    .form-select-sm-dark:focus {
+      outline: none;
+      border-color: #CF102D;
+    }
+
+    .form-select-sm-dark option {
+      background: #262626;
+      color: #e5e7eb;
     }
 
     .btn-sm-primary {
@@ -215,6 +254,20 @@ import { TemporadaService } from '../../../core/services/temporada.service';
 
     .btn-sm-secondary:hover {
       background: #e5e7eb;
+    }
+
+    .btn-sm-secondary-dark {
+      padding: 0.4rem 0.75rem;
+      background: #262626;
+      color: #e5e7eb;
+      border: 1px solid #374151;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .btn-sm-secondary-dark:hover {
+      background: #333333;
     }
 
     .btn-nuevo {
@@ -263,12 +316,21 @@ import { TemporadaService } from '../../../core/services/temporada.service';
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
     }
 
+    .modal-dark {
+      background: #1a1a1a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
     .modal-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: 1.25rem 1.5rem;
       border-bottom: 1px solid #e5e7eb;
+    }
+
+    .modal-header-dark {
+      border-bottom-color: #333;
     }
 
     .modal-header h2 {
@@ -290,6 +352,15 @@ import { TemporadaService } from '../../../core/services/temporada.service';
     .modal-close:hover {
       background: #f3f4f6;
       color: #1f2937;
+    }
+
+    .modal-close-dark {
+      color: #9ca3af;
+    }
+
+    .modal-close-dark:hover {
+      background: #333;
+      color: #e5e7eb;
     }
 
     .modal-body {
@@ -331,6 +402,21 @@ import { TemporadaService } from '../../../core/services/temporada.service';
       box-shadow: 0 0 0 3px rgba(207, 16, 45, 0.1);
     }
 
+    .input-dark {
+      background: #262626 !important;
+      border-color: #374151 !important;
+      color: #e5e7eb !important;
+    }
+
+    .input-dark:focus {
+      border-color: #CF102D !important;
+    }
+
+    .input-dark option {
+      background: #262626;
+      color: #e5e7eb;
+    }
+
     .form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -347,6 +433,11 @@ import { TemporadaService } from '../../../core/services/temporada.service';
       border-radius: 0 0 12px 12px;
     }
 
+    .modal-footer-dark {
+      background: #0d0d0d;
+      border-top-color: #333;
+    }
+
     .btn-cancel {
       padding: 0.6rem 1rem;
       background: white;
@@ -360,6 +451,21 @@ import { TemporadaService } from '../../../core/services/temporada.service';
 
     .btn-cancel:hover {
       background: #f3f4f6;
+    }
+
+    .btn-cancel-dark {
+      padding: 0.6rem 1rem;
+      background: #262626;
+      color: #e5e7eb;
+      border: 1px solid #374151;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn-cancel-dark:hover {
+      background: #333;
     }
 
     .btn-save {
@@ -387,15 +493,24 @@ import { TemporadaService } from '../../../core/services/temporada.service';
     .calendar-wrapper {
       flex: 1 1 0;
       min-height: 0;
-      background: #ffffff;
       border-radius: 1rem;
       padding: 1.4rem;
-      border: 1px solid rgba(15, 23, 42, 0.08);
-      box-shadow: 0 20px 35px rgba(15, 23, 42, 0.1);
       position: relative;
       overflow: hidden;
       display: flex;
       flex-direction: column;
+    }
+
+    .calendar-wrapper-light {
+      background: #ffffff;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 20px 35px rgba(15, 23, 42, 0.1);
+    }
+
+    .calendar-wrapper-dark {
+      background: #1a1a1a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.3);
     }
 
     .calendar-wrapper full-calendar {
@@ -411,6 +526,10 @@ import { TemporadaService } from '../../../core/services/temporada.service';
       align-items: center;
       justify-content: center;
       z-index: 10;
+    }
+
+    .loading-overlay-dark {
+      background: rgba(26, 26, 26, 0.9);
     }
 
     /* FullCalendar overrides - altura completa */
@@ -710,6 +829,65 @@ import { TemporadaService } from '../../../core/services/temporada.service';
     :host ::ng-deep .fc-timegrid-now-indicator-arrow {
       border-color: #CF102D !important;
     }
+
+    /* ========================================= */
+    /* DARK MODE FULLCALENDAR OVERRIDES */
+    /* ========================================= */
+    :host ::ng-deep .calendar-wrapper-dark .fc {
+      color: #e5e7eb;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-toolbar-title {
+      color: #e5e7eb !important;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-scrollgrid {
+      border-color: #374151 !important;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-theme-standard td,
+    :host ::ng-deep .calendar-wrapper-dark .fc-theme-standard th {
+      border-color: #374151 !important;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-col-header-cell-cushion {
+      color: #9ca3af;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-daygrid-day-number {
+      color: #e5e7eb;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-day-other {
+      background: #0d0d0d !important;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-day-today {
+      background-color: rgba(207, 16, 45, 0.15) !important;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-daygrid-more-link {
+      color: #CF102D !important;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-timegrid-slot-label {
+      color: #9ca3af;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-button-primary {
+      background-color: #CF102D !important;
+      border-color: #CF102D !important;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-button-primary:hover {
+      background-color: #a80d25 !important;
+      border-color: #a80d25 !important;
+    }
+
+    :host ::ng-deep .calendar-wrapper-dark .fc-button-primary:not(:disabled).fc-button-active {
+      background-color: #8a0b1e !important;
+      border-color: #8a0b1e !important;
+    }
   `]
 })
 export class CalendarioComponent implements OnInit {
@@ -719,6 +897,10 @@ export class CalendarioComponent implements OnInit {
   private tipoActividadService = inject(TipoActividadService);
   private temporadaService = inject(TemporadaService);
   private destroyRef = inject(DestroyRef);
+  private themeService = inject(ThemeService);
+
+  // Dark mode
+  isDark = this.themeService.isDark;
 
   // State signals para filtros seleccionados
   selectedEspacioId = signal<string | ''>('');
