@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { interval, Subscription } from 'rxjs';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -29,7 +29,7 @@ interface SignageEntry {
 @Component({
   selector: 'app-carteleria-sala',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   template: `
     <div class="carteleria-sala h-screen text-white overflow-hidden"
          [style.background]="'linear-gradient(135deg, ' + (espacio()?.espacioColor || '#1e293b') + '30, #0f172a)'">
@@ -46,9 +46,16 @@ interface SignageEntry {
             <h1 class="text-4xl font-bold">{{ espacio()?.espacioNombre || 'Cargando...' }}</h1>
           </div>
         </div>
-        <div class="text-right">
-          <div class="text-2xl font-light">{{ formattedDate }}</div>
-          <div class="text-6xl font-bold tracking-wider">{{ currentTime() }}</div>
+        <div class="flex items-center gap-6">
+          <div class="text-right">
+            <div class="text-2xl font-light">{{ formattedDate }}</div>
+            <div class="text-6xl font-bold tracking-wider">{{ currentTime() }}</div>
+          </div>
+          <a routerLink="/tempo/carteleria"
+             class="p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors"
+             title="Volver al panel">
+            <span class="material-icons text-3xl">close</span>
+          </a>
         </div>
       </div>
 

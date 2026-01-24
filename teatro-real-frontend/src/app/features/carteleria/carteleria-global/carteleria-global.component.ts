@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { interval, Subscription } from 'rxjs';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -28,7 +29,7 @@ interface SignageEntry {
 @Component({
   selector: 'app-carteleria-global',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   template: `
     <div class="carteleria-global h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
       <!-- Header -->
@@ -43,9 +44,16 @@ interface SignageEntry {
           <div class="text-xl font-light opacity-90">{{ formattedDate() }}</div>
           <div class="text-4xl font-bold tracking-wider">{{ currentTime() }}</div>
         </div>
-        <div class="text-right">
-          <div class="text-sm opacity-70">Cartelería Digital</div>
-          <div class="text-lg font-semibold">Vista Global</div>
+        <div class="flex items-center gap-4">
+          <div class="text-right">
+            <div class="text-sm opacity-70">Cartelería Digital</div>
+            <div class="text-lg font-semibold">Vista Global</div>
+          </div>
+          <a routerLink="/tempo/carteleria"
+             class="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+             title="Volver al panel">
+            <span class="material-icons text-2xl">close</span>
+          </a>
         </div>
       </div>
 
