@@ -44,7 +44,15 @@ export class ActividadService {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
 
-    return this.api.get<Actividad[]>('/api/actividades/search', filter).pipe(
+    // Limpiar valores undefined/null para evitar que se serialicen mal
+    const cleanFilter: Record<string, string> = {};
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        cleanFilter[key] = String(value);
+      }
+    });
+
+    return this.api.get<Actividad[]>('/api/actividades/search', cleanFilter).pipe(
       tap(actividades => {
         this.actividadesSignal.set(actividades);
         this.loadingSignal.set(false);
@@ -64,14 +72,14 @@ export class ActividadService {
    * Obtiene una actividad concreta por ID.
    */
   getById(id: string): Observable<Actividad> {
-    return this.api.get<Actividad>(`/actividades/${id}`);
+    return this.api.get<Actividad>(`/api/actividades/${id}`);
   }
 
   /**
    * Registra una nueva actividad.
    */
   create(data: ActividadFormData): Observable<Actividad> {
-    return this.api.post<Actividad>('/actividades', data).pipe(
+    return this.api.post<Actividad>('/api/actividades', data).pipe(
       tap(nueva => {
         this.actividadesSignal.update(list => [...list, nueva]);
       })
@@ -82,7 +90,7 @@ export class ActividadService {
    * Actualiza una actividad existente.
    */
   update(id: string, data: ActividadFormData): Observable<Actividad> {
-    return this.api.put<Actividad>(`/actividades/${id}`, data).pipe(
+    return this.api.put<Actividad>(`/api/actividades/${id}`, data).pipe(
       tap(updated => {
         this.actividadesSignal.update(list =>
           list.map(a => a.id === id ? updated : a)
@@ -95,7 +103,7 @@ export class ActividadService {
    * Elimina una actividad.
    */
   delete(id: string): Observable<void> {
-    return this.api.delete<void>(`/actividades/${id}`).pipe(
+    return this.api.delete<void>(`/api/actividades/${id}`).pipe(
       tap(() => {
         this.actividadesSignal.update(list => list.filter(a => a.id !== id));
       })
@@ -106,7 +114,7 @@ export class ActividadService {
    * Clona una actividad a otra fecha.
    */
   clone(id: string, nuevaFecha: string): Observable<Actividad> {
-    return this.api.post<Actividad>(`/actividades/${id}/clone`, { nuevaFecha }).pipe(
+    return this.api.post<Actividad>(`/api/actividades/${id}/clone`, { nuevaFecha }).pipe(
       tap(clonada => {
         this.actividadesSignal.update(list => [...list, clonada]);
       })
@@ -117,7 +125,7 @@ export class ActividadService {
    * Cambia el estado logístico de una actividad de almacén.
    */
   updateStatus(id: string, estado: 'PENDIENTE' | 'EN_TRANSITO' | 'COMPLETADO'): Observable<Actividad> {
-    return this.api.put<Actividad>(`/actividades/${id}/status`, { estado }).pipe(
+    return this.api.put<Actividad>(`/api/actividades/${id}/status`, { estado }).pipe(
       tap(updated => {
         this.actividadesSignal.update(list =>
           list.map(a => a.id === id ? updated : a)
@@ -137,6 +145,6 @@ export class ActividadService {
    * Exporta el calendario de actividades en formato descargable (ej: Excel/pdf).
    */
   exportCalendario(filter: CalendarioFilter): Observable<Blob> {
-    return this.api.downloadBlob('/actividades/export', filter);
+    return this.api.downloadBlob('/api/actividades/export', filter);
   }
 }

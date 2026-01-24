@@ -34,7 +34,6 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
   // IMPORTANTE: Devolvemos throwError en vez de EMPTY para que los observables completen
   // y los componentes puedan manejar el estado de error correctamente
   if (!backendStatus.shouldAllowRequest() && !isHealthCheck(req.url)) {
-    console.debug(`[Interceptor] Petición bloqueada - backend offline: ${req.url}`);
     return throwError(() => new HttpErrorResponse({
       error: 'Backend offline',
       status: 0,
