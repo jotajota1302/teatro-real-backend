@@ -22,26 +22,26 @@ import { ThemeService } from '../../core/services/theme.service';
     <!-- Indicador de estado del backend -->
     <app-backend-status-indicator></app-backend-status-indicator>
 
-    <!-- Layout principal -->
+    <!-- Layout principal - altura fija sin scroll -->
     <div
-      class="min-h-screen font-montserrat transition-colors duration-300"
+      class="h-screen overflow-hidden font-montserrat transition-colors duration-300"
       [class]="bgClass()">
 
       <!-- Sidebar flotante - oculto en móvil -->
       <app-sidebar class="hidden md:block"></app-sidebar>
 
-      <!-- Área de contenido principal -->
+      <!-- Área de contenido principal - flex column para distribuir altura -->
       <div
-        class="min-h-screen transition-all duration-300"
+        class="h-screen flex flex-col transition-all duration-300"
         [class]="contentAreaClass()">
 
-        <!-- Header -->
-        <div class="sticky top-0 z-30 px-4 pt-4">
+        <!-- Header - altura fija -->
+        <div class="flex-shrink-0 z-30 px-4 pt-4">
           <app-header></app-header>
         </div>
 
-        <!-- Main content -->
-        <main class="p-4 md:p-6">
+        <!-- Main content - flex para que el contenido herede la altura -->
+        <main class="flex-1 min-h-0 flex flex-col p-4 md:p-6">
           <router-outlet></router-outlet>
         </main>
       </div>
@@ -53,6 +53,19 @@ import { ThemeService } from '../../core/services/theme.service';
   styles: [`
     :host {
       display: block;
+    }
+
+    /* Hacer que el contenido del router-outlet ocupe todo el espacio disponible */
+    main {
+      display: flex;
+      flex-direction: column;
+    }
+
+    main ::ng-deep router-outlet + * {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
     }
   `]
 })

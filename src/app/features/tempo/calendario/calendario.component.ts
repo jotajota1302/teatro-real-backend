@@ -25,189 +25,373 @@ import { TemporadaService } from '../../../core/services/temporada.service';
   imports: [CommonModule, FullCalendarModule],
   template: `
     <div class="page">
-      <div class="space-y-6">
-        <!-- Header -->
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <!-- Header compacto -->
+      <div class="header-section">
+        <div class="flex items-center justify-between">
           <div>
-            <h1 class="text-3xl font-semibold text-gray-800">Calendario de Actividades</h1>
-            <p class="text-gray-500">Visualiza y gestiona las actividades programadas</p>
+            <h1 class="text-2xl font-semibold text-gray-800">Calendario de Actividades</h1>
           </div>
-        </div>
-
-        <!-- Stats -->
-        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-          <article class="stat-card">
-            <p class="text-sm text-gray-500 uppercase tracking-wide">Actividades Mes</p>
-            <p class="text-3xl font-semibold text-gray-800 mt-1">{{ actividadService.actividades().length }}</p>
-          </article>
-          <article class="stat-card">
-            <p class="text-sm text-gray-500 uppercase tracking-wide">Espacios</p>
-            <p class="text-3xl font-semibold text-blue-600 mt-1">{{ espacios().length }}</p>
-          </article>
-          <article class="stat-card">
-            <p class="text-sm text-gray-500 uppercase tracking-wide">Tipos</p>
-            <p class="text-3xl font-semibold text-green-600 mt-1">{{ tipos().length }}</p>
-          </article>
-          <article class="stat-card">
-            <p class="text-sm text-gray-500 uppercase tracking-wide">Cargando</p>
-            <p class="text-3xl font-semibold mt-1" [class.text-yellow-600]="actividadService.loading()" [class.text-gray-400]="!actividadService.loading()">
-              {{ actividadService.loading() ? 'Sí' : 'No' }}
-            </p>
-          </article>
-        </div>
-
-        <!-- Filtros -->
-        <div class="card">
-          <div class="flex flex-wrap gap-4 items-end">
-            <div>
-              <label for="filtro-espacio" class="form-label">Espacio</label>
-              <select id="filtro-espacio" class="form-select"
-                [value]="selectedEspacioId()" (change)="onEspacioChange($event)">
-                <option value="">Todos los espacios</option>
-                <option *ngFor="let espacio of espacios()" [value]="espacio.id">
-                  {{ espacio.nombre }}
-                </option>
-              </select>
-            </div>
-            <div>
-              <label for="filtro-tipo" class="form-label">Tipo Actividad</label>
-              <select id="filtro-tipo" class="form-select"
-                [value]="selectedTipoId()" (change)="onTipoChange($event)">
-                <option value="">Todos los tipos</option>
-                <option *ngFor="let tipo of tipos()" [value]="tipo.id">
-                  {{ tipo.nombre }}
-                </option>
-              </select>
-            </div>
-            <div>
-              <label for="filtro-temporada" class="form-label">Temporada</label>
-              <select id="filtro-temporada" class="form-select"
-                [value]="selectedTemporadaId()" (change)="onTemporadaChange($event)">
-                <option value="">Todas</option>
-                <option *ngFor="let temp of temporadas()" [value]="temp.id">
-                  {{ temp.nombre }}
-                </option>
-              </select>
-            </div>
-            <button class="btn-secondary" (click)="resetFiltros()">
-              <span class="material-icons text-sm">clear</span>
-              Limpiar
-            </button>
-            <button class="btn-primary ml-auto" (click)="loadActividades()">
-              <span class="material-icons text-sm">refresh</span>
-              Recargar
-            </button>
-          </div>
-        </div>
-
-        <!-- Calendario -->
-        <div class="card calendar-card">
-          @if (actividadService.loading()) {
-            <div class="loading-overlay">
-              <div class="animate-spin w-8 h-8 border-4 border-[#CF102D] border-t-transparent rounded-full"></div>
-              <p class="mt-2 text-gray-500">Cargando actividades...</p>
-            </div>
-          }
-          <full-calendar [options]="calendarOptions()"></full-calendar>
+          <button class="btn-nueva-actividad" (click)="abrirModalNuevaActividad()">
+            <span class="material-icons text-sm">add</span>
+            Nueva Actividad
+          </button>
         </div>
       </div>
+
+      <!-- Filtros compactos -->
+      <div class="filters-section">
+        <div class="flex flex-wrap gap-3 items-center">
+          <select class="form-select-sm" [value]="selectedEspacioId()" (change)="onEspacioChange($event)">
+            <option value="">Todos los espacios</option>
+            <option *ngFor="let espacio of espacios()" [value]="espacio.id">{{ espacio.nombre }}</option>
+          </select>
+          <select class="form-select-sm" [value]="selectedTipoId()" (change)="onTipoChange($event)">
+            <option value="">Todos los tipos</option>
+            <option *ngFor="let tipo of tipos()" [value]="tipo.id">{{ tipo.nombre }}</option>
+          </select>
+          <select class="form-select-sm" [value]="selectedTemporadaId()" (change)="onTemporadaChange($event)">
+            <option value="">Todas las temporadas</option>
+            <option *ngFor="let temp of temporadas()" [value]="temp.id">{{ temp.nombre }}</option>
+          </select>
+          <button class="btn-sm-secondary" (click)="resetFiltros()">Limpiar</button>
+        </div>
+      </div>
+
+      <!-- Calendario - ocupa el resto del espacio -->
+      <div class="calendar-wrapper">
+        @if (actividadService.loading()) {
+          <div class="loading-overlay">
+            <div class="animate-spin w-8 h-8 border-4 border-[#CF102D] border-t-transparent rounded-full"></div>
+          </div>
+        }
+        <full-calendar [options]="calendarOptions()"></full-calendar>
+      </div>
+
+      <!-- Modal Nueva Actividad -->
+      @if (modalAbierto()) {
+        <div class="modal-overlay" (click)="cerrarModal()">
+          <div class="modal-content" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h2>Nueva Actividad</h2>
+              <button class="modal-close" (click)="cerrarModal()">
+                <span class="material-icons">close</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label>Título *</label>
+                <input type="text" [value]="formData().titulo" (input)="updateForm('titulo', $event)" placeholder="Nombre de la actividad">
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Tipo de Actividad *</label>
+                  <select [value]="formData().tipoActividadId" (change)="updateForm('tipoActividadId', $event)">
+                    <option value="">Seleccionar tipo</option>
+                    <option *ngFor="let tipo of tipos()" [value]="tipo.id">{{ tipo.nombre }}</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Espacio *</label>
+                  <select [value]="formData().espacioId" (change)="updateForm('espacioId', $event)">
+                    <option value="">Seleccionar espacio</option>
+                    <option *ngFor="let esp of espacios()" [value]="esp.id">{{ esp.nombre }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Fecha *</label>
+                <input type="date" [value]="formData().fecha" (input)="updateForm('fecha', $event)">
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Hora Inicio *</label>
+                  <input type="time" [value]="formData().horaInicio" (input)="updateForm('horaInicio', $event)">
+                </div>
+                <div class="form-group">
+                  <label>Hora Fin *</label>
+                  <input type="time" [value]="formData().horaFin" (input)="updateForm('horaFin', $event)">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Descripción</label>
+                <textarea rows="3" [value]="formData().descripcion" (input)="updateForm('descripcion', $event)" placeholder="Notas adicionales..."></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn-cancel" (click)="cerrarModal()">Cancelar</button>
+              <button class="btn-save" (click)="guardarActividad()" [disabled]="guardando()">
+                @if (guardando()) {
+                  <span class="animate-spin mr-2">⏳</span>
+                }
+                Crear Actividad
+              </button>
+            </div>
+          </div>
+        </div>
+      }
     </div>
   `,
   styles: [`
     :host {
       display: block;
-      background: #f2f4f7;
+      height: 100%;
+      overflow: hidden;
     }
 
     .page {
-      background: #f2f4f7;
-      padding: 2rem;
-      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: transparent;
+      overflow: hidden;
     }
 
-    .card {
-      background: #ffffff;
-      border-radius: 1rem;
-      border: 1px solid rgba(15, 23, 42, 0.08);
-      padding: 1.4rem;
-      box-shadow: 0 20px 35px rgba(15, 23, 42, 0.1);
+    .header-section {
+      flex-shrink: 0;
+      margin-bottom: 0.75rem;
     }
 
-    .calendar-card {
-      position: relative;
-      padding: 1.4rem;
-    }
-
-    .stat-card {
-      border-radius: 0.9rem;
-      border: 1px solid rgba(15, 23, 42, 0.08);
-      padding: 1.2rem;
-      background: #ffffff;
-      box-shadow: 0 15px 30px rgba(15, 23, 42, 0.08);
-    }
-
-    .form-label {
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 600;
+    .stat-inline {
       color: #6b7280;
-      margin-bottom: 0.35rem;
-      text-transform: uppercase;
-      letter-spacing: 0.025em;
     }
 
-    .form-select {
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 0.875rem;
+    .filters-section {
+      flex-shrink: 0;
       background: white;
-      cursor: pointer;
-      min-width: 160px;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.75rem;
+      border: 1px solid rgba(15, 23, 42, 0.08);
     }
 
-    .form-select:focus {
+    .form-select-sm {
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      background: white;
+      color: #374151;
+      cursor: pointer;
+      min-width: 140px;
+    }
+
+    .form-select-sm:focus {
       outline: none;
       border-color: #CF102D;
-      box-shadow: 0 0 0 2px rgba(207, 16, 45, 0.1);
     }
 
-    .btn-primary {
+    .btn-sm-primary {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      padding: 0.4rem 0.6rem;
+      background: #CF102D;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn-sm-primary:hover {
+      background: #a80d25;
+    }
+
+    .btn-sm-secondary {
+      padding: 0.4rem 0.75rem;
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .btn-sm-secondary:hover {
+      background: #e5e7eb;
+    }
+
+    .btn-nueva-actividad {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
       padding: 0.5rem 1rem;
       background: #CF102D;
       color: white;
       border: none;
       border-radius: 8px;
-      font-weight: 600;
       font-size: 0.875rem;
+      font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: background 0.2s;
     }
 
-    .btn-primary:hover {
+    .btn-nueva-actividad:hover {
       background: #a80d25;
     }
 
-    .btn-secondary {
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
       display: flex;
       align-items: center;
-      gap: 0.35rem;
-      padding: 0.5rem 1rem;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: #6b7280;
+      cursor: pointer;
+      padding: 0.25rem;
+      border-radius: 4px;
+    }
+
+    .modal-close:hover {
       background: #f3f4f6;
+      color: #1f2937;
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-group label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 0.6rem 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      background: white;
+      color: #1f2937;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #CF102D;
+      box-shadow: 0 0 0 3px rgba(207, 16, 45, 0.1);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid #e5e7eb;
+      background: #f9fafb;
+      border-radius: 0 0 12px 12px;
+    }
+
+    .btn-cancel {
+      padding: 0.6rem 1rem;
+      background: white;
       color: #374151;
       border: 1px solid #d1d5db;
       border-radius: 8px;
-      font-weight: 500;
       font-size: 0.875rem;
+      font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
     }
 
-    .btn-secondary:hover {
-      background: #e5e7eb;
+    .btn-cancel:hover {
+      background: #f3f4f6;
+    }
+
+    .btn-save {
+      display: flex;
+      align-items: center;
+      padding: 0.6rem 1.25rem;
+      background: #CF102D;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn-save:hover:not(:disabled) {
+      background: #a80d25;
+    }
+
+    .btn-save:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .calendar-wrapper {
+      flex: 1 1 0;
+      min-height: 0;
+      background: white;
+      border-radius: 12px;
+      padding: 1rem;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .calendar-wrapper full-calendar {
+      flex: 1 1 0;
+      min-height: 0;
     }
 
     .loading-overlay {
@@ -215,22 +399,178 @@ import { TemporadaService } from '../../../core/services/temporada.service';
       inset: 0;
       background: rgba(255, 255, 255, 0.9);
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 10;
-      border-radius: 1rem;
     }
 
-    /* FullCalendar overrides */
+    /* FullCalendar overrides - altura completa */
     :host ::ng-deep .fc {
       font-family: inherit;
+      height: 100% !important;
+    }
+
+    :host ::ng-deep .fc-view-harness {
+      height: 100% !important;
+    }
+
+    :host ::ng-deep .fc-view-harness-active > .fc-view {
+      height: 100% !important;
+    }
+
+    :host ::ng-deep .fc-scrollgrid {
+      height: 100% !important;
+      border-radius: 8px !important;
+      border: 1px solid #e5e7eb !important;
+    }
+
+    :host ::ng-deep .fc-scrollgrid-liquid {
+      height: 100% !important;
+    }
+
+    :host ::ng-deep .fc-scrollgrid > tbody {
+      height: 100%;
+    }
+
+    :host ::ng-deep .fc-scrollgrid-section-body {
+      height: 100%;
+    }
+
+    :host ::ng-deep .fc-scrollgrid-section-body > td {
+      height: 100%;
+    }
+
+    :host ::ng-deep .fc-scroller-harness {
+      height: 100% !important;
+    }
+
+    :host ::ng-deep .fc-scrollgrid td:last-child {
+      border-right: none !important;
+    }
+
+    :host ::ng-deep .fc-scrollgrid tr:last-child td {
+      border-bottom: none !important;
+    }
+
+    :host ::ng-deep .fc-theme-standard td,
+    :host ::ng-deep .fc-theme-standard th {
+      border-color: #e5e7eb !important;
+    }
+
+    /* === Vista MES (dayGridMonth) === */
+    :host ::ng-deep .fc-dayGridMonth-view {
+      height: 100% !important;
+    }
+
+    :host ::ng-deep .fc-dayGridMonth-view .fc-daygrid {
+      height: 100% !important;
+    }
+
+    :host ::ng-deep .fc-dayGridMonth-view .fc-scroller {
+      height: 100% !important;
+      overflow: hidden !important;
+    }
+
+    :host ::ng-deep .fc-dayGridMonth-view .fc-daygrid-body {
+      height: 100% !important;
+      width: 100% !important;
+    }
+
+    :host ::ng-deep .fc-dayGridMonth-view .fc-scrollgrid-sync-table {
+      height: 100% !important;
+    }
+
+    /* Ocultar celdas vacías de otros meses */
+    :host ::ng-deep .fc-day-other {
+      background: #f8f9fa !important;
+      visibility: hidden;
+    }
+
+    :host ::ng-deep .fc-daygrid-body-unbalanced .fc-daygrid-day-events {
+      min-height: 2em;
+    }
+
+    :host ::ng-deep .fc-daygrid-body-natural .fc-daygrid-day-events {
+      margin-bottom: 0;
+    }
+
+    /* === Vistas SEMANA y DÍA (timeGrid) === */
+    /* Hacer que todo el día quepa sin scroll */
+    :host ::ng-deep .fc-timeGridWeek-view,
+    :host ::ng-deep .fc-timeGridDay-view {
+      height: 100% !important;
+      overflow: hidden !important;
+    }
+
+    :host ::ng-deep .fc-timeGridWeek-view .fc-scrollgrid,
+    :host ::ng-deep .fc-timeGridDay-view .fc-scrollgrid {
+      height: 100% !important;
+    }
+
+    /* El scroller NO debe hacer scroll - todo debe caber */
+    :host ::ng-deep .fc-timeGridWeek-view .fc-scroller,
+    :host ::ng-deep .fc-timeGridDay-view .fc-scroller {
+      overflow: hidden !important;
+      position: relative !important;
+      height: 100% !important;
+    }
+
+    :host ::ng-deep .fc-timeGridWeek-view .fc-scroller-liquid-absolute,
+    :host ::ng-deep .fc-timeGridDay-view .fc-scroller-liquid-absolute {
+      position: relative !important;
+      overflow: hidden !important;
+      height: 100% !important;
+    }
+
+    /* Hacer que el timegrid-body ocupe todo el espacio */
+    :host ::ng-deep .fc-timegrid-body {
+      height: 100% !important;
+    }
+
+    /* La tabla de slots debe ocupar todo el alto disponible */
+    :host ::ng-deep .fc-timegrid-slots table {
+      height: 100% !important;
+    }
+
+    /* Slots de tiempo - altura automática para que quepan todos */
+    /* Con 32 slots (16 horas x 2), cada uno será ~2% del alto */
+    :host ::ng-deep .fc-timegrid-slot {
+      height: auto !important;
+      min-height: 0 !important;
+    }
+
+    :host ::ng-deep .fc-timegrid-slot-label {
+      vertical-align: middle;
+      font-size: 0.65rem !important;
+      padding: 0 4px !important;
+    }
+
+    /* Ajustar la columna de eventos para que coincida con los slots */
+    :host ::ng-deep .fc-timegrid-cols {
+      height: 100% !important;
+    }
+
+    :host ::ng-deep .fc-timegrid-cols table {
+      height: 100% !important;
+    }
+
+    :host ::ng-deep .fc-timegrid-col {
+      height: 100% !important;
     }
 
     :host ::ng-deep .fc-toolbar-title {
-      font-size: 1.25rem !important;
+      font-size: 1.1rem !important;
       font-weight: 600;
       color: #1f2937;
+    }
+
+    :host ::ng-deep .fc-toolbar {
+      margin-bottom: 0.75rem !important;
+    }
+
+    :host ::ng-deep .fc-button {
+      padding: 0.3rem 0.6rem !important;
+      font-size: 0.8rem !important;
     }
 
     :host ::ng-deep .fc-button-primary {
@@ -248,15 +588,60 @@ import { TemporadaService } from '../../../core/services/temporada.service';
       border-color: #8a0b1e !important;
     }
 
+    /* Día actual - destacado con amarillo suave y borde */
     :host ::ng-deep .fc-day-today {
-      background-color: rgba(207, 16, 45, 0.08) !important;
+      background-color: rgba(251, 191, 36, 0.15) !important;
+    }
+
+    :host ::ng-deep .fc-day-today .fc-daygrid-day-number {
+      background: #CF102D;
+      color: white !important;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
     }
 
     :host ::ng-deep .fc-event {
       border-radius: 4px;
-      padding: 2px 4px;
-      font-size: 0.8rem;
+      padding: 2px 6px;
+      font-size: 0.75rem;
       cursor: pointer;
+      border: none !important;
+      margin-bottom: 2px;
+    }
+
+    /* Eventos como bloques - texto blanco legible */
+    :host ::ng-deep .fc-daygrid-event {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    :host ::ng-deep .fc-event-title {
+      color: white !important;
+      font-weight: 500;
+    }
+
+    :host ::ng-deep .fc-event-time {
+      color: rgba(255,255,255,0.9) !important;
+      font-weight: 400;
+    }
+
+    :host ::ng-deep .fc-event:hover {
+      filter: brightness(1.1);
+      transform: scale(1.02);
+      transition: all 0.15s ease;
+    }
+
+    /* Link "+X más" */
+    :host ::ng-deep .fc-daygrid-more-link {
+      color: #CF102D !important;
+      font-weight: 600;
+      font-size: 0.75rem;
     }
 
     :host ::ng-deep .fc-daygrid-day-number {
@@ -269,6 +654,52 @@ import { TemporadaService } from '../../../core/services/temporada.service';
       color: #6b7280;
       text-transform: uppercase;
       font-size: 0.75rem;
+    }
+
+    /* Asegurar que todo el calendario tenga texto oscuro */
+    :host ::ng-deep .fc {
+      color: #374151;
+    }
+
+    :host ::ng-deep .fc-toolbar-title {
+      color: #1f2937 !important;
+    }
+
+    /* Estilos para vista semanal/diaria (timeGrid) */
+    :host ::ng-deep .fc-timegrid-slot-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #6b7280;
+    }
+
+    :host ::ng-deep .fc-timegrid-event {
+      border-radius: 4px;
+      border: none !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    :host ::ng-deep .fc-timegrid-event .fc-event-main {
+      padding: 4px 6px;
+    }
+
+    :host ::ng-deep .fc-timegrid-event .fc-event-title {
+      font-weight: 500;
+      font-size: 0.75rem;
+    }
+
+    :host ::ng-deep .fc-timegrid-event .fc-event-time {
+      font-size: 0.7rem;
+      opacity: 0.9;
+    }
+
+    /* Línea de hora actual */
+    :host ::ng-deep .fc-timegrid-now-indicator-line {
+      border-color: #CF102D !important;
+      border-width: 2px;
+    }
+
+    :host ::ng-deep .fc-timegrid-now-indicator-arrow {
+      border-color: #CF102D !important;
     }
   `]
 })
@@ -284,6 +715,19 @@ export class CalendarioComponent implements OnInit {
   selectedEspacioId = signal<string | ''>('');
   selectedTipoId = signal<string | ''>('');
   selectedTemporadaId = signal<string | ''>('');
+
+  // State signals para modal de nueva actividad
+  modalAbierto = signal(false);
+  guardando = signal(false);
+  formData = signal({
+    titulo: '',
+    tipoActividadId: '',
+    espacioId: '',
+    fecha: new Date().toISOString().slice(0, 10),
+    horaInicio: '09:00',
+    horaFin: '13:00',
+    descripcion: ''
+  });
 
   // Signals públicas para el template
   espacios = this.espacioService.espacios;
@@ -324,22 +768,23 @@ export class CalendarioComponent implements OnInit {
     const inicio = rangoInicio ?? this.rangeStart();
     const fin = rangoFin ?? this.rangeEnd();
 
-    this.actividadService.loadActividades({
+    const filtro = {
       fechaInicio: inicio,
       fechaFin: fin,
       espacioId: this.selectedEspacioId() ? Number(this.selectedEspacioId()) : undefined,
-      tipoActividadId: this.selectedTipoId() ? Number(this.selectedTipoId()) : undefined,
+      tipoActividadId: this.selectedTipoId() || undefined, // UUID string - no convertir a número
       temporadaId: this.selectedTemporadaId() ? Number(this.selectedTemporadaId()) : undefined
-    }).pipe(
+    };
+
+    this.actividadService.loadActividades(filtro).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({
-      next: (data) => {
+      next: () => {
         this.initialLoadDone = true;
-        console.debug('[Calendario] Actividades cargadas:', data.length);
       },
       error: (err) => {
         this.initialLoadDone = true;
-        console.warn('[Calendario] Error cargando actividades:', err?.message || err);
+        console.error('[Calendario] ❌ Error cargando actividades:', err);
       }
     });
   }
@@ -370,6 +815,68 @@ export class CalendarioComponent implements OnInit {
     this.loadActividades(); // Carga explícita al resetear
   }
 
+  // --- Métodos del modal de nueva actividad ---
+  abrirModalNuevaActividad(): void {
+    // Reset form con valores por defecto
+    this.formData.set({
+      titulo: '',
+      tipoActividadId: this.tipos()[0]?.id?.toString() || '',
+      espacioId: this.espacios()[0]?.id?.toString() || '',
+      fecha: new Date().toISOString().slice(0, 10),
+      horaInicio: '09:00',
+      horaFin: '13:00',
+      descripcion: ''
+    });
+    this.modalAbierto.set(true);
+  }
+
+  cerrarModal(): void {
+    this.modalAbierto.set(false);
+  }
+
+  updateForm(field: string, event: Event): void {
+    const value = (event.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement).value;
+    this.formData.update(f => ({ ...f, [field]: value }));
+  }
+
+  guardarActividad(): void {
+    const form = this.formData();
+
+    // Validación básica
+    if (!form.titulo || !form.tipoActividadId || !form.espacioId || !form.fecha) {
+      alert('Por favor, completa los campos obligatorios');
+      return;
+    }
+
+    this.guardando.set(true);
+
+    const actividadData = {
+      titulo: form.titulo,
+      tipoActividadId: form.tipoActividadId,
+      espacioId: Number(form.espacioId),
+      fecha: form.fecha,
+      horaInicio: form.horaInicio,
+      horaFin: form.horaFin,
+      descripcion: form.descripcion || undefined
+    };
+
+    this.actividadService.create(actividadData).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: () => {
+        this.guardando.set(false);
+        this.cerrarModal();
+        // Recargar actividades para ver la nueva
+        this.loadActividades();
+      },
+      error: (err) => {
+        this.guardando.set(false);
+        console.error('[Calendario] Error creando actividad:', err);
+        alert('Error al crear la actividad: ' + (err.message || 'Error desconocido'));
+      }
+    });
+  }
+
   // Opciones calculadas de FullCalendar
   calendarOptions = computed(() => {
     const self = this;
@@ -386,6 +893,9 @@ export class CalendarioComponent implements OnInit {
         tipo: act.tipoActividad?.nombre,
         departamento: act.departamento?.nombre,
         estado: act.estado,
+        horaInicio: act.horaInicio,
+        horaFin: act.horaFin,
+        descripcion: act.descripcion
       }
     }));
 
@@ -393,7 +903,8 @@ export class CalendarioComponent implements OnInit {
       plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
       initialView: 'dayGridMonth',
       locale: esLocale,
-      height: 'auto',
+      height: 'parent', // 'parent' funciona mejor con flex containers
+      expandRows: true, // Expande las filas para llenar todo el espacio disponible
       headerToolbar: {
         left: 'prev,next today',
         center: 'title',
@@ -403,6 +914,52 @@ export class CalendarioComponent implements OnInit {
       selectable: true,
       themeSystem: 'standard',
       events: eventos,
+      // No mostrar días de otros meses
+      showNonCurrentDates: false,
+      fixedWeekCount: false,
+      // Mostrar máximo 3 eventos, luego "+X más"
+      dayMaxEvents: 3,
+      // Configuración por vista
+      views: {
+        dayGridMonth: {
+          displayEventTime: false // Ocultar hora en vista mes (se ve al hacer clic)
+        },
+        timeGridWeek: {
+          dayHeaderFormat: { weekday: 'short' as const, day: 'numeric' as const }
+        },
+        timeGridDay: {
+          dayHeaderFormat: { weekday: 'long' as const, day: 'numeric' as const, month: 'long' as const }
+        }
+      },
+      // Forzar eventos como bloques de color
+      eventDisplay: 'block',
+      // Mostrar solo hora de inicio en el bloque
+      eventTimeFormat: {
+        hour: '2-digit' as const,
+        minute: '2-digit' as const,
+        hour12: false
+      },
+      // Configuración para vista semanal/diaria
+      slotMinTime: '08:00:00', // Empezar a las 8:00
+      slotMaxTime: '24:00:00', // Terminar a medianoche
+      slotEventOverlap: false, // Evitar superposición de eventos
+      slotDuration: '00:30:00', // Slots de 30 minutos
+      // Formato de etiquetas de hora en la columna izquierda
+      slotLabelFormat: {
+        hour: '2-digit' as const,
+        minute: '2-digit' as const,
+        hour12: false
+      },
+      // Mostrar línea de hora actual
+      nowIndicator: true,
+      // Tooltip al pasar el ratón
+      eventDidMount(info: any) {
+        const props = info.event.extendedProps;
+        const hora = `${props.horaInicio || ''} - ${props.horaFin || ''}`;
+        info.el.setAttribute('title',
+          `${info.event.title}\n📍 ${props.espacio || 'Sin espacio'}\n🕐 ${hora}\n📋 ${props.tipo || 'Sin tipo'}`
+        );
+      },
       datesSet(arg: any) {
         // Solo cargar si el rango ha cambiado realmente
         const newStart = arg.startStr.slice(0, 10);
@@ -420,12 +977,51 @@ export class CalendarioComponent implements OnInit {
         }
       },
       eventClick: (info: any) => {
-        alert(
-          `Título: ${info.event.title}\nEspacio: ${info.event.extendedProps.espacio}\nTipo: ${info.event.extendedProps.tipo}\nEstado: ${info.event.extendedProps.estado}`
-        );
+        const props = info.event.extendedProps;
+        const hora = `${props.horaInicio || ''} - ${props.horaFin || ''}`;
+
+        // Modal con mejor formato
+        const modal = document.createElement('div');
+        modal.innerHTML = `
+          <div style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999">
+            <div style="background:white;border-radius:12px;padding:24px;max-width:400px;width:90%;box-shadow:0 20px 40px rgba(0,0,0,0.3)">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+                <div style="width:12px;height:12px;border-radius:50%;background:${info.event.backgroundColor}"></div>
+                <h3 style="margin:0;font-size:1.25rem;color:#1f2937">${info.event.title}</h3>
+              </div>
+              <div style="display:grid;gap:12px;color:#4b5563">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-size:1.2rem">📍</span>
+                  <span><strong>Espacio:</strong> ${props.espacio || 'No asignado'}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-size:1.2rem">🕐</span>
+                  <span><strong>Horario:</strong> ${hora}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-size:1.2rem">📋</span>
+                  <span><strong>Tipo:</strong> ${props.tipo || 'No especificado'}</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span style="font-size:1.2rem">📊</span>
+                  <span><strong>Estado:</strong> ${props.estado || 'Pendiente'}</span>
+                </div>
+                ${props.descripcion ? `
+                <div style="margin-top:8px;padding-top:12px;border-top:1px solid #e5e7eb">
+                  <p style="margin:0;font-size:0.875rem;color:#6b7280">${props.descripcion}</p>
+                </div>` : ''}
+              </div>
+              <button onclick="this.closest('div[style*=fixed]').remove()"
+                style="margin-top:20px;width:100%;padding:10px;background:#CF102D;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer">
+                Cerrar
+              </button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
       },
       eventDrop: (info: any) => {
-        alert('Arrastrado a: ' + info.event.startStr);
+        // TODO: Implementar persistencia del drag & drop
       }
     };
   });

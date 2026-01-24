@@ -70,7 +70,7 @@ export interface ActividadDocumento {
  */
 export interface ActividadFormData {
   titulo: string;
-  tipoActividadId: number;
+  tipoActividadId: string | number;
   espacioId: number;
   fecha: string;
   horaInicio: string;
@@ -109,7 +109,7 @@ export interface Espacio {
  * Tipología de la actividad (ensayo, función, montaje, etc.)
  */
 export interface TipoActividad {
-  id: number;
+  id: string | number;
   nombre: string;
   colorHex: string;
   aplicaA: 'SALA' | 'ALMACEN' | 'AMBOS';
@@ -150,7 +150,7 @@ export interface Temporada {
  */
 export interface CalendarioFilter {
   espacioId?: number;
-  tipoActividadId?: number;
+  tipoActividadId?: string | number;
   departamentoId?: number;
   temporadaId?: number;
   fechaInicio: string;
