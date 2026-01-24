@@ -1,74 +1,210 @@
-import { Component } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router, NavigationEnd, RouterModule } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDividerModule } from '@angular/material/divider';
+import { filter, map } from 'rxjs/operators';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { NotificationBellComponent } from '../../shared/components/notification-bell/notification-bell.component';
 import { AuthService } from '../../core/auth/auth.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, NotificationBellComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    MatIconModule,
+    MatMenuModule,
+    MatButtonModule,
+    MatDividerModule,
+    NotificationBellComponent
+  ],
   template: `
-    <header class="w-full flex items-center justify-between py-2 px-6 bg-teatro-primary shadow-md z-20">
-      <div class="flex items-center gap-3">
-        <img src="/assets/images/teatro-real-logo.svg" alt="Teatro Real" class="h-14 w-auto flex-shrink-0 mr-2" />
+    <nav class="rounded-xl py-3 px-4 bg-transparent w-full">
+      <div class="flex items-center justify-between gap-4">
+        <!-- Breadcrumbs y título -->
+        <div class="capitalize flex-1 min-w-0">
+          <!-- Breadcrumbs -->
+          <div class="flex items-center gap-1 text-xs md:text-sm">
+            <a
+              [routerLink]="['/', layout(), 'espacios']"
+              class="font-normal opacity-50 transition-all hover:text-teatro-carmesi hover:opacity-100"
+              [class]="textClass()">
+              {{ layout() }}
+            </a>
+            <span [class]="textMutedClass()">/</span>
+            <span class="font-normal truncate" [class]="textClass()">
+              {{ page() }}
+            </span>
+          </div>
+          <!-- Título de página -->
+          <h1 class="text-sm md:text-lg font-semibold truncate mt-1" [class]="textClass()">
+            {{ pageTitle() }}
+          </h1>
+        </div>
+
+        <!-- Acciones -->
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <!-- Menú de usuario -->
+          <button
+            [matMenuTriggerFor]="userMenu"
+            class="user-menu-btn flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-black/5 transition-colors cursor-pointer">
+            <div class="h-8 w-8 rounded-full bg-teatro-carmesi flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+              {{ userInitials() }}
+            </div>
+            <div class="hidden xl:flex flex-col text-left">
+              <span class="font-semibold text-sm leading-tight" [class]="textClass()">
+                {{ userName() }}
+              </span>
+              <span class="font-normal text-xs leading-tight" [class]="textMutedClass()">
+                {{ userRole() }}
+              </span>
+            </div>
+            <mat-icon class="hidden md:block text-base" [class]="textMutedClass()">expand_more</mat-icon>
+          </button>
+          <mat-menu #userMenu="matMenu">
+            <button mat-menu-item>
+              <mat-icon>person</mat-icon>
+              <span>Mi Perfil</span>
+            </button>
+            <button mat-menu-item>
+              <mat-icon>settings</mat-icon>
+              <span>Configuración</span>
+            </button>
+            <mat-divider></mat-divider>
+            <button mat-menu-item class="text-red-500" (click)="logout()">
+              <mat-icon class="text-red-500">logout</mat-icon>
+              <span class="text-red-500">Cerrar Sesión</span>
+            </button>
+          </mat-menu>
+
+          <!-- Notificaciones -->
+          <app-notification-bell></app-notification-bell>
+
+          <!-- Configurador de tema -->
+          <button
+            mat-icon-button
+            (click)="openConfigurator()"
+            title="Configuración de tema">
+            <mat-icon [class]="textMutedClass()">settings</mat-icon>
+          </button>
+        </div>
       </div>
-      <div class="flex items-center gap-4 h-12">
-        <app-notification-bell class="self-center"></app-notification-bell>
-        <button
-          class="btn-logout-theater-real"
-          (click)="logout()"
-          title="Cerrar sesión"
-          aria-label="Cerrar sesión"
-        >
-          Logout
-        </button>
-      </div>
-    </header>
+    </nav>
   `,
   styles: [`
-    header {
-      min-height: 64px;
-      padding-top: 8px;
-      padding-right: 16px;
+    :host {
+      display: block;
     }
-    .bg-teatro-primary {
-      background-color: #1a1a2e;
-    }
-    .text-teatro-gold {
-      color: #c9a227;
-    }
-    .btn-logout-theater-real {
-      background: transparent;
+
+    .text-teatro-carmesi {
       color: #CF102D;
-      border: 2px solid #CF102D;
-      padding: 7px 18px;
-      min-width: 0;
-      min-height: 32px;
-      border-radius: 4px;
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 600;
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      transition: background 0.2s, color 0.2s;
-      cursor: pointer;
-      outline: none;
-      line-height: 1.2;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
-    .btn-logout-theater-real:hover, .btn-logout-theater-real:focus {
-      background: #CF102D;
-      color: #fff;
+
+    .bg-teatro-carmesi {
+      background-color: #CF102D;
+    }
+
+    .user-menu-btn {
+      border: none;
+      background: transparent;
+      outline: none;
+    }
+
+    .user-menu-btn:hover {
+      background: rgba(0, 0, 0, 0.05);
     }
   `]
 })
 export class HeaderComponent {
-  constructor(private authService: AuthService) {}
+  private router = inject(Router);
+  private authService = inject(AuthService);
+  private theme = inject(ThemeService);
 
-  logout() {
+  // Tema
+  isDark = this.theme.isDark;
+
+  // Breadcrumbs desde la URL
+  private url$ = this.router.events.pipe(
+    filter(event => event instanceof NavigationEnd),
+    map(() => this.router.url)
+  );
+
+  private currentUrl = toSignal(this.url$, { initialValue: this.router.url });
+
+  layout = computed(() => {
+    const parts = this.currentUrl().split('/').filter(p => p);
+    return parts[0] || 'tempo';
+  });
+
+  page = computed(() => {
+    const parts = this.currentUrl().split('/').filter(p => p);
+    return parts[1] || 'espacios';
+  });
+
+  pageTitle = computed(() => {
+    const pageName = this.page();
+    // Capitalizar y formatear
+    const titles: Record<string, string> = {
+      'espacios': 'Espacios',
+      'calendario': 'Calendario',
+      'movimientos': 'Logística',
+      'producciones': 'Producciones',
+      'guiones-tecnicos': 'Guiones Técnicos',
+      'guiones-new': 'Guiones NEW',
+      'editor-guiones': 'Editor de Guiones',
+      'global': 'Cartelería Global',
+      'admin': 'Administración'
+    };
+    return titles[pageName] || pageName.charAt(0).toUpperCase() + pageName.slice(1);
+  });
+
+  // Usuario
+  userName = computed(() => {
+    const user = this.authService.currentUser();
+    return user?.nombre || 'Usuario';
+  });
+
+  userInitials = computed(() => {
+    const name = this.userName();
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  });
+
+  userRole = computed(() => {
+    const user = this.authService.currentUser();
+    const roles: Record<string, string> = {
+      'ADMIN': 'Administrador',
+      'GESTOR': 'Gestor',
+      'OPERADOR': 'Operador',
+      'VISUALIZADOR': 'Visualizador'
+    };
+    const rolNombre = user?.rol?.nombre || '';
+    return roles[rolNombre] || 'Usuario';
+  });
+
+  // Clases de tema
+  textClass = computed(() => {
+    return this.isDark() ? 'text-white' : 'text-gray-700';
+  });
+
+  textMutedClass = computed(() => {
+    return this.isDark() ? 'text-gray-400' : 'text-gray-500';
+  });
+
+  openConfigurator(): void {
+    this.theme.openConfigurator();
+  }
+
+  logout(): void {
     this.authService.logout();
   }
 }
