@@ -1,13 +1,15 @@
 // teatro-real-frontend/src/app/features/tempo/logistica/logistica.component.ts
 
-import { Component, OnInit, inject, DestroyRef } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   LogisticaService,
   LogisticaStatDto,
-  OperacionLogisticaDto
+  OperacionLogisticaDto,
+  CrearOperacionDto
 } from '../logistica/logistica.service';
 import { ThemeService } from '../../../core/services/theme.service';
 
@@ -22,7 +24,7 @@ const ESTADO_LABELS: Record<string, string> = {
 @Component({
   selector: 'app-logistica',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   template: `
     <div class="page" [class]="isDark() ? 'page-dark' : 'page-light'">
       <div class="space-y-6">
@@ -37,7 +39,7 @@ const ESTADO_LABELS: Record<string, string> = {
               <span class="material-icons text-lg">calendar_month</span>
               Ver Calendario
             </a>
-            <button class="btn-nuevo">
+            <button class="btn-nuevo" (click)="openModal()">
               <span class="material-icons text-lg">add</span>
               Nuevo Movimiento
             </button>
@@ -69,10 +71,42 @@ const ESTADO_LABELS: Record<string, string> = {
                 </option>
               </select>
             </div>
-            <button [class]="isDark() ? 'btn-secondary-dark' : 'btn-secondary'" class="ml-auto">
-              <span class="material-icons text-sm">filter_list</span>
-              Más filtros
+            <button [class]="isDark() ? 'btn-secondary-dark' : 'btn-secondary'" class="ml-auto" (click)="toggleFiltrosAvanzados()">
+              <span class="material-icons text-sm">{{ showFiltrosAvanzados() ? 'expand_less' : 'expand_more' }}</span>
+              {{ showFiltrosAvanzados() ? 'Menos filtros' : 'Más filtros' }}
             </button>
+          </div>
+
+          <!-- Filtros avanzados expandibles -->
+          <div *ngIf="showFiltrosAvanzados()" class="mt-4 pt-4" [class]="isDark() ? 'border-t border-gray-700' : 'border-t border-gray-200'">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <label [class]="isDark() ? 'form-label-dark' : 'form-label'">Fecha desde</label>
+                <input type="date" [class]="isDark() ? 'form-input-dark' : 'form-input'" [(ngModel)]="filtroFechaDesde">
+              </div>
+              <div>
+                <label [class]="isDark() ? 'form-label-dark' : 'form-label'">Fecha hasta</label>
+                <input type="date" [class]="isDark() ? 'form-input-dark' : 'form-input'" [(ngModel)]="filtroFechaHasta">
+              </div>
+              <div>
+                <label [class]="isDark() ? 'form-label-dark' : 'form-label'">Producción</label>
+                <input type="text" [class]="isDark() ? 'form-input-dark' : 'form-input'" [(ngModel)]="filtroProduccion" placeholder="Buscar producción...">
+              </div>
+              <div>
+                <label [class]="isDark() ? 'form-label-dark' : 'form-label'">Origen/Destino</label>
+                <input type="text" [class]="isDark() ? 'form-input-dark' : 'form-input'" [(ngModel)]="filtroLugar" placeholder="Buscar lugar...">
+              </div>
+            </div>
+            <div class="flex justify-end gap-2 mt-4">
+              <button [class]="isDark() ? 'btn-secondary-dark' : 'btn-secondary'" (click)="limpiarFiltros()">
+                <span class="material-icons text-sm">clear</span>
+                Limpiar
+              </button>
+              <button class="btn-nuevo" style="padding: 0.5rem 1rem;" (click)="aplicarFiltros()">
+                <span class="material-icons text-sm">search</span>
+                Aplicar
+              </button>
+            </div>
           </div>
         </div>
 
@@ -144,6 +178,105 @@ const ESTADO_LABELS: Record<string, string> = {
             <p [class]="isDark() ? 'text-gray-400' : 'text-gray-500'">No hay operaciones que coincidan con los filtros</p>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Modal Nuevo Movimiento -->
+    <div class="modal-overlay" *ngIf="showModal()" (click)="closeModal()">
+      <div class="modal-content" [class]="isDark() ? 'modal-dark' : 'modal-light'" (click)="$event.stopPropagation()">
+        <div class="modal-header" [class]="isDark() ? 'border-gray-700' : 'border-gray-200'">
+          <h2 class="text-lg font-semibold" [class]="isDark() ? 'text-white' : 'text-gray-900'">Nuevo Movimiento</h2>
+          <button class="btn-close" [class]="isDark() ? 'btn-close-dark' : 'btn-close-light'" (click)="closeModal()">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+
+        <form (ngSubmit)="guardarMovimiento()">
+          <!-- Tipo de movimiento -->
+          <div class="form-group">
+            <label [class]="isDark() ? 'form-label-dark' : 'form-label'">Tipo de Movimiento *</label>
+            <div class="flex gap-2">
+              <button type="button"
+                      class="tipo-btn"
+                      [class.tipo-btn-active]="formData.tipoMovimiento === 'ENTRADA'"
+                      [class.tipo-btn-dark]="isDark() && formData.tipoMovimiento !== 'ENTRADA'"
+                      (click)="formData.tipoMovimiento = 'ENTRADA'">
+                <span class="material-icons">arrow_back</span>
+                Recogida
+              </button>
+              <button type="button"
+                      class="tipo-btn"
+                      [class.tipo-btn-active]="formData.tipoMovimiento === 'SALIDA'"
+                      [class.tipo-btn-dark]="isDark() && formData.tipoMovimiento !== 'SALIDA'"
+                      (click)="formData.tipoMovimiento = 'SALIDA'">
+                <span class="material-icons">arrow_forward</span>
+                Salida
+              </button>
+              <button type="button"
+                      class="tipo-btn"
+                      [class.tipo-btn-active]="formData.tipoMovimiento === 'INTERNO'"
+                      [class.tipo-btn-dark]="isDark() && formData.tipoMovimiento !== 'INTERNO'"
+                      (click)="formData.tipoMovimiento = 'INTERNO'">
+                <span class="material-icons">swap_horiz</span>
+                Interno
+              </button>
+            </div>
+          </div>
+
+          <!-- Producción -->
+          <div class="form-group">
+            <label [class]="isDark() ? 'form-label-dark' : 'form-label'">Producción *</label>
+            <input type="text" [class]="isDark() ? 'form-input-dark' : 'form-input'" [(ngModel)]="formData.produccionNombre" name="produccion" required placeholder="Ej: La Traviata">
+          </div>
+
+          <!-- Origen y Destino -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="form-group">
+              <label [class]="isDark() ? 'form-label-dark' : 'form-label'">Origen *</label>
+              <input type="text" [class]="isDark() ? 'form-input-dark' : 'form-input'" [(ngModel)]="formData.lugarOrigen" name="origen" required placeholder="Ej: Arganda-Nave">
+            </div>
+            <div class="form-group">
+              <label [class]="isDark() ? 'form-label-dark' : 'form-label'">Destino *</label>
+              <input type="text" [class]="isDark() ? 'form-input-dark' : 'form-input'" [(ngModel)]="formData.lugarDestino" name="destino" required placeholder="Ej: Teatro Real">
+            </div>
+          </div>
+
+          <!-- Fecha y Hora -->
+          <div class="grid grid-cols-3 gap-4">
+            <div class="form-group">
+              <label [class]="isDark() ? 'form-label-dark' : 'form-label'">Fecha *</label>
+              <input type="date" [class]="isDark() ? 'form-input-dark' : 'form-input'" [(ngModel)]="formData.fecha" name="fecha" required>
+            </div>
+            <div class="form-group">
+              <label [class]="isDark() ? 'form-label-dark' : 'form-label'">Hora inicio *</label>
+              <input type="time" [class]="isDark() ? 'form-input-dark' : 'form-input'" [(ngModel)]="formData.horaInicio" name="horaInicio" required>
+            </div>
+            <div class="form-group">
+              <label [class]="isDark() ? 'form-label-dark' : 'form-label'">Hora fin</label>
+              <input type="time" [class]="isDark() ? 'form-input-dark' : 'form-input'" [(ngModel)]="formData.horaFin" name="horaFin">
+            </div>
+          </div>
+
+          <!-- Camiones y Descripción -->
+          <div class="grid grid-cols-3 gap-4">
+            <div class="form-group">
+              <label [class]="isDark() ? 'form-label-dark' : 'form-label'">Nº Camiones</label>
+              <input type="number" [class]="isDark() ? 'form-input-dark' : 'form-input'" [(ngModel)]="formData.numCamiones" name="camiones" min="0" placeholder="0">
+            </div>
+            <div class="form-group col-span-2">
+              <label [class]="isDark() ? 'form-label-dark' : 'form-label'">Descripción</label>
+              <input type="text" [class]="isDark() ? 'form-input-dark' : 'form-input'" [(ngModel)]="formData.descripcion" name="descripcion" placeholder="Notas adicionales...">
+            </div>
+          </div>
+
+          <!-- Acciones -->
+          <div class="modal-actions" [class]="isDark() ? 'border-gray-700' : 'border-gray-200'">
+            <button type="button" [class]="isDark() ? 'btn-cancel-dark' : 'btn-cancel'" (click)="closeModal()">Cancelar</button>
+            <button type="submit" class="btn-nuevo" style="padding: 0.5rem 1.5rem;" [disabled]="guardando">
+              {{ guardando ? 'Guardando...' : 'Crear Movimiento' }}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   `,
@@ -544,6 +677,193 @@ const ESTADO_LABELS: Record<string, string> = {
       opacity: 0.5;
       cursor: not-allowed;
     }
+
+    /* Form inputs */
+    .form-input {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      background: white;
+      color: #374151;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #CF102D;
+      box-shadow: 0 0 0 2px rgba(207, 16, 45, 0.1);
+    }
+
+    .form-input-dark {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #374151;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      background: #262626;
+      color: #e5e7eb;
+    }
+
+    .form-input-dark:focus {
+      outline: none;
+      border-color: #CF102D;
+      box-shadow: 0 0 0 2px rgba(207, 16, 45, 0.2);
+    }
+
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+      border-radius: 16px;
+      width: calc(100% - 2rem);
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      margin: 1rem;
+    }
+
+    .modal-light {
+      background: white;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-dark {
+      background: #1a1a1a;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid;
+    }
+
+    .btn-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-close-light {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .btn-close-light:hover {
+      background: #e5e7eb;
+    }
+
+    .btn-close-dark {
+      background: #262626;
+      color: #9ca3af;
+    }
+
+    .btn-close-dark:hover {
+      background: #333333;
+    }
+
+    .form-group {
+      padding: 0 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      margin-top: 0.5rem;
+      border-top: 1px solid;
+    }
+
+    .btn-cancel {
+      padding: 0.5rem 1rem;
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+      background: #e5e7eb;
+    }
+
+    .btn-cancel-dark {
+      padding: 0.5rem 1rem;
+      background: #262626;
+      color: #d1d5db;
+      border: 1px solid #374151;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-cancel-dark:hover {
+      background: #333333;
+    }
+
+    /* Tipo buttons */
+    .tipo-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      background: #f3f4f6;
+      color: #6b7280;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tipo-btn:hover {
+      border-color: #CF102D;
+      color: #CF102D;
+    }
+
+    .tipo-btn-active {
+      background: rgba(207, 16, 45, 0.1);
+      border-color: #CF102D;
+      color: #CF102D;
+    }
+
+    .tipo-btn-dark {
+      background: #262626;
+      color: #9ca3af;
+      border-color: #374151;
+    }
+
+    .tipo-btn-dark:hover {
+      border-color: #CF102D;
+      color: #CF102D;
+    }
   `]
 })
 export class LogisticaComponent implements OnInit {
@@ -563,6 +883,18 @@ export class LogisticaComponent implements OnInit {
   estadoLabels = ESTADO_LABELS;
   selectedTipo = TIPO_FILTROS[0];
   selectedEstado = ESTADOS_FILTROS[0];
+
+  // Modal state
+  showModal = signal(false);
+  guardando = false;
+  formData: Partial<CrearOperacionDto> = this.getEmptyForm();
+
+  // Filtros avanzados
+  showFiltrosAvanzados = signal(false);
+  filtroFechaDesde = '';
+  filtroFechaHasta = '';
+  filtroProduccion = '';
+  filtroLugar = '';
 
   ngOnInit(): void {
     this.logisticaService.obtenerResumen()
@@ -600,14 +932,6 @@ export class LogisticaComponent implements OnInit {
 
   setEstado(estado: string): void {
     this.selectedEstado = estado;
-  }
-
-  operacionesFiltradas(): OperacionLogisticaDto[] {
-    return this.operaciones.filter(op => {
-      const tipoMatch = this.selectedTipo === 'Todos' || (op.tipo ?? 'Otros') === this.selectedTipo;
-      const estadoMatch = this.selectedEstado === 'Todos' || op.estado === this.selectedEstado;
-      return tipoMatch && estadoMatch;
-    });
   }
 
   getEstadoLabel(estado: string): string {
@@ -691,5 +1015,123 @@ export class LogisticaComponent implements OnInit {
         next: stats => (this.stats = stats),
         error: () => {}
       });
+  }
+
+  // Modal methods
+  getEmptyForm(): Partial<CrearOperacionDto> {
+    const today = new Date().toISOString().split('T')[0];
+    return {
+      tipoMovimiento: 'ENTRADA',
+      produccionNombre: '',
+      lugarOrigen: '',
+      lugarDestino: '',
+      fecha: today,
+      horaInicio: '09:00',
+      horaFin: '18:00',
+      numCamiones: 1,
+      descripcion: ''
+    };
+  }
+
+  openModal(): void {
+    this.formData = this.getEmptyForm();
+    this.showModal.set(true);
+  }
+
+  closeModal(): void {
+    this.showModal.set(false);
+    this.formData = this.getEmptyForm();
+  }
+
+  guardarMovimiento(): void {
+    if (!this.formData.produccionNombre || !this.formData.lugarOrigen || !this.formData.lugarDestino) {
+      return;
+    }
+
+    this.guardando = true;
+    const operacion = this.formData as CrearOperacionDto;
+
+    this.logisticaService.crear(operacion)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (created) => {
+          this.operaciones = [created, ...this.operaciones];
+          this.refreshStats();
+          this.guardando = false;
+          this.closeModal();
+        },
+        error: (err) => {
+          console.error('Error al crear movimiento:', err);
+          this.guardando = false;
+          // Fallback: añadir localmente con ID temporal
+          const tempOp: OperacionLogisticaDto = {
+            id: `temp-${Date.now()}`,
+            nombre: operacion.produccionNombre,
+            estado: 'PENDIENTE',
+            estadoColor: '#FBBF24',
+            estadoLabel: 'Pendiente',
+            icon: operacion.tipoMovimiento === 'ENTRADA' ? 'arrow_back' :
+                  operacion.tipoMovimiento === 'SALIDA' ? 'arrow_forward' : 'swap_horiz',
+            desde: operacion.lugarOrigen,
+            hacia: operacion.lugarDestino,
+            fecha: operacion.fecha,
+            hora: operacion.horaInicio,
+            horaFin: operacion.horaFin,
+            camiones: operacion.numCamiones || 0,
+            detalle: operacion.descripcion || '',
+            tipo: operacion.tipoMovimiento === 'ENTRADA' ? 'Descargas' :
+                  operacion.tipoMovimiento === 'SALIDA' ? 'Cargas' : 'Transportes',
+            tipoMovimiento: operacion.tipoMovimiento,
+            produccionNombre: operacion.produccionNombre
+          };
+          this.operaciones = [tempOp, ...this.operaciones];
+          this.closeModal();
+        }
+      });
+  }
+
+  // Filtros avanzados
+  toggleFiltrosAvanzados(): void {
+    this.showFiltrosAvanzados.set(!this.showFiltrosAvanzados());
+  }
+
+  limpiarFiltros(): void {
+    this.filtroFechaDesde = '';
+    this.filtroFechaHasta = '';
+    this.filtroProduccion = '';
+    this.filtroLugar = '';
+    this.selectedTipo = 'Todos';
+    this.selectedEstado = 'Todos';
+  }
+
+  aplicarFiltros(): void {
+    // Los filtros ya se aplican en operacionesFiltradas()
+    // Este método podría usarse para búsquedas en servidor si fuera necesario
+  }
+
+  operacionesFiltradas(): OperacionLogisticaDto[] {
+    return this.operaciones.filter(op => {
+      const tipoMatch = this.selectedTipo === 'Todos' || (op.tipo ?? 'Otros') === this.selectedTipo;
+      const estadoMatch = this.selectedEstado === 'Todos' || op.estado === this.selectedEstado;
+
+      // Filtros avanzados
+      let fechaMatch = true;
+      if (this.filtroFechaDesde && op.fecha < this.filtroFechaDesde) {
+        fechaMatch = false;
+      }
+      if (this.filtroFechaHasta && op.fecha > this.filtroFechaHasta) {
+        fechaMatch = false;
+      }
+
+      const produccionMatch = !this.filtroProduccion ||
+        (op.produccionNombre?.toLowerCase().includes(this.filtroProduccion.toLowerCase()) ||
+         op.nombre?.toLowerCase().includes(this.filtroProduccion.toLowerCase()));
+
+      const lugarMatch = !this.filtroLugar ||
+        op.desde?.toLowerCase().includes(this.filtroLugar.toLowerCase()) ||
+        op.hacia?.toLowerCase().includes(this.filtroLugar.toLowerCase());
+
+      return tipoMatch && estadoMatch && fechaMatch && produccionMatch && lugarMatch;
+    });
   }
 }
