@@ -18,21 +18,18 @@ import { LogisticaService, OperacionLogisticaDto } from './logistica.service';
   imports: [CommonModule, FullCalendarModule, RouterLink],
   template: `
     <div class="page">
-      <!-- Header -->
+      <!-- Header compacto -->
       <div class="header-section">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div>
-            <h1 class="text-3xl font-semibold text-gray-800">Calendario Logística</h1>
-            <p class="text-gray-500">Visualiza las operaciones de almacén en el calendario</p>
-          </div>
+        <div class="flex items-center justify-between">
+          <h1 class="text-2xl font-semibold text-gray-800">Calendario Logística</h1>
           <div class="flex gap-2">
-            <a routerLink="/tempo/movimientos" class="btn-secondary">
-              <span class="material-icons text-lg">list</span>
-              Ver Lista
+            <a routerLink="/tempo/movimientos" class="btn-secondary-sm">
+              <span class="material-icons text-base">list</span>
+              Lista
             </a>
-            <button class="btn-nuevo" (click)="abrirModalNuevaOperacion()">
-              <span class="material-icons text-lg">add</span>
-              Nueva Operación
+            <button class="btn-nuevo-sm" (click)="abrirModalNuevaOperacion()">
+              <span class="material-icons text-base">add</span>
+              Nueva
             </button>
           </div>
         </div>
@@ -83,32 +80,32 @@ import { LogisticaService, OperacionLogisticaDto } from './logistica.service';
       height: 100%;
       background: #f2f4f7;
       overflow: hidden;
-      padding: 1.5rem 2rem;
+      padding: 1rem 2rem;
     }
 
     .header-section {
       flex-shrink: 0;
-      margin-bottom: 1.5rem;
+      margin-bottom: 0.75rem;
     }
 
     .filters-section {
       flex-shrink: 0;
       background: #ffffff;
-      border-radius: 0.9rem;
-      padding: 1.2rem;
-      margin-bottom: 1.5rem;
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.75rem;
       border: 1px solid rgba(15, 23, 42, 0.08);
-      box-shadow: 0 15px 30px rgba(15, 23, 42, 0.08);
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
     }
 
     .calendar-wrapper {
       flex: 1 1 0;
       min-height: 0;
       background: #ffffff;
-      border-radius: 1rem;
-      padding: 1.4rem;
+      border-radius: 0.75rem;
+      padding: 0.75rem;
       border: 1px solid rgba(15, 23, 42, 0.08);
-      box-shadow: 0 20px 35px rgba(15, 23, 42, 0.1);
+      box-shadow: 0 15px 30px rgba(15, 23, 42, 0.08);
       overflow: hidden;
       position: relative;
       display: flex;
@@ -130,47 +127,43 @@ import { LogisticaService, OperacionLogisticaDto } from './logistica.service';
       z-index: 10;
     }
 
-    .btn-nuevo {
+    .btn-nuevo-sm {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1.5rem;
+      gap: 0.35rem;
+      padding: 0.4rem 0.75rem;
       background: #CF102D;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       font-weight: 600;
-      font-size: 0.875rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      font-size: 0.8rem;
       cursor: pointer;
       transition: all 0.2s;
-      box-shadow: 0 4px 12px rgba(207, 16, 45, 0.3);
+      box-shadow: 0 2px 8px rgba(207, 16, 45, 0.25);
     }
 
-    .btn-nuevo:hover {
+    .btn-nuevo-sm:hover {
       background: #a80d25;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(207, 16, 45, 0.4);
     }
 
-    .btn-secondary {
+    .btn-secondary-sm {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1.5rem;
+      gap: 0.35rem;
+      padding: 0.4rem 0.75rem;
       background: white;
       color: #374151;
       border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.875rem;
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 0.8rem;
       cursor: pointer;
       transition: all 0.2s;
       text-decoration: none;
     }
 
-    .btn-secondary:hover {
+    .btn-secondary-sm:hover {
       background: #f3f4f6;
     }
 
@@ -365,7 +358,7 @@ import { LogisticaService, OperacionLogisticaDto } from './logistica.service';
     }
 
     :host ::ng-deep .fc-toolbar {
-      margin-bottom: 0.75rem !important;
+      margin-bottom: 0.5rem !important;
     }
 
     :host ::ng-deep .fc-button {
