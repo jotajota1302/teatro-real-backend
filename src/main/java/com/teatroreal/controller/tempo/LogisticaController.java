@@ -1,5 +1,6 @@
 package com.teatroreal.controller.tempo;
 
+import com.teatroreal.dto.request.OperacionLogisticaRequest;
 import com.teatroreal.dto.response.ActividadResponse;
 import com.teatroreal.dto.response.LogisticaSummaryResponse;
 import com.teatroreal.service.tempo.LogisticaService;
@@ -8,8 +9,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -104,5 +107,42 @@ public class LogisticaController {
     @GetMapping("/almacenes")
     public ResponseEntity<List<Map<String, Object>>> getAlmacenes() {
         return ResponseEntity.ok(logisticaService.getAlmacenes());
+    }
+
+    @Operation(summary = "Crear nueva operación logística")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Operación creada"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+            @ApiResponse(responseCode = "404", description = "Almacén o temporada no encontrada")
+    })
+    @PostMapping("/operaciones")
+    public ResponseEntity<ActividadResponse> crear(@Valid @RequestBody OperacionLogisticaRequest request) {
+        ActividadResponse response = logisticaService.crear(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Operation(summary = "Actualizar operación logística existente")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Operación actualizada"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos o no es operación de almacén"),
+            @ApiResponse(responseCode = "404", description = "Operación no encontrada")
+    })
+    @PutMapping("/operaciones/{id}")
+    public ResponseEntity<ActividadResponse> actualizar(
+            @PathVariable String id,
+            @Valid @RequestBody OperacionLogisticaRequest request) {
+        return ResponseEntity.ok(logisticaService.actualizar(id, request));
+    }
+
+    @Operation(summary = "Eliminar operación logística")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Operación eliminada"),
+            @ApiResponse(responseCode = "400", description = "No es operación de almacén"),
+            @ApiResponse(responseCode = "404", description = "Operación no encontrada")
+    })
+    @DeleteMapping("/operaciones/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable String id) {
+        logisticaService.eliminar(id);
+        return ResponseEntity.noContent().build();
     }
 }

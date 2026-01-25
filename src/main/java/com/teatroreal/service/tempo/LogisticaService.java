@@ -1,16 +1,20 @@
 package com.teatroreal.service.tempo;
 
 import com.teatroreal.domain.tempo.*;
+import com.teatroreal.dto.request.OperacionLogisticaRequest;
 import com.teatroreal.dto.response.ActividadResponse;
 import com.teatroreal.dto.response.LogisticaSummaryResponse;
 import com.teatroreal.repository.tempo.ActividadRepository;
 import com.teatroreal.repository.tempo.EspacioRepository;
+import com.teatroreal.repository.tempo.TemporadaRepository;
+import com.teatroreal.repository.tempo.TipoActividadRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -21,6 +25,8 @@ public class LogisticaService {
 
     private final ActividadRepository actividadRepository;
     private final EspacioRepository espacioRepository;
+    private final TemporadaRepository temporadaRepository;
+    private final TipoActividadRepository tipoActividadRepository;
 
     /**
      * Obtiene estadísticas de logística para el dashboard
@@ -148,6 +154,105 @@ public class LogisticaService {
                     return map;
                 })
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Crea una nueva operación logística (actividad en almacén)
+     */
+    public ActividadResponse crear(OperacionLogisticaRequest request) {
+        // Obtener almacén (espacio tipo ALMACEN)
+        Espacio almacen;
+        if (request.getAlmacenId() != null) {
+            almacen = espacioRepository.findById(request.getAlmacenId())
+                    .orElseThrow(() -> new EntityNotFoundException("Almacén no encontrado"));
+            if (!"ALMACEN".equals(almacen.getTipo())) {
+                throw new IllegalArgumentException("El espacio seleccionado no es un almacén");
+            }
+        } else {
+            // Usar el primer almacén disponible
+            almacen = espacioRepository.findByTipo("ALMACEN")
+                    .stream()
+                    .findFirst()
+                    .orElseThrow(() -> new EntityNotFoundException("No hay almacenes configurados"));
+        }
+
+        // Obtener temporada
+        Temporada temporada;
+        if (request.getTemporadaId() != null) {
+            temporada = temporadaRepository.findById(request.getTemporadaId())
+                    .orElseThrow(() -> new EntityNotFoundException("Temporada no encontrada"));
+        } else {
+            temporada = temporadaRepository.findByActivaTrue()
+                    .orElseThrow(() -> new EntityNotFoundException("No hay temporada activa"));
+        }
+
+        // Obtener o crear tipo actividad para logística
+        TipoActividad tipoActividad = tipoActividadRepository.findByNombreIgnoreCase("Logística")
+                .orElseGet(() -> tipoActividadRepository.findByNombreIgnoreCase("Movimiento")
+                        .orElseGet(() -> tipoActividadRepository.findAll()
+                                .stream()
+                                .findFirst()
+                                .orElseThrow(() -> new EntityNotFoundException("No hay tipos de actividad configurados"))));
+
+        // Crear la actividad
+        Actividad actividad = new Actividad();
+        actividad.setTitulo(request.getProduccionNombre() + " - " + request.getTipoMovimiento());
+        actividad.setTemporada(temporada);
+        actividad.setEspacio(almacen);
+        actividad.setTipoActividad(tipoActividad);
+        actividad.setFecha(LocalDate.parse(request.getFecha()));
+        actividad.setHoraInicio(LocalTime.parse(request.getHoraInicio()));
+        actividad.setHoraFin(LocalTime.parse(request.getHoraFin()));
+        actividad.setDescripcion(request.getDescripcion());
+        actividad.setEstado(Actividad.EstadoActividad.PENDIENTE);
+
+        // Campos específicos de logística
+        actividad.setTipoMovimiento(Actividad.TipoMovimiento.valueOf(request.getTipoMovimiento()));
+        actividad.setNumCamiones(request.getNumCamiones());
+        actividad.setLugarOrigen(request.getLugarOrigen());
+        actividad.setLugarDestino(request.getLugarDestino());
+        actividad.setProduccionNombre(request.getProduccionNombre());
+
+        actividad = actividadRepository.save(actividad);
+        return toResponse(actividad);
+    }
+
+    /**
+     * Actualiza una operación logística existente
+     */
+    public ActividadResponse actualizar(String id, OperacionLogisticaRequest request) {
+        Actividad actividad = actividadRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Operación no encontrada"));
+
+        validateEsOperacionAlmacen(actividad);
+
+        // Actualizar campos
+        actividad.setTitulo(request.getProduccionNombre() + " - " + request.getTipoMovimiento());
+        actividad.setFecha(LocalDate.parse(request.getFecha()));
+        actividad.setHoraInicio(LocalTime.parse(request.getHoraInicio()));
+        actividad.setHoraFin(LocalTime.parse(request.getHoraFin()));
+        actividad.setDescripcion(request.getDescripcion());
+
+        // Campos específicos de logística
+        actividad.setTipoMovimiento(Actividad.TipoMovimiento.valueOf(request.getTipoMovimiento()));
+        actividad.setNumCamiones(request.getNumCamiones());
+        actividad.setLugarOrigen(request.getLugarOrigen());
+        actividad.setLugarDestino(request.getLugarDestino());
+        actividad.setProduccionNombre(request.getProduccionNombre());
+
+        actividad = actividadRepository.save(actividad);
+        return toResponse(actividad);
+    }
+
+    /**
+     * Elimina una operación logística
+     */
+    public void eliminar(String id) {
+        Actividad actividad = actividadRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Operación no encontrada"));
+
+        validateEsOperacionAlmacen(actividad);
+        actividadRepository.delete(actividad);
     }
 
     private void validateEsOperacionAlmacen(Actividad actividad) {
