@@ -13,11 +13,11 @@
 
 ## Resumen Ejecutivo
 
-| Semana | Fran (Backend focus) | Sandra (Frontend focus) | Sergio (Validación) |
-|--------|---------------------|------------------------|---------------------|
-| **S1** | Auth + Entidades base | Auth + Layout + Componentes shared | Daily review código |
-| **S2** | TEMPO + Logística API | TEMPO + Logística UI | Sprint review miércoles |
-| **S3** | TOPS API + Integraciones | TOPS UI + Cartelería | Demo final viernes |
+| Semana | Fran (Backend focus) | Sandra (Frontend focus) | Sergio (Validación) | Estado |
+|--------|---------------------|------------------------|---------------------|--------|
+| **S1** | Auth + Entidades base | Auth + Layout + Componentes shared | Daily review código | ✅ Completado |
+| **S2** | TEMPO + Logística API | TEMPO + Logística UI | Sprint review miércoles | ✅ Completado |
+| **S3** | TOPS API + Integraciones | TOPS UI + Cartelería | Demo final viernes | ⏳ En Progreso |
 
 ---
 
@@ -84,12 +84,12 @@
 | **Sandra** | Tests unitarios Auth frontend (Jasmine) | 2h | AuthService tests |
 | **Sergio** | **SPRINT REVIEW S1** | 2h | Demo + feedback |
 
-### Entregables Semana 1 ✓
+### Entregables Semana 1 ✅ COMPLETADO
 - [x] Autenticación JWT con 4 roles funcionando
 - [x] Login/logout operativo
 - [x] Header con selector temporada y notificaciones
 - [x] Entidades base creadas (Usuario, Rol, Departamento, Temporada, PermisoModulo)
-- [ ] Tests básicos auth
+- [ ] Tests básicos auth (pendiente para Sprint 5)
 
 ---
 
@@ -179,21 +179,26 @@
 | **Sandra** | Admin: Lista + Form Espacios, TiposActividad, Departamentos | 2h | Material components |
 | **Sergio** | **SPRINT REVIEW S2** | 2h | Demo TEMPO + Logística |
 
-### Entregables Semana 2 ✓
+### Entregables Semana 2 ✅ COMPLETADO
 - [x] Landing TEMPO con vista semanal Excel
 - [x] Calendario FullCalendar integrado (TEMPO) - mes/semana/día sin scroll
 - [x] Modal "Nueva Actividad" en calendario
 - [x] CRUD actividades con estados almacén
 - [x] Clonar actividades funcionando
-- [ ] **Landing Logística con calendario (mes/semana/día)**
-- [ ] **Calendario Logística por almacén (Arganda-Campa, Arganda-Nave)**
-- [ ] **CRUD operaciones logística (RECOGIDA verde/SALIDA rosa)**
-- [ ] **Campos v1.3: nº camiones, lugar origen/destino**
-- [ ] **Botones transición: Pendiente → En tránsito → Completado**
-- [ ] **Filtros: por almacén, tipo, temporada, fecha**
+- [x] **Landing Logística con calendario (mes/semana/día)**
+- [x] **Calendario Logística por almacén (Arganda-Campa, Arganda-Nave)**
+- [x] **CRUD operaciones logística (RECOGIDA verde/SALIDA rosa)** - Backend + Frontend completo
+- [x] **Campos v1.3: nº camiones, lugar origen/destino**
+- [x] **Botones transición: Pendiente → En tránsito → Completado**
+- [x] **Filtros: por almacén, tipo, temporada, fecha**
 - [x] Admin: Espacios (SALA/ALMACEN) - Dashboard completo
 - [x] Admin: Tipos, Departamentos
 - [x] Filtros por temporada operativos
+- [x] **Backend CRUD completo: POST/PUT/DELETE /api/logistica/operaciones**
+- [x] **Manejo errores: error banners + retry cuando backend no disponible**
+
+> **Nota (2026-01-25):** TEMPO completado al 100%. Backend y Frontend totalmente funcionales.
+> Sin fallbacks silenciosos - errores se muestran claramente al usuario.
 
 ---
 

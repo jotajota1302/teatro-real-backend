@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of, catchError, map } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError, map, catchError } from 'rxjs';
 
 export interface LogisticaStatDto {
   programados: number;
@@ -66,14 +66,14 @@ export class LogisticaService {
 
   obtenerResumen(): Observable<LogisticaStatDto> {
     return this.http.get<LogisticaStatDto>(`${this.baseUrl}/summary`).pipe(
-      catchError(() => of({ programados: 0, enTransito: 0, completados: 0, camionesHoy: 0 }))
+      catchError(this.handleError)
     );
   }
 
   operacionesRecientes(): Observable<OperacionLogisticaDto[]> {
     return this.http.get<ActividadResponse[]>(`${this.baseUrl}/operaciones`).pipe(
       map(ops => ops.map(op => this.mapToOperacion(op))),
-      catchError(() => of([]))
+      catchError(this.handleError)
     );
   }
 
@@ -82,7 +82,7 @@ export class LogisticaService {
       params: { inicio, fin }
     }).pipe(
       map(ops => ops.map(op => this.mapToOperacion(op))),
-      catchError(() => of([]))
+      catchError(this.handleError)
     );
   }
 
@@ -112,8 +112,25 @@ export class LogisticaService {
 
   getAlmacenes(): Observable<{ id: number; nombre: string; ubicacion: string }[]> {
     return this.http.get<{ id: number; nombre: string; ubicacion: string }[]>(`${this.baseUrl}/almacenes`).pipe(
-      catchError(() => of([]))
+      catchError(this.handleError)
     );
+  }
+
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    let errorMessage = 'Error de conexión con el servidor';
+
+    if (error.status === 0) {
+      errorMessage = 'No se puede conectar con el servidor. Verifique que el backend está en ejecución.';
+    } else if (error.status === 404) {
+      errorMessage = 'Recurso no encontrado';
+    } else if (error.status === 500) {
+      errorMessage = 'Error interno del servidor';
+    } else if (error.error?.message) {
+      errorMessage = error.error.message;
+    }
+
+    console.error('LogisticaService Error:', errorMessage, error);
+    return throwError(() => new Error(errorMessage));
   }
 
   private mapToOperacion(op: ActividadResponse): OperacionLogisticaDto {
