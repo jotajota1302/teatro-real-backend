@@ -1,7 +1,8 @@
 // teatro-real-frontend/src/app/features/tempo/services/espacio.service.ts
 
 import { Injectable, signal } from '@angular/core';
-import { Observable, of, catchError, map, tap } from 'rxjs';
+import { Observable, throwError, catchError, map, tap } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ApiService } from '../../../core/services/api.service';
 import { Espacio } from '../models/actividad.model';
 
@@ -41,8 +42,13 @@ export interface TempoEspacioDto {
 export class EspacioService {
   private espaciosSignal = signal<Espacio[]>([]);
   private loadingSignal = signal(false);
+  private errorSignal = signal<string | null>(null);
   private readonly baseUrl = '/api/espacios';
-  private readonly fallbackEspacios: TempoEspacioDto[] = [
+
+  error = this.errorSignal.asReadonly();
+
+  // Datos de ejemplo para referencia (no se usan como fallback)
+  private readonly ejemploEspacios: TempoEspacioDto[] = [
     {
       nombre: 'Escenario Principal',
       tipo: 'Escenario',
@@ -201,6 +207,7 @@ export class EspacioService {
    */
   loadEspacios(): Observable<Espacio[]> {
     this.loadingSignal.set(true);
+    this.errorSignal.set(null);
     // El backend devuelve directamente un array, no un wrapper
     return this.api.get<EspacioBackend[]>(this.baseUrl).pipe(
       map(espacios => espacios as unknown as Espacio[]),
@@ -208,11 +215,11 @@ export class EspacioService {
         this.espaciosSignal.set(espacios);
         this.loadingSignal.set(false);
       }),
-      catchError(() => {
-        const fallback = this.fallbackEspacios as unknown as Espacio[];
-        this.espaciosSignal.set(fallback);
+      catchError((error: HttpErrorResponse) => {
         this.loadingSignal.set(false);
-        return of(fallback);
+        const errorMsg = this.getErrorMessage(error);
+        this.errorSignal.set(errorMsg);
+        return throwError(() => new Error(errorMsg));
       })
     );
   }
@@ -221,16 +228,32 @@ export class EspacioService {
    * Recupera los espacios diseñados para el nuevo dashboard TEMPO.
    */
   obtenerEspaciosResumen(): Observable<TempoEspacioDto[]> {
+    this.errorSignal.set(null);
     // El backend devuelve directamente un array de EspacioBackend
     return this.api.get<EspacioBackend[]>(this.baseUrl).pipe(
       map(espacios => {
         if (espacios && espacios.length > 0) {
           return espacios.map(e => this.mapBackendToDto(e));
         }
-        return this.fallbackEspacios;
+        return [];
       }),
-      catchError(() => of(this.fallbackEspacios))
+      catchError((error: HttpErrorResponse) => {
+        const errorMsg = this.getErrorMessage(error);
+        this.errorSignal.set(errorMsg);
+        return throwError(() => new Error(errorMsg));
+      })
     );
+  }
+
+  private getErrorMessage(error: HttpErrorResponse): string {
+    if (error.status === 0) {
+      return 'No se puede conectar con el servidor. Verifique que el backend está en ejecución.';
+    } else if (error.status === 404) {
+      return 'Recurso no encontrado';
+    } else if (error.status === 500) {
+      return 'Error interno del servidor';
+    }
+    return error.error?.message || 'Error de conexión con el servidor';
   }
 
   /**

@@ -46,8 +46,23 @@ const ESTADO_LABELS: Record<string, string> = {
           </div>
         </div>
 
+        <!-- Error Banner -->
+        <div *ngIf="backendError" class="error-banner" [class]="isDark() ? 'error-banner-dark' : 'error-banner-light'">
+          <div class="flex items-center gap-3">
+            <span class="material-icons text-2xl">cloud_off</span>
+            <div class="flex-1">
+              <p class="font-semibold">Servidor no disponible</p>
+              <p class="text-sm opacity-80">{{ backendError }}</p>
+            </div>
+            <button (click)="retryConnection()" class="retry-btn">
+              <span class="material-icons text-sm">refresh</span>
+              Reintentar
+            </button>
+          </div>
+        </div>
+
         <!-- Stats -->
-        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4" *ngIf="!backendError">
           <article [class]="isDark() ? 'stat-card-dark' : 'stat-card'" *ngFor="let stat of statCards">
             <p class="text-sm uppercase tracking-wide" [class]="isDark() ? 'text-gray-400' : 'text-gray-500'">{{ stat.label }}</p>
             <p class="text-3xl font-semibold mt-1" [class]="isDark() ? 'text-white' : 'text-gray-800'">{{ stat.value }}</p>
@@ -343,6 +358,49 @@ const ESTADO_LABELS: Record<string, string> = {
       padding: 1.2rem;
       background: #1a1a1a;
       box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .error-banner {
+      padding: 1rem 1.5rem;
+      border-radius: 0.75rem;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .error-banner-light {
+      background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+      border: 1px solid #F87171;
+      color: #991B1B;
+    }
+
+    .error-banner-dark {
+      background: linear-gradient(135deg, #450A0A 0%, #7F1D1D 100%);
+      border: 1px solid #DC2626;
+      color: #FCA5A5;
+    }
+
+    .retry-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid currentColor;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: inherit;
+    }
+
+    .retry-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.02);
     }
 
     .form-label {
@@ -877,6 +935,7 @@ export class LogisticaComponent implements OnInit {
   operaciones: OperacionLogisticaDto[] = [];
   loading = true;
   procesando = false;
+  backendError: string | null = null;
 
   tipoFiltros = TIPO_FILTROS;
   estadoFiltros = ESTADOS_FILTROS;
@@ -897,11 +956,20 @@ export class LogisticaComponent implements OnInit {
   filtroLugar = '';
 
   ngOnInit(): void {
+    this.loadData();
+  }
+
+  private loadData(): void {
+    this.loading = true;
+    this.backendError = null;
+
     this.logisticaService.obtenerResumen()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: stats => (this.stats = stats),
-        error: () => {} // Silencioso - servicio tiene fallback
+        error: (err) => {
+          this.backendError = err.message || 'Error al conectar con el servidor';
+        }
       });
 
     this.logisticaService.operacionesRecientes()
@@ -910,11 +978,17 @@ export class LogisticaComponent implements OnInit {
         next: operaciones => {
           this.operaciones = operaciones;
           this.loading = false;
+          this.backendError = null;
         },
-        error: () => {
+        error: (err) => {
           this.loading = false;
+          this.backendError = err.message || 'No se puede conectar con el servidor. Verifique que el backend está en ejecución.';
         }
       });
+  }
+
+  retryConnection(): void {
+    this.loadData();
   }
 
   get statCards() {
@@ -1063,28 +1137,7 @@ export class LogisticaComponent implements OnInit {
         error: (err) => {
           console.error('Error al crear movimiento:', err);
           this.guardando = false;
-          // Fallback: añadir localmente con ID temporal
-          const tempOp: OperacionLogisticaDto = {
-            id: `temp-${Date.now()}`,
-            nombre: operacion.produccionNombre,
-            estado: 'PENDIENTE',
-            estadoColor: '#FBBF24',
-            estadoLabel: 'Pendiente',
-            icon: operacion.tipoMovimiento === 'ENTRADA' ? 'arrow_back' :
-                  operacion.tipoMovimiento === 'SALIDA' ? 'arrow_forward' : 'swap_horiz',
-            desde: operacion.lugarOrigen,
-            hacia: operacion.lugarDestino,
-            fecha: operacion.fecha,
-            hora: operacion.horaInicio,
-            horaFin: operacion.horaFin,
-            camiones: operacion.numCamiones || 0,
-            detalle: operacion.descripcion || '',
-            tipo: operacion.tipoMovimiento === 'ENTRADA' ? 'Descargas' :
-                  operacion.tipoMovimiento === 'SALIDA' ? 'Cargas' : 'Transportes',
-            tipoMovimiento: operacion.tipoMovimiento,
-            produccionNombre: operacion.produccionNombre
-          };
-          this.operaciones = [tempOp, ...this.operaciones];
+          this.backendError = err.message || 'Error al crear la operación. Verifique la conexión con el servidor.';
           this.closeModal();
         }
       });

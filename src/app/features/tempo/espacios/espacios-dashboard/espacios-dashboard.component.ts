@@ -160,6 +160,50 @@ interface DashboardStats {
       box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
     }
 
+    .error-banner {
+      margin: 0 2rem 1rem 2rem;
+      padding: 1rem 1.5rem;
+      border-radius: 0.75rem;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .error-banner-light {
+      background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+      border: 1px solid #F87171;
+      color: #991B1B;
+    }
+
+    .error-banner-dark {
+      background: linear-gradient(135deg, #450A0A 0%, #7F1D1D 100%);
+      border: 1px solid #DC2626;
+      color: #FCA5A5;
+    }
+
+    .retry-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid currentColor;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: inherit;
+    }
+
+    .retry-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.02);
+    }
+
     .filters button {
       min-width: 110px;
       text-transform: uppercase;
@@ -498,9 +542,26 @@ interface DashboardStats {
         </div>
       </div>
 
+      <!-- Error Banner -->
+      @if (backendError()) {
+        <div class="error-banner" [class]="isDark() ? 'error-banner-dark' : 'error-banner-light'">
+          <div class="flex items-center gap-3">
+            <span class="material-icons text-2xl">cloud_off</span>
+            <div class="flex-1">
+              <p class="font-semibold">Servidor no disponible</p>
+              <p class="text-sm opacity-80">{{ backendError() }}</p>
+            </div>
+            <button (click)="retryConnection()" class="retry-btn">
+              <span class="material-icons text-sm">refresh</span>
+              Reintentar
+            </button>
+          </div>
+        </div>
+      }
+
       <!-- Zona scrollable: Solo las tarjetas -->
       <div class="scrollable-content">
-        <ng-container *ngIf="!loading(); else loadingTemplate">
+        <ng-container *ngIf="!loading() && !backendError(); else loadingTemplate">
           <div class="space-y-8">
             <section *ngFor="let section of seccionesFiltradas()" class="space-y-4">
               <div class="flex items-center gap-2">
@@ -681,6 +742,7 @@ export class EspaciosDashboardComponent {
   espacios = signal<TempoEspacioDto[]>([]);
   groupedSections = signal<CategoryGroup[]>([]);
   loading = signal(true);
+  backendError = signal<string | null>(null);
   stats = signal<DashboardStats>({ total: 0, active: 0, withCalendar: 0 });
   filters = FILTER_OPTIONS;
   selectedFilter = signal<string>('Todos');
@@ -711,19 +773,27 @@ export class EspaciosDashboardComponent {
   }
 
   cargarEspacios(): void {
+    this.loading.set(true);
+    this.backendError.set(null);
     this.espacioService.obtenerEspaciosResumen()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: espacios => {
           this.espacios.set(espacios);
           this.loading.set(false);
+          this.backendError.set(null);
           this.actualizarEstadisticas(espacios);
           this.groupedSections.set(this.agruparPorCategoria(espacios));
         },
-        error: () => {
+        error: (err) => {
           this.loading.set(false);
+          this.backendError.set(err.message || 'No se puede conectar con el servidor. Verifique que el backend está en ejecución.');
         }
       });
+  }
+
+  retryConnection(): void {
+    this.cargarEspacios();
   }
 
   badgeBackground(disponible: boolean): string {
@@ -798,16 +868,8 @@ export class EspaciosDashboardComponent {
           },
           error: (err) => {
             console.error('Error actualizando espacio:', err);
-            // Actualización local como fallback
-            const espacios = this.espacios();
-            const index = espacios.findIndex(e => e.id === editing.id || e.nombre === editing.nombre);
-            if (index !== -1) {
-              espacios[index] = espacioData;
-              this.espacios.set([...espacios]);
-              this.actualizarEstadisticas(espacios);
-              this.groupedSections.set(this.agruparPorCategoria(espacios));
-            }
             this.closeModal();
+            this.backendError.set(err.message || 'Error al actualizar el espacio. Verifique la conexión con el servidor.');
           }
         });
     } else {
@@ -824,12 +886,8 @@ export class EspaciosDashboardComponent {
           },
           error: (err) => {
             console.error('Error creando espacio:', err);
-            // Creación local como fallback
-            const espacios = [...this.espacios(), espacioData];
-            this.espacios.set(espacios);
-            this.actualizarEstadisticas(espacios);
-            this.groupedSections.set(this.agruparPorCategoria(espacios));
             this.closeModal();
+            this.backendError.set(err.message || 'Error al crear el espacio. Verifique la conexión con el servidor.');
           }
         });
     }
@@ -854,21 +912,14 @@ export class EspaciosDashboardComponent {
             },
             error: (err) => {
               console.error('Error eliminando espacio:', err);
-              // Eliminación local como fallback
-              const espacios = this.espacios().filter(e => e.nombre !== editing.nombre);
-              this.espacios.set(espacios);
-              this.actualizarEstadisticas(espacios);
-              this.groupedSections.set(this.agruparPorCategoria(espacios));
               this.closeModal();
+              this.backendError.set(err.message || 'Error al eliminar el espacio. Verifique la conexión con el servidor.');
             }
           });
       } else {
-        // Eliminación local (espacio sin ID = fallback data)
-        const espacios = this.espacios().filter(e => e.nombre !== editing.nombre);
-        this.espacios.set(espacios);
-        this.actualizarEstadisticas(espacios);
-        this.groupedSections.set(this.agruparPorCategoria(espacios));
+        // Espacio sin ID no debería existir si el backend funciona
         this.closeModal();
+        this.backendError.set('No se puede eliminar un espacio que no fue guardado en el servidor.');
       }
     }
   }

@@ -55,15 +55,34 @@ import { ThemeService } from '../../../core/services/theme.service';
         </div>
       </div>
 
-      <!-- Calendario -->
-      <div class="calendar-wrapper" [class]="isDark() ? 'calendar-wrapper-dark' : 'calendar-wrapper-light'">
-        @if (loading()) {
-          <div class="loading-overlay" [class]="isDark() ? 'loading-overlay-dark' : ''">
-            <div class="animate-spin w-8 h-8 border-4 border-[#CF102D] border-t-transparent rounded-full"></div>
+      <!-- Error Banner -->
+      @if (backendError()) {
+        <div class="error-banner" [class]="isDark() ? 'error-banner-dark' : ''">
+          <div class="error-content">
+            <span class="material-icons error-icon">cloud_off</span>
+            <div class="error-text">
+              <strong>Sin conexión</strong>
+              <p>{{ backendError() }}</p>
+            </div>
+            <button class="retry-btn" (click)="retryConnection()">
+              <span class="material-icons">refresh</span>
+              Reintentar
+            </button>
           </div>
-        }
-        <full-calendar [options]="calendarOptions()"></full-calendar>
-      </div>
+        </div>
+      }
+
+      <!-- Calendario -->
+      @if (!backendError()) {
+        <div class="calendar-wrapper" [class]="isDark() ? 'calendar-wrapper-dark' : 'calendar-wrapper-light'">
+          @if (loading()) {
+            <div class="loading-overlay" [class]="isDark() ? 'loading-overlay-dark' : ''">
+              <div class="animate-spin w-8 h-8 border-4 border-[#CF102D] border-t-transparent rounded-full"></div>
+            </div>
+          }
+          <full-calendar [options]="calendarOptions()"></full-calendar>
+        </div>
+      }
 
     </div>
   `,
@@ -283,6 +302,78 @@ import { ThemeService } from '../../../core/services/theme.service';
 
     .btn-sm-secondary-dark:hover {
       background: #333333;
+    }
+
+    /* Error Banner */
+    .error-banner {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 0.75rem;
+      padding: 2rem;
+    }
+
+    .error-banner-dark {
+      background: rgba(220, 38, 38, 0.1);
+      border-color: rgba(220, 38, 38, 0.3);
+    }
+
+    .error-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      text-align: center;
+    }
+
+    .error-icon {
+      font-size: 3rem;
+      color: #dc2626;
+    }
+
+    .error-text {
+      color: #991b1b;
+    }
+
+    .error-banner-dark .error-text {
+      color: #fca5a5;
+    }
+
+    .error-text strong {
+      font-size: 1.25rem;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .error-text p {
+      margin: 0;
+      font-size: 0.875rem;
+      opacity: 0.9;
+    }
+
+    .retry-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: #CF102D;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .retry-btn:hover {
+      background: #a80d25;
+    }
+
+    .retry-btn .material-icons {
+      font-size: 1.25rem;
     }
 
     /* FullCalendar overrides - altura completa */
@@ -638,6 +729,7 @@ export class LogisticaCalendarioComponent implements OnInit {
   isDark = this.themeService.isDark;
   operaciones = signal<OperacionLogisticaDto[]>([]);
   loading = signal(true);
+  backendError = signal<string | null>(null);
   selectedTipo = signal('');
   selectedEstado = signal('');
 
@@ -720,6 +812,7 @@ export class LogisticaCalendarioComponent implements OnInit {
 
   private loadOperaciones(): void {
     this.loading.set(true);
+    this.backendError.set(null);
 
     // Cargar operaciones del mes actual
     const now = new Date();
@@ -732,11 +825,17 @@ export class LogisticaCalendarioComponent implements OnInit {
         next: (ops) => {
           this.operaciones.set(ops);
           this.loading.set(false);
+          this.backendError.set(null);
         },
-        error: () => {
+        error: (err) => {
           this.loading.set(false);
+          this.backendError.set(err.message || 'No se puede conectar con el servidor');
         }
       });
+  }
+
+  retryConnection(): void {
+    this.loadOperaciones();
   }
 
   onDatesSet(dateInfo: any): void {
@@ -751,9 +850,11 @@ export class LogisticaCalendarioComponent implements OnInit {
         next: (ops) => {
           this.operaciones.set(ops);
           this.loading.set(false);
+          this.backendError.set(null);
         },
-        error: () => {
+        error: (err) => {
           this.loading.set(false);
+          this.backendError.set(err.message || 'Error al cargar operaciones');
         }
       });
   }

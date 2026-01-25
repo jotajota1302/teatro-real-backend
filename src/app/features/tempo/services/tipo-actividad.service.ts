@@ -1,20 +1,10 @@
 // teatro-real-frontend/src/app/features/tempo/services/tipo-actividad.service.ts
 
 import { Injectable, signal } from '@angular/core';
-import { Observable, tap, of, catchError } from 'rxjs';
+import { Observable, tap, throwError, catchError } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 import { ApiService } from '../../../core/services/api.service';
 import { TipoActividad } from '../models/actividad.model';
-
-// Fallback de tipos de actividad cuando el backend no está disponible
-// Los IDs deben coincidir con los del seed (V3__seed_espacios_tipoactividad.sql)
-const FALLBACK_TIPOS: TipoActividad[] = [
-  { id: 'ta-funcion-001', nombre: 'Función', colorHex: '#DC2626', descripcion: 'Funciones de ópera y ballet', aplicaA: 'SALA', orden: 1 },
-  { id: 'ta-ensayo-general-002', nombre: 'Ensayo General', colorHex: '#2563EB', descripcion: 'Ensayos generales y parciales', aplicaA: 'SALA', orden: 2 },
-  { id: 'ta-montaje-008', nombre: 'Montaje', colorHex: '#EA580C', descripcion: 'Montaje de escenografía', aplicaA: 'AMBOS', orden: 3 },
-  { id: 'ta-desmontaje-009', nombre: 'Desmontaje', colorHex: '#F97316', descripcion: 'Desmontaje de producción', aplicaA: 'AMBOS', orden: 4 },
-  { id: 'ta-mantenimiento-015', nombre: 'Mantenimiento', colorHex: '#6B7280', descripcion: 'Tareas de mantenimiento', aplicaA: 'AMBOS', orden: 5 },
-  { id: 'ta-evento-012', nombre: 'Evento', colorHex: '#F472B6', descripcion: 'Eventos especiales', aplicaA: 'SALA', orden: 6 }
-];
 
 /**
  * Servicio para gestión CRUD de tipos de actividad (ensayo, función, etc) módulo TEMPO.
@@ -24,9 +14,11 @@ const FALLBACK_TIPOS: TipoActividad[] = [
 export class TipoActividadService {
   private tiposSignal = signal<TipoActividad[]>([]);
   private loadingSignal = signal(false);
+  private errorSignal = signal<string | null>(null);
 
   tipos = this.tiposSignal.asReadonly();
   loading = this.loadingSignal.asReadonly();
+  error = this.errorSignal.asReadonly();
 
   constructor(private api: ApiService) {}
 
@@ -35,6 +27,7 @@ export class TipoActividadService {
    */
   loadTiposActividad(): Observable<TipoActividad[]> {
     this.loadingSignal.set(true);
+    this.errorSignal.set(null);
     // El backend devuelve directamente un array de TipoActividadResponse
     return this.api.get<TipoActividad[]>('/api/tipo-actividades').pipe(
       tap(tipos => {
@@ -50,14 +43,25 @@ export class TipoActividadService {
         this.tiposSignal.set(mapped);
         this.loadingSignal.set(false);
       }),
-      catchError((err) => {
-        // Fallback a datos estáticos cuando no hay backend
-        this.tiposSignal.set(FALLBACK_TIPOS);
+      catchError((error: HttpErrorResponse) => {
         this.loadingSignal.set(false);
-        console.warn('[TipoActividadService] Usando tipos de actividad por defecto:', err?.message || err);
-        return of(FALLBACK_TIPOS);
+        const errorMsg = this.getErrorMessage(error);
+        this.errorSignal.set(errorMsg);
+        console.warn('[TipoActividadService] Error cargando tipos:', errorMsg);
+        return throwError(() => new Error(errorMsg));
       })
     );
+  }
+
+  private getErrorMessage(error: HttpErrorResponse): string {
+    if (error.status === 0) {
+      return 'No se puede conectar con el servidor. Verifique que el backend está en ejecución.';
+    } else if (error.status === 404) {
+      return 'Recurso no encontrado';
+    } else if (error.status === 500) {
+      return 'Error interno del servidor';
+    }
+    return error.error?.message || 'Error de conexión con el servidor';
   }
 
   /**
