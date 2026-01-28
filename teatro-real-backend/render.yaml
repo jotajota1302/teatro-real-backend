@@ -1,0 +1,39 @@
+# ===========================================
+# Render Blueprint - Teatro Real Backend
+# ===========================================
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  # Spring Boot API
+  - type: web
+    name: teatro-real-api
+    runtime: docker
+    repo: https://github.com/TU_USUARIO/teatro-real-backend  # <-- Cambiar por tu repo
+    branch: main
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: https://teatro-real-app.vercel.app
+      - key: JDBC_DATABASE_URL
+        fromDatabase:
+          name: teatro-real-db
+          property: connectionString
+      - key: DATABASE_USERNAME
+        fromDatabase:
+          name: teatro-real-db
+          property: user
+      - key: DATABASE_PASSWORD
+        fromDatabase:
+          name: teatro-real-db
+          property: password
+
+databases:
+  - name: teatro-real-db
+    plan: free
+    databaseName: teatroreal
+    user: teatroreal

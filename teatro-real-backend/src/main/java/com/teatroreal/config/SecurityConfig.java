@@ -1,5 +1,6 @@
 package com.teatroreal.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,9 +14,13 @@ import com.teatroreal.security.JwtAuthFilter;
 import com.teatroreal.security.JwtUtil;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
+
+    @Value("${cors.allowed-origins:http://localhost:4200}")
+    private String corsAllowedOrigins;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
@@ -25,6 +30,8 @@ public class SecurityConfig {
             .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin())) // Para H2 console
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                // Health check publico (para Render)
+                .requestMatchers("/api/health").permitAll()
                 // DESARROLLO: permitir todo temporalmente
                 .anyRequest().permitAll()
             );
@@ -37,14 +44,17 @@ public class SecurityConfig {
         return new JwtAuthFilter(jwtUtil);
     }
 
-    // CORS global abierto
+    // CORS configurable via propiedades
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
+        // Parsear origenes desde propiedad (separados por coma)
+        List<String> origins = Arrays.asList(corsAllowedOrigins.split(","));
+        config.setAllowedOrigins(origins);
         config.setAllowedHeaders(Arrays.asList("*"));
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        config.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
