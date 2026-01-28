@@ -2,13 +2,14 @@
 # Render Blueprint - Teatro Real Backend
 # ===========================================
 # Docs: https://render.com/docs/blueprint-spec
+# Usa H2 en memoria (datos se recrean con Flyway en cada deploy)
 
 services:
   # Spring Boot API
   - type: web
     name: teatro-real-api
     runtime: docker
-    repo: https://github.com/TU_USUARIO/teatro-real-backend  # <-- Cambiar por tu repo
+    repo: https://github.com/jotajota1302/teatro-real-backend
     branch: main
     plan: free
     healthCheckPath: /api/health
@@ -19,21 +20,3 @@ services:
         generateValue: true
       - key: CORS_ORIGINS
         value: https://teatro-real-app.vercel.app
-      - key: JDBC_DATABASE_URL
-        fromDatabase:
-          name: teatro-real-db
-          property: connectionString
-      - key: DATABASE_USERNAME
-        fromDatabase:
-          name: teatro-real-db
-          property: user
-      - key: DATABASE_PASSWORD
-        fromDatabase:
-          name: teatro-real-db
-          property: password
-
-databases:
-  - name: teatro-real-db
-    plan: free
-    databaseName: teatroreal
-    user: teatroreal
