@@ -1,0 +1,25 @@
+# Workflow para mantener el backend de Render despierto
+# Render free tier se duerme tras 15 min de inactividad
+# Este cron hace ping cada 10 minutos
+
+name: Keep Alive
+
+on:
+  schedule:
+    # Cada 10 minutos (formato cron: minuto hora día mes día_semana)
+    - cron: '*/10 * * * *'
+  workflow_dispatch: # Permite ejecutar manualmente
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend health endpoint
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" https://teatro-real-backend.onrender.com/api/health)
+          echo "Health check response: $response"
+          if [ "$response" -eq 200 ]; then
+            echo "✅ Backend is awake"
+          else
+            echo "⚠️ Backend returned status $response (may be waking up)"
+          fi
