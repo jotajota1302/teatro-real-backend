@@ -5,6 +5,7 @@ import { Observable, throwError, catchError, map, tap } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ApiService } from '../../../core/services/api.service';
 import { Espacio } from '../models/actividad.model';
+import { environment } from '../../../../environments/environment';
 
 // Respuesta del backend (EspacioResponse.java)
 interface EspacioBackend {
@@ -43,7 +44,7 @@ export class EspacioService {
   private espaciosSignal = signal<Espacio[]>([]);
   private loadingSignal = signal(false);
   private errorSignal = signal<string | null>(null);
-  private readonly baseUrl = '/api/espacios';
+  private readonly baseUrl = `${environment.apiUrl}/espacios`;
 
   error = this.errorSignal.asReadonly();
 

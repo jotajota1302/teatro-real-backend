@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, map, catchError } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 export interface LogisticaStatDto {
   programados: number;
@@ -60,7 +61,7 @@ interface ActividadResponse {
 
 @Injectable({ providedIn: 'root' })
 export class LogisticaService {
-  private readonly baseUrl = '/api/logistica';
+  private readonly baseUrl = `${environment.apiUrl}/logistica`;
 
   constructor(private readonly http: HttpClient) {}
 
