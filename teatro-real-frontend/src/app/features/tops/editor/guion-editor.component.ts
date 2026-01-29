@@ -251,16 +251,25 @@ import { AuthService } from '../../../core/auth/auth.service';
               @for (escena of acto.escenas || []; track escena.id) {
                 <div>
                   <!-- Título Escena -->
-                  <div class="text-sm font-bold uppercase mt-5 mb-2.5 font-serif">
-                    <span>ESCENA: </span>
-                    <app-editable-text
-                      [value]="escena.nombre"
-                      (valueChange)="updateEscena(acto.id, escena.id, 'nombre', $event)"
-                      placeholder="Nombre de la escena"
-                      className="inline uppercase"
-                    />
-                    @if (escena.duracion) {
-                      <span class="font-normal"> (c. {{ escena.duracion }})</span>
+                  <div class="flex items-center justify-between mt-5 mb-2.5">
+                    <div class="text-sm font-bold uppercase font-serif">
+                      <span>ESCENA: </span>
+                      <app-editable-text
+                        [value]="escena.nombre"
+                        (valueChange)="updateEscena(acto.id, escena.id, 'nombre', $event)"
+                        placeholder="Nombre de la escena"
+                        className="inline uppercase"
+                      />
+                      @if (escena.duracion) {
+                        <span class="font-normal"> (c. {{ escena.duracion }})</span>
+                      }
+                    </div>
+                    @if (canEdit()) {
+                      <button class="w-6 h-6 inline-flex items-center justify-center rounded hover:bg-red-100 opacity-40 hover:opacity-100 transition-opacity"
+                              (click)="deleteEscena(acto.id, escena.id)"
+                              title="Eliminar escena">
+                        <mat-icon class="!text-base text-red-600">delete</mat-icon>
+                      </button>
                     }
                   </div>
 
@@ -508,6 +517,13 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
       orden: numEscenas + 1
     }).subscribe({
       error: () => this.showError('Error al crear escena')
+    });
+  }
+
+  deleteEscena(actoId: string, escenaId: string): void {
+    if (!this.canEdit()) return;
+    this.guionService.deleteEscena(actoId, escenaId).subscribe({
+      error: () => this.showError('Error al eliminar escena')
     });
   }
 
