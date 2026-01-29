@@ -18,12 +18,12 @@ public class ElementoGuionService {
     private final ElementoGuionRepository elementoGuionRepository;
     private final EscenaRepository escenaRepository;
 
-    public ElementoGuion crearElementoEnEscena(String escenaId, String texto, String tipoElemento, Integer orden, String colorHex) {
+    public ElementoGuion crearElementoEnEscena(String escenaId, String descripcion, String tipoElemento, Integer orden, String colorHex) {
         Escena escena = escenaRepository.findById(escenaId)
                 .orElseThrow(() -> new EntityNotFoundException("Escena no encontrada"));
         ElementoGuion elemento = new ElementoGuion();
         elemento.setEscena(escena);
-        elemento.setTexto(texto);
+        elemento.setDescripcion(descripcion);
         elemento.setTipoElemento(ElementoGuion.TipoElemento.valueOf(tipoElemento));
         elemento.setOrden(orden != null ? orden : 0);
         elemento.setColorHex(colorHex);

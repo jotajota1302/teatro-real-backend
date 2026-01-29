@@ -7,7 +7,7 @@
 | **Sprint 0: Setup** | ✅ Completado | 100% | 2025-12-11 |
 | **Sprint 1: Auth + Layout** | ✅ Completado | 100% | 2025-01-23 |
 | **Sprint 2: TEMPO** | ✅ Completado | 100% | 2026-01-25 |
-| **Sprint 3: TOPS** | ⏳ En Progreso | 15% | 2025-01-23 |
+| **Sprint 3: TOPS** | ⏳ En Progreso | 85% | 2026-01-29 |
 | **Sprint 4: Integraciones** | Parcial | 35% | 2026-01-23 |
 | **Sprint 5: Testing + Deploy** | En Progreso | 30% | 2025-01-23 |
 
@@ -263,55 +263,89 @@
 
 ---
 
-## Sprint 3: Módulo TOPS - EN PROGRESO 15%
+## Sprint 3: Módulo TOPS - EN PROGRESO 45%
 
-### Backend
+> **Enfoque:** Editor tipo Word para guiones técnicos (basado en guiones-new.jsx del MVP reference)
+
+### Backend - ✅ COMPLETADO 95%
 
 | Tarea | Estado | Notas |
 |-------|--------|-------|
-| Entidad JPA: Guion | [x] Completado | domain/tops/Guion.java |
-| Entidad JPA: Acto | [x] Completado | domain/tops/Acto.java |
-| Entidad JPA: Escena | [x] Completado | domain/tops/Escena.java |
-| Entidad JPA: ElementoGuion | [x] Completado | domain/tops/ElementoGuion.java |
+| **Migración V6 TOPS schema** | [x] Completado | V6__tops_guiones_schema.sql - tablas completas |
+| Entidad JPA: Guion | [x] Completado | domain/tops/Guion.java (+ lock/unlock, estados) |
+| Entidad JPA: Acto | [x] Completado | domain/tops/Acto.java (+ pasadaItems) |
+| Entidad JPA: Escena | [x] Completado | domain/tops/Escena.java (+ duracion) |
+| Entidad JPA: ElementoGuion | [x] Completado | domain/tops/ElementoGuion.java (+ PIE, DPTO, observaciones) |
 | Entidad JPA: ColorElementoGuion | [x] Completado | domain/tops/ColorElementoGuion.java |
-| GuionRepository | [x] Completado | repository/tops/ |
+| **Entidad JPA: PasadaItem** | [x] Completado | domain/tops/PasadaItem.java - NUEVO |
+| GuionRepository | [x] Completado | repository/tops/ (+ findByIdCompleto, countTops) |
 | ActoRepository | [x] Completado | repository/tops/ |
 | EscenaRepository | [x] Completado | repository/tops/ |
 | ElementoGuionRepository | [x] Completado | repository/tops/ |
 | ColorElementoGuionRepository | [x] Completado | repository/tops/ |
-| **GuionService** | **[ ] PENDIENTE** | **CRÍTICO - Falta implementar** |
-| **GuionController** | **[ ] PENDIENTE** | **CRÍTICO - Falta implementar** |
+| **PasadaItemRepository** | [x] Completado | repository/tops/ - NUEVO |
+| **GuionService** | [x] Completado | CRUD + lock/unlock + estados + createWithActos |
+| **GuionController** | [x] Completado | /api/guiones/* (GET, POST, PUT, DELETE, lock) |
+| **PasadaItemService** | [x] Completado | CRUD + insertAt (insertar en posición) |
+| **PasadaItemController** | [x] Completado | /api/actos/{actoId}/pasada/* |
 | ActoService + Controller | [x] Completado | service/tops/, controller/tops/ |
 | EscenaService + Controller | [x] Completado | service/tops/, controller/tops/ |
 | ElementoGuionService + Controller | [x] Completado | service/tops/, controller/tops/ |
 | ColorElementoGuionService | [x] Completado | service/tops/ |
-| Operaciones jerárquicas | [ ] Pendiente | |
+| **DTOs Request** | [x] Completado | GuionRequest, PasadaItemRequest |
+| **DTOs Response** | [x] Completado | GuionResponse, GuionCompletoResponse (árbol completo) |
+| Operaciones jerárquicas | [x] Completado | findByIdCompleto carga árbol completo |
 | Reordenar elementos (drag & drop API) | [ ] Pendiente | |
-| Vistas (completa, tops, departamento) | [ ] Pendiente | |
-| HistorialService (auditoría) | [ ] Pendiente | |
 | Tests TOPS | [ ] Pendiente | |
 
-### Frontend - **CASI TODO PENDIENTE**
+#### Endpoints API TOPS (Backend)
+
+```
+# Guiones
+GET    /api/guiones                    # Lista (filtrable por temporada)
+GET    /api/guiones/{id}               # Metadata
+GET    /api/guiones/{id}/completo      # Árbol completo para editor
+POST   /api/guiones                    # Crear con N actos iniciales
+PUT    /api/guiones/{id}               # Actualizar metadata
+DELETE /api/guiones/{id}               # Eliminar
+
+# Lock/Unlock (edición exclusiva)
+POST   /api/guiones/{id}/lock          # Bloquear para edición
+DELETE /api/guiones/{id}/lock          # Desbloquear
+DELETE /api/guiones/{id}/lock/force    # Forzar desbloqueo (admin)
+
+# Estados
+PUT    /api/guiones/{id}/estado        # Cambiar: BORRADOR→EN_EDICION→VALIDADO→PUBLICADO
+
+# Pasada Items (setup antes de cada acto)
+GET    /api/actos/{actoId}/pasada
+POST   /api/actos/{actoId}/pasada
+POST   /api/actos/{actoId}/pasada/insert?orden=X   # Insertar en posición
+PUT    /api/actos/{actoId}/pasada/{id}
+DELETE /api/actos/{actoId}/pasada/{id}
+```
+
+### Frontend - ✅ COMPLETADO 90%
+
+> **Objetivo:** Replicar experiencia de guiones-new.jsx (React/Supabase) en Angular
 
 | Tarea | Estado | Notas |
 |-------|--------|-------|
-| Modelos TypeScript TOPS | [ ] Pendiente | |
-| GuionService | [ ] Pendiente | |
-| ElementoService | [ ] Pendiente | |
-| **TOPS Landing (2 listas)** | **[ ] PENDIENTE** | **Solo hay placeholder** |
-| Lista de guiones | [ ] Pendiente | |
-| Detalle guion (metadata) | [ ] Pendiente | |
-| Form crear/editar guion | [ ] Pendiente | |
-| **Editor principal** | **[ ] PENDIENTE** | **Componente principal** |
-| Panel de Acto (expandible) | [ ] Pendiente | |
-| Panel de Escena | [ ] Pendiente | |
-| Elemento item (TOP, E, M, etc.) | [ ] Pendiente | |
-| Tabla de Pasada | [ ] Pendiente | |
-| Dialog crear/editar TOP | [ ] Pendiente | |
-| Drag & drop para reordenar | [ ] Pendiente | |
-| Indicador de bloqueo | [ ] Pendiente | |
-| Vista solo TOPs | [ ] Pendiente | |
-| Vista por departamento | [ ] Pendiente | |
+| Modelos TypeScript TOPS | [x] Completado | guion.model.ts con interfaces completas |
+| GuionService con signals | [x] Completado | CRUD + lock/unlock + estado reactivo |
+| **Editor Guiones (tipo Word)** | [x] Completado | guion-editor.component.ts |
+| ├─ EditableCell (click-to-edit) | [x] Completado | components/editable-cell.component.ts |
+| ├─ EditableText (inline edit) | [x] Completado | components/editable-text.component.ts |
+| ├─ Toolbar | [x] Completado | Integrado en editor (volver, lock, exportar) |
+| ├─ Header documento | [x] Completado | Metadata editable (título, compositor, directores) |
+| ├─ ActoBlock | [x] Completado | Contenedor con Pasada + Escenas |
+| ├─ PasadaTable | [x] Completado | Tabla DPTO/LUGAR/DESCRIPCION editable |
+| ├─ EscenaBlock | [x] Completado | Contenedor con TopsTable |
+| └─ TopsTable | [x] Completado | Tabla PIE/TOP/DPTO/QUIEN-QUE/OBS |
+| Lista guiones (landing) | [x] Completado | guion-list.component.ts |
+| Dialog crear guion | [x] Completado | guion-create-dialog.component.ts |
+| Indicador de bloqueo | [x] Completado | Badge en lista + banner en editor |
+| Rutas configuradas | [x] Completado | /tops (lista) + /tops/:id (editor) |
 | Tests TOPS | [ ] Pendiente | |
 
 ### Verificación Sprint 3
@@ -482,41 +516,38 @@ teatro-real-frontend/src/app/
 
 ---
 
-### 🔴 ALTA PRIORIDAD: TOPS (Sprint 3) - PRÓXIMO
+### 🔴 ALTA PRIORIDAD: TOPS (Sprint 3) - EN PROGRESO
 
-> **Objetivo:** Implementar editor de guiones técnicos
+> **Objetivo:** Implementar editor de guiones técnicos tipo Word
 
-#### Backend (CRÍTICO - Falta GuionService/Controller)
+#### Backend - ✅ COMPLETADO
 
-1. [ ] **Crear GuionService.java**
-   - CRUD guiones
-   - Lock/unlock para edición exclusiva
-   - Filtro por temporada
-   - Operaciones jerárquicas (actos → escenas → elementos)
+1. [x] **GuionService.java** - CRUD + lock/unlock + estados
+2. [x] **GuionController.java** - Endpoints completos
+3. [x] **PasadaItemService/Controller** - CRUD pasada por acto
+4. [x] **DTOs completos** - GuionCompletoResponse con árbol anidado
+5. [x] **Migración V6** - Schema completo TOPS
 
-2. [ ] **Crear GuionController.java**
-   - GET/POST/PUT/DELETE /api/guiones
-   - POST /api/guiones/{id}/lock
-   - POST /api/guiones/{id}/unlock
-   - GET /api/guiones/{id}/estructura (árbol completo)
+#### Frontend - PRÓXIMO
 
-#### Frontend (Solo placeholder actualmente)
+1. [ ] **Modelos TypeScript TOPS**
+   - guion.model.ts, acto.model.ts, escena.model.ts, elemento.model.ts
+   - Interfaces que mapean DTOs del backend
 
-3. [ ] **Crear TOPS Landing**
-   - Lista guiones de la temporada actual
-   - Lista "Mis guiones" (filtrado por usuario)
-   - Botón crear nuevo guion
+2. [ ] **GuionService con signals**
+   - Llamadas a /api/guiones/*
+   - Estado reactivo con Angular signals
 
-4. [ ] **Crear Editor TOPS**
-   - Vista jerárquica: Actos → Escenas → Elementos
-   - Panel actos expandible (CDK accordion)
-   - Panel escenas con drag & drop
-   - Elementos con colores configurables
-   - Tabla de pasada
+3. [ ] **Editor tipo Word (componentes)**
+   - EditableCell: click-to-edit para tablas
+   - EditableText: edición inline títulos
+   - Canvas estilo Word (fondo gris, página blanca)
+   - Estructura: ActoBlock → PasadaTable + EscenaBlock → TopsTable
 
-5. [ ] **Modelos TypeScript TOPS**
-   - guion.model.ts con interfaces completas
-   - GuionService con signals
+4. [ ] **Configurar rutas TOPS**
+   - Eliminar placeholder actual
+   - /tops → lista guiones
+   - /tops/:id → editor Word-like
 
 ### 🟡 MEDIA PRIORIDAD
 
@@ -597,8 +628,18 @@ npm test         # Tests
 | 2026-01-25 | Frontend: Error banners en logistica, espacios-dashboard (sin fallbacks silenciosos) | Claude |
 | 2026-01-24 | TEMPO-Logística backend completo: LogisticaService, LogisticaController, migration V5 | Claude |
 | 2026-01-24 | TEMPO-Logística frontend: Calendario FullCalendar, botones transición estado | Claude |
+| 2026-01-29 | **TOPS Backend COMPLETADO:** Migración V6, entidades, DTOs, services, controllers | Claude |
+| 2026-01-29 | Nuevas entidades: PasadaItem, campos PIE (refPagina/refCompas/refTimecode) en ElementoGuion | Claude |
+| 2026-01-29 | GuionService: CRUD + lock/unlock exclusivo + transiciones estado | Claude |
+| 2026-01-29 | GuionCompletoResponse: DTO anidado para cargar árbol completo en una query | Claude |
+| 2026-01-29 | PasadaItemService/Controller: CRUD items pasada con inserción en posición | Claude |
+| 2026-01-29 | **TOPS Frontend COMPLETADO:** Modelos, GuionService, Editor tipo Word | Claude |
+| 2026-01-29 | Frontend: EditableCell, EditableText (click-to-edit como Word) | Claude |
+| 2026-01-29 | Frontend: GuionEditorComponent con canvas estilo Word | Claude |
+| 2026-01-29 | Frontend: GuionListComponent + GuionCreateDialogComponent | Claude |
+| 2026-01-29 | Rutas TOPS actualizadas: /tops (lista) + /tops/:id (editor) | Claude |
 
 ---
 
-*Última actualización: 2026-01-25*
-*Progreso Global: ~62%* (TEMPO 100% completado, TOPS próximo)
+*Última actualización: 2026-01-29*
+*Progreso Global: ~78%* (TEMPO 100%, TOPS 85% - Backend completo, Frontend completo)

@@ -1,10 +1,13 @@
 package com.teatroreal.domain.tops;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.UUID;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "actos")
@@ -21,6 +24,7 @@ public class Acto implements Serializable {
         }
     }
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "guion_id", nullable = false)
     private Guion guion;
@@ -30,11 +34,21 @@ public class Acto implements Serializable {
 
     private Integer orden = 0;
 
+    // Pasada: setup inicial del acto (antes de que empiece)
     @OneToMany(mappedBy = "acto", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("orden ASC")
-    private List<Escena> escenas = new ArrayList<>();
+    private Set<PasadaItem> pasadaItems = new LinkedHashSet<>();
 
-    // Getters y setters...
+    // Escenas del acto
+    @OneToMany(mappedBy = "acto", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orden ASC")
+    private Set<Escena> escenas = new LinkedHashSet<>();
+
+    @CreationTimestamp
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    // Getters y setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
@@ -47,6 +61,24 @@ public class Acto implements Serializable {
     public Integer getOrden() { return orden; }
     public void setOrden(Integer orden) { this.orden = orden; }
 
-    public List<Escena> getEscenas() { return escenas; }
-    public void setEscenas(List<Escena> escenas) { this.escenas = escenas; }
+    public Set<PasadaItem> getPasadaItems() { return pasadaItems; }
+    public void setPasadaItems(Set<PasadaItem> pasadaItems) { this.pasadaItems = pasadaItems; }
+
+    public Set<Escena> getEscenas() { return escenas; }
+    public void setEscenas(Set<Escena> escenas) { this.escenas = escenas; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    // Helper: añadir pasada item
+    public void addPasadaItem(PasadaItem item) {
+        pasadaItems.add(item);
+        item.setActo(this);
+    }
+
+    // Helper: añadir escena
+    public void addEscena(Escena escena) {
+        escenas.add(escena);
+        escena.setActo(this);
+    }
 }

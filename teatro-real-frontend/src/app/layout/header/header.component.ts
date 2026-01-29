@@ -144,7 +144,12 @@ export class HeaderComponent {
 
   page = computed(() => {
     const parts = this.currentUrl().split('/').filter(p => p);
-    return parts[1] || 'espacios';
+    const pagePart = parts[1] || 'espacios';
+    // Si parece un UUID, mostrar "editor" en vez del UUID
+    if (this.isUuid(pagePart)) {
+      return 'editor';
+    }
+    return pagePart;
   });
 
   pageTitle = computed(() => {
@@ -158,11 +163,18 @@ export class HeaderComponent {
       'guiones-tecnicos': 'Guiones Técnicos',
       'guiones-new': 'Guiones NEW',
       'editor-guiones': 'Editor de Guiones',
+      'editor': 'Editor de Guion',
       'global': 'Cartelería Global',
       'admin': 'Administración'
     };
     return titles[pageName] || pageName.charAt(0).toUpperCase() + pageName.slice(1);
   });
+
+  // Helper para detectar UUIDs
+  private isUuid(str: string): boolean {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+  }
 
   // Usuario
   userName = computed(() => {

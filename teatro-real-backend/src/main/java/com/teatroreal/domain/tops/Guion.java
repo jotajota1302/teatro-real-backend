@@ -6,10 +6,15 @@ import org.hibernate.annotations.UpdateTimestamp;
 import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Guion técnico de una producción.
+ * Según TR-Requisitos v1.3: incluye metadata de la producción,
+ * estructura jerárquica de actos→escenas→elementos, y control de bloqueo.
+ */
 @Entity
 @Table(name = "guiones")
 public class Guion implements Serializable {
@@ -25,49 +30,72 @@ public class Guion implements Serializable {
         }
     }
 
+    // Metadata del guion según requisitos v1.3
     @Column(nullable = false)
     private String temporada;
 
-    @Column(nullable = false)
+    @Column(name = "produccion_nombre", nullable = false)
     private String produccionNombre;
+
     private String compania;
     private String productor;
+
+    @Column(name = "responsable_edicion")
     private String responsableEdicion;
+
+    @Column(name = "director_escena")
     private String directorEscena;
+
+    @Column(name = "director_musical")
     private String directorMusical;
 
+    // Campos adicionales para el documento
+    private String subtitulo;  // Ej: "Ópera en cuatro actos"
+    private String compositor;
+
+    // Versionado
     private Integer version = 1;
+
+    @Column(name = "version_nombre")
     private String versionNombre;
 
+    // Control de bloqueo para edición exclusiva
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "locked_by")
     private Usuario lockedBy;
 
+    @Column(name = "locked_at")
     private LocalDateTime lockedAt;
 
     @Enumerated(EnumType.STRING)
-    private EstadoGuion estado;
+    private EstadoGuion estado = EstadoGuion.BORRADOR;
 
+    // Estructura jerárquica: Guion → Actos
     @OneToMany(mappedBy = "guion", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("orden ASC")
-    private List<Acto> actos = new ArrayList<>();
+    private Set<Acto> actos = new LinkedHashSet<>();
 
+    // Auditoría
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private Usuario createdBy;
 
     @CreationTimestamp
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     public enum EstadoGuion {
-        BORRADOR, EN_EDICION, VALIDADO, PUBLICADO
+        BORRADOR,    // En creación
+        EN_EDICION,  // Siendo editado activamente
+        VALIDADO,    // Revisado y aprobado
+        PUBLICADO    // Versión final
     }
 
-    // Getters y setters...
-
+    // Getters y setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
@@ -92,6 +120,12 @@ public class Guion implements Serializable {
     public String getDirectorMusical() { return directorMusical; }
     public void setDirectorMusical(String directorMusical) { this.directorMusical = directorMusical; }
 
+    public String getSubtitulo() { return subtitulo; }
+    public void setSubtitulo(String subtitulo) { this.subtitulo = subtitulo; }
+
+    public String getCompositor() { return compositor; }
+    public void setCompositor(String compositor) { this.compositor = compositor; }
+
     public Integer getVersion() { return version; }
     public void setVersion(Integer version) { this.version = version; }
 
@@ -107,8 +141,8 @@ public class Guion implements Serializable {
     public EstadoGuion getEstado() { return estado; }
     public void setEstado(EstadoGuion estado) { this.estado = estado; }
 
-    public List<Acto> getActos() { return actos; }
-    public void setActos(List<Acto> actos) { this.actos = actos; }
+    public Set<Acto> getActos() { return actos; }
+    public void setActos(Set<Acto> actos) { this.actos = actos; }
 
     public Usuario getCreatedBy() { return createdBy; }
     public void setCreatedBy(Usuario createdBy) { this.createdBy = createdBy; }
@@ -118,4 +152,35 @@ public class Guion implements Serializable {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    // Helper: añadir acto
+    public void addActo(Acto acto) {
+        actos.add(acto);
+        acto.setGuion(this);
+    }
+
+    // Helper: verificar si está bloqueado
+    public boolean isLocked() {
+        return lockedBy != null;
+    }
+
+    // Helper: verificar si está bloqueado por otro usuario
+    public boolean isLockedByOther(String userId) {
+        return lockedBy != null && !lockedBy.getId().equals(userId);
+    }
+
+    // Helper: contar TOPs en todo el guion
+    public int contarTops() {
+        int count = 0;
+        for (Acto acto : actos) {
+            for (Escena escena : acto.getEscenas()) {
+                for (ElementoGuion elem : escena.getElementos()) {
+                    if (elem.getTipoElemento() == ElementoGuion.TipoElemento.TOP) {
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
+    }
 }
