@@ -28,5 +28,21 @@ public class EscenaService {
         return escenaRepository.save(escena);
     }
 
-    // Otros métodos CRUD si se requieren...
+    public Escena updateEscena(String escenaId, String nombre, String duracion) {
+        Escena escena = escenaRepository.findById(escenaId)
+                .orElseThrow(() -> new EntityNotFoundException("Escena no encontrada"));
+        if (nombre != null) {
+            escena.setNombre(nombre);
+        }
+        if (duracion != null) {
+            escena.setDuracion(duracion);
+        }
+        return escenaRepository.save(escena);
+    }
+
+    public void deleteEscena(String escenaId) {
+        Escena escena = escenaRepository.findById(escenaId)
+                .orElseThrow(() -> new EntityNotFoundException("Escena no encontrada"));
+        escenaRepository.delete(escena);
+    }
 }

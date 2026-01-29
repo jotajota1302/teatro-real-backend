@@ -20,5 +20,20 @@ public class EscenaController {
         return ResponseEntity.status(201).body(escena);
     }
 
-    // Otros endpoints según necesidad...
+    @PutMapping("/{escenaId}")
+    public ResponseEntity<Escena> updateEscena(
+            @PathVariable String actoId,
+            @PathVariable String escenaId,
+            @RequestBody EscenaRequest request) {
+        Escena escena = escenaService.updateEscena(escenaId, request.getNombre(), request.getDuracion());
+        return ResponseEntity.ok(escena);
+    }
+
+    @DeleteMapping("/{escenaId}")
+    public ResponseEntity<Void> deleteEscena(
+            @PathVariable String actoId,
+            @PathVariable String escenaId) {
+        escenaService.deleteEscena(escenaId);
+        return ResponseEntity.noContent().build();
+    }
 }
