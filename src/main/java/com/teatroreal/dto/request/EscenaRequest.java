@@ -8,4 +8,5 @@ import lombok.Setter;
 public class EscenaRequest {
     private String nombre;
     private Integer orden;
+    private String duracion;
 }
