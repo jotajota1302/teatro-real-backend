@@ -64,27 +64,9 @@ import { ThemeService } from '../../core/services/theme.service';
           </p>
           <ul class="flex flex-col gap-1">
             <li>
-              <a routerLink="/tempo/producciones" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
-                <mat-icon class="nav-icon">album</mat-icon>
-                <span>Producciones</span>
-              </a>
-            </li>
-            <li>
-              <a routerLink="/tops/guiones-tecnicos" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
+              <a routerLink="/tops" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item" [class]="navItemClass()">
                 <mat-icon class="nav-icon">description</mat-icon>
                 <span>Guiones Técnicos</span>
-              </a>
-            </li>
-            <li>
-              <a routerLink="/tops/guiones-new" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
-                <mat-icon class="nav-icon">auto_fix_high</mat-icon>
-                <span>Guiones NEW</span>
-              </a>
-            </li>
-            <li>
-              <a routerLink="/tops/editor-guiones" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
-                <mat-icon class="nav-icon">edit</mat-icon>
-                <span>Editor de Guiones</span>
               </a>
             </li>
           </ul>
