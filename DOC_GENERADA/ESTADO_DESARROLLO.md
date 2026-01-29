@@ -7,7 +7,7 @@
 | **Sprint 0: Setup** | ✅ Completado | 100% | 2025-12-11 |
 | **Sprint 1: Auth + Layout** | ✅ Completado | 100% | 2025-01-23 |
 | **Sprint 2: TEMPO** | ✅ Completado | 100% | 2026-01-25 |
-| **Sprint 3: TOPS** | ⏳ En Progreso | 85% | 2026-01-29 |
+| **Sprint 3: TOPS** | ✅ Completado | 95% | 2026-01-29 |
 | **Sprint 4: Integraciones** | Parcial | 35% | 2026-01-23 |
 | **Sprint 5: Testing + Deploy** | En Progreso | 30% | 2025-01-23 |
 
@@ -17,7 +17,7 @@
 > - Cartelería Digital: ✅ Completado 100%
 > - Logística (Almacenes): ✅ Completado 100% (backend CRUD completo + manejo errores frontend)
 
-**Progreso Global: ~62%**
+**Progreso Global: ~80%**
 
 ---
 
@@ -263,7 +263,7 @@
 
 ---
 
-## Sprint 3: Módulo TOPS - EN PROGRESO 45%
+## Sprint 3: Módulo TOPS - ✅ COMPLETADO 95%
 
 > **Enfoque:** Editor tipo Word para guiones técnicos (basado en guiones-new.jsx del MVP reference)
 
@@ -325,7 +325,7 @@ PUT    /api/actos/{actoId}/pasada/{id}
 DELETE /api/actos/{actoId}/pasada/{id}
 ```
 
-### Frontend - ✅ COMPLETADO 90%
+### Frontend - ✅ COMPLETADO 95%
 
 > **Objetivo:** Replicar experiencia de guiones-new.jsx (React/Supabase) en Angular
 
@@ -334,29 +334,30 @@ DELETE /api/actos/{actoId}/pasada/{id}
 | Modelos TypeScript TOPS | [x] Completado | guion.model.ts con interfaces completas |
 | GuionService con signals | [x] Completado | CRUD + lock/unlock + estado reactivo |
 | **Editor Guiones (tipo Word)** | [x] Completado | guion-editor.component.ts |
-| ├─ EditableCell (click-to-edit) | [x] Completado | components/editable-cell.component.ts |
-| ├─ EditableText (inline edit) | [x] Completado | components/editable-text.component.ts |
-| ├─ Toolbar | [x] Completado | Integrado en editor (volver, lock, exportar) |
-| ├─ Header documento | [x] Completado | Metadata editable (título, compositor, directores) |
+| ├─ EditableCell (click-to-edit) | [x] Completado | display: contents para layout tabla |
+| ├─ EditableText (inline edit) | [x] Completado | display: block para metadata en líneas |
+| ├─ Toolbar | [x] Completado | Volver, lock/unlock, exportar Word |
+| ├─ Header documento | [x] Completado | Metadata editable con estilos Teatro Real |
 | ├─ ActoBlock | [x] Completado | Contenedor con Pasada + Escenas |
-| ├─ PasadaTable | [x] Completado | Tabla DPTO/LUGAR/DESCRIPCION editable |
+| ├─ PasadaTable | [x] Completado | Tabla DPTO/LUGAR/DESC + insertar/borrar filas |
 | ├─ EscenaBlock | [x] Completado | Contenedor con TopsTable |
 | └─ TopsTable | [x] Completado | Tabla PIE/TOP/DPTO/QUIEN-QUE/OBS |
-| Lista guiones (landing) | [x] Completado | guion-list.component.ts |
+| Lista guiones (landing) | [x] Completado | Cards con botón editar centrado |
 | Dialog crear guion | [x] Completado | guion-create-dialog.component.ts |
-| Indicador de bloqueo | [x] Completado | Badge en lista + banner en editor |
+| Indicador de bloqueo | [x] Completado | Badge en lista + botones lock/unlock |
 | Rutas configuradas | [x] Completado | /tops (lista) + /tops/:id (editor) |
+| Breadcrumb inteligente | [x] Completado | Muestra "editor" en vez de UUID |
 | Tests TOPS | [ ] Pendiente | |
 
 ### Verificación Sprint 3
 
-- [ ] Lista de guiones con filtros
-- [ ] Crear nuevo guion con metadata
-- [ ] Editor jerárquico (actos → escenas → elementos)
-- [ ] Tabla de pasada funcional
-- [ ] Crear/editar TOPs con todos los campos
+- [x] Lista de guiones con filtros
+- [x] Crear nuevo guion con metadata
+- [x] Editor jerárquico (actos → escenas → elementos)
+- [x] Tabla de pasada funcional (insertar/borrar filas)
+- [x] Crear/editar TOPs con todos los campos
 - [ ] Drag & drop para reordenar
-- [ ] Bloqueo de edición exclusivo
+- [x] Bloqueo de edición exclusivo
 - [ ] Vistas filtradas (global, tops, departamento)
 
 ---
@@ -516,9 +517,9 @@ teatro-real-frontend/src/app/
 
 ---
 
-### 🔴 ALTA PRIORIDAD: TOPS (Sprint 3) - EN PROGRESO
+### ✅ COMPLETADO: TOPS (Sprint 3) - 95%
 
-> **Objetivo:** Implementar editor de guiones técnicos tipo Word
+> **Editor de guiones técnicos tipo Word implementado y funcional**
 
 #### Backend - ✅ COMPLETADO
 
@@ -527,27 +528,25 @@ teatro-real-frontend/src/app/
 3. [x] **PasadaItemService/Controller** - CRUD pasada por acto
 4. [x] **DTOs completos** - GuionCompletoResponse con árbol anidado
 5. [x] **Migración V6** - Schema completo TOPS
+6. [x] **@JsonIgnore** - Evita referencias circulares en serialización
 
-#### Frontend - PRÓXIMO
+#### Frontend - ✅ COMPLETADO
 
-1. [ ] **Modelos TypeScript TOPS**
-   - guion.model.ts, acto.model.ts, escena.model.ts, elemento.model.ts
-   - Interfaces que mapean DTOs del backend
+1. [x] **Modelos TypeScript TOPS** - guion.model.ts con interfaces completas
+2. [x] **GuionService con signals** - CRUD + lock/unlock reactivo
+3. [x] **Editor tipo Word** - Canvas blanco sobre fondo gris
+   - EditableCell con `display: contents` (layout tabla correcto)
+   - EditableText con `display: block` (metadata en líneas separadas)
+   - Botones Teatro Real (rojo carmesí) en vez de Material azul
+   - Insertar/borrar filas con actualización local (sin recarga)
+4. [x] **Rutas TOPS** - /tops (lista) + /tops/:id (editor)
+5. [x] **Breadcrumb inteligente** - Detecta UUIDs y muestra "editor"
 
-2. [ ] **GuionService con signals**
-   - Llamadas a /api/guiones/*
-   - Estado reactivo con Angular signals
+#### Pendiente (5%)
 
-3. [ ] **Editor tipo Word (componentes)**
-   - EditableCell: click-to-edit para tablas
-   - EditableText: edición inline títulos
-   - Canvas estilo Word (fondo gris, página blanca)
-   - Estructura: ActoBlock → PasadaTable + EscenaBlock → TopsTable
-
-4. [ ] **Configurar rutas TOPS**
-   - Eliminar placeholder actual
-   - /tops → lista guiones
-   - /tops/:id → editor Word-like
+- [ ] Drag & drop para reordenar elementos
+- [ ] Vistas filtradas (global, tops, departamento)
+- [ ] Export Word funcional (Apache POI)
 
 ### 🟡 MEDIA PRIORIDAD
 
@@ -638,8 +637,15 @@ npm test         # Tests
 | 2026-01-29 | Frontend: GuionEditorComponent con canvas estilo Word | Claude |
 | 2026-01-29 | Frontend: GuionListComponent + GuionCreateDialogComponent | Claude |
 | 2026-01-29 | Rutas TOPS actualizadas: /tops (lista) + /tops/:id (editor) | Claude |
+| 2026-01-29 | **Fix: Tabla PASADA** - EditableCellComponent con `display: contents` para layout correcto | Claude |
+| 2026-01-29 | **Fix: Breadcrumb UUID** - Header detecta UUIDs y muestra "editor" en vez del ID | Claude |
+| 2026-01-29 | **Fix: Botones editor** - Cambiados de Material azul a estilos Teatro Real (rojo/naranja) | Claude |
+| 2026-01-29 | **Fix: Metadata editor** - Título/Subtítulo/Compositor cada uno en línea separada | Claude |
+| 2026-01-29 | **Fix: Backend circular reference** - @JsonIgnore en Acto.guion, PasadaItem.acto, etc. | Claude |
+| 2026-01-29 | **Optimización: insertPasadaItem** - Actualiza estado local sin recargar todo el guion | Claude |
+| 2026-01-29 | **Deploy:** Subido a GitLab, GitHub, Vercel y Render | Claude |
 
 ---
 
 *Última actualización: 2026-01-29*
-*Progreso Global: ~78%* (TEMPO 100%, TOPS 85% - Backend completo, Frontend completo)
+*Progreso Global: ~80%* (TEMPO 100%, TOPS 95% - Editor funcional con correcciones visuales)
