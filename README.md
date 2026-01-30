@@ -14,7 +14,7 @@ Sistema integral de gestión interna para el Teatro Real de Madrid, desarrollado
 - Usuario: `admin`
 - Password: `admin123`
 
-> **Nota:** El backend en Render (plan free) se "duerme" tras 15 min de inactividad. Se mantiene despierto mediante un **GitHub Actions cron** que hace ping cada 10 minutos (24/7).
+> **Nota:** El backend en Render (plan free) se "duerme" tras 15 min de inactividad. Se mantiene despierto mediante un **keep-alive desde el frontend** que hace ping a `/api/health` cada 5 minutos mientras la app esté abierta.
 
 ## Descripción
 
