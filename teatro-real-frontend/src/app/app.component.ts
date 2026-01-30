@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { BackendStatusService } from './core/services/backend-status.service';
 
 @Component({
   selector: 'app-root',
@@ -10,6 +11,11 @@ import { RouterOutlet } from '@angular/router';
   `,
   styles: [],
 })
-export class AppComponent {
-  title = 'teatro-real-frontend';
+export class AppComponent implements OnInit {
+  private backendStatus = inject(BackendStatusService);
+
+  ngOnInit(): void {
+    // Inicia keep-alive para evitar que el backend de Render se duerma
+    this.backendStatus.startKeepAlive();
+  }
 }

@@ -1,15 +1,21 @@
 // teatro-real-frontend/src/app/core/services/backend-status.service.ts
 
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject, OnDestroy } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Subscription, interval } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export type BackendStatus = 'online' | 'offline' | 'checking' | 'unknown';
 
 /**
  * Servicio centralizado para gestionar el estado de conexión con el backend.
  * Evita que la app genere errores constantes cuando el backend no está disponible.
+ * También incluye keep-alive para evitar que el backend de Render se duerma.
  */
 @Injectable({ providedIn: 'root' })
-export class BackendStatusService {
+export class BackendStatusService implements OnDestroy {
+  private http = inject(HttpClient);
+
   private statusSignal = signal<BackendStatus>('unknown');
   private lastCheckSignal = signal<Date | null>(null);
   private errorCountSignal = signal<number>(0);
@@ -27,6 +33,10 @@ export class BackendStatusService {
   private readonly ERROR_THRESHOLD = 3;
   // Tiempo mínimo entre checks (30 segundos)
   private readonly MIN_CHECK_INTERVAL = 30000;
+  // Intervalo de keep-alive: 5 minutos (evita que Render duerma el servicio)
+  private readonly KEEP_ALIVE_INTERVAL = 5 * 60 * 1000;
+
+  private keepAliveSubscription?: Subscription;
 
   /**
    * Reporta un error de red/conexión.
@@ -93,5 +103,56 @@ export class BackendStatusService {
     this.errorCountSignal.set(0);
     this.consecutiveErrorsSignal.set(0);
     this.lastCheckSignal.set(null);
+  }
+
+  /**
+   * Inicia el keep-alive que hace ping al backend periódicamente.
+   * Evita que el servicio de Render se duerma por inactividad.
+   */
+  startKeepAlive(): void {
+    if (this.keepAliveSubscription) {
+      return; // Ya está activo
+    }
+
+    console.info('[BackendStatus] Iniciando keep-alive (cada 5 minutos)');
+
+    // Ping inicial
+    this.pingHealth();
+
+    // Ping periódico
+    this.keepAliveSubscription = interval(this.KEEP_ALIVE_INTERVAL).subscribe(() => {
+      this.pingHealth();
+    });
+  }
+
+  /**
+   * Detiene el keep-alive.
+   */
+  stopKeepAlive(): void {
+    if (this.keepAliveSubscription) {
+      this.keepAliveSubscription.unsubscribe();
+      this.keepAliveSubscription = undefined;
+      console.info('[BackendStatus] Keep-alive detenido');
+    }
+  }
+
+  /**
+   * Hace ping al endpoint de health del backend.
+   */
+  private pingHealth(): void {
+    this.http.get<{ status: string }>(`${environment.apiUrl}/health`).subscribe({
+      next: () => {
+        this.reportSuccess();
+        console.debug('[BackendStatus] Keep-alive ping OK');
+      },
+      error: (err) => {
+        this.reportError(err);
+        console.warn('[BackendStatus] Keep-alive ping falló', err.status);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.stopKeepAlive();
   }
 }
