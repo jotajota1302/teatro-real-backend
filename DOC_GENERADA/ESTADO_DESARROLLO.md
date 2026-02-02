@@ -259,6 +259,7 @@
 - [x] Botones de transición de estado
 - [x] Backend CRUD completo (POST, PUT, DELETE)
 - [x] Manejo de errores: banner + retry cuando backend no disponible
+- [x] **Responsive:** Stats cards 2x2 en móvil, operation cards con truncado
 - [ ] Tests unitarios
 
 ---
@@ -358,6 +359,7 @@ DELETE /api/actos/{actoId}/pasada/{id}
 - [x] Crear/editar TOPs con todos los campos
 - [ ] Drag & drop para reordenar
 - [x] Bloqueo de edición exclusivo
+- [x] **Fix race condition:** Guiones cargan cuando temporada está lista (effect + setTimeout)
 - [ ] Vistas filtradas (global, tops, departamento)
 
 ---
@@ -644,8 +646,13 @@ npm test         # Tests
 | 2026-01-29 | **Fix: Backend circular reference** - @JsonIgnore en Acto.guion, PasadaItem.acto, etc. | Claude |
 | 2026-01-29 | **Optimización: insertPasadaItem** - Actualiza estado local sin recargar todo el guion | Claude |
 | 2026-01-29 | **Deploy:** Subido a GitLab, GitHub, Vercel y Render | Claude |
+| 2026-02-02 | **Calendario TEMPO:** Vista semanal mejorada con datos reales y agrupación por sala | Claude |
+| 2026-02-02 | **TOPS fix:** Race condition - guiones no cargaban si temporada no estaba lista | Claude |
+| 2026-02-02 | **TOPS fix:** Error NG0600 - signal writing en effect (setTimeout workaround) | Claude |
+| 2026-02-02 | **Logística fix:** Stats cards responsive (2x2 en móvil en vez de 4x1) | Claude |
+| 2026-02-02 | **Logística fix:** Operation cards responsive con truncado de texto | Claude |
 
 ---
 
-*Última actualización: 2026-01-29*
-*Progreso Global: ~80%* (TEMPO 100%, TOPS 95% - Editor funcional con correcciones visuales)
+*Última actualización: 2026-02-02*
+*Progreso Global: ~82%* (TEMPO 100%, TOPS 95% - Fixes responsive y race conditions)
