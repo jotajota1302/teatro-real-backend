@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -14,10 +15,10 @@ public class HealthController {
 
     @GetMapping("/health")
     public ResponseEntity<Map<String, Object>> health() {
-        return ResponseEntity.ok(Map.of(
-            "status", "UP",
-            "service", "teatro-real-backend",
-            "timestamp", Instant.now().toString()
-        ));
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "UP");
+        response.put("service", "teatro-real-backend");
+        response.put("timestamp", Instant.now().toString());
+        return ResponseEntity.ok(response);
     }
 }
