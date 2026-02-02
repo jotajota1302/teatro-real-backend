@@ -155,7 +155,8 @@ export class SidebarComponent {
   // Permission checks as computed signals
   canAccessTempo = computed(() => this.auth.canAccessModule('TEMPO'));
   canAccessTops = computed(() => this.auth.canAccessModule('TOPS'));
-  canAccessAdmin = computed(() => this.auth.canAccessModule('ADMIN'));
+  // Admin section uses role check (same as route guard) instead of module permission
+  canAccessAdmin = computed(() => this.auth.isAdmin());
 
   sidenavClasses = computed(() => {
     return this.isDark()
