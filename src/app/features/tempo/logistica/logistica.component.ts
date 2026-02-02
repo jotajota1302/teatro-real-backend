@@ -62,10 +62,10 @@ const ESTADO_LABELS: Record<string, string> = {
         </div>
 
         <!-- Stats -->
-        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4" *ngIf="!backendError">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4" *ngIf="!backendError">
           <article [class]="isDark() ? 'stat-card-dark' : 'stat-card'" *ngFor="let stat of statCards">
-            <p class="text-sm uppercase tracking-wide" [class]="isDark() ? 'text-gray-400' : 'text-gray-500'">{{ stat.label }}</p>
-            <p class="text-3xl font-semibold mt-1" [class]="isDark() ? 'text-white' : 'text-gray-800'">{{ stat.value }}</p>
+            <p class="stat-label" [class]="isDark() ? 'text-gray-400' : 'text-gray-500'">{{ stat.label }}</p>
+            <p class="stat-value" [class]="isDark() ? 'text-white' : 'text-gray-800'">{{ stat.value }}</p>
           </article>
         </div>
 
@@ -351,17 +351,49 @@ const ESTADO_LABELS: Record<string, string> = {
     .stat-card {
       border-radius: 0.9rem;
       border: 1px solid rgba(15, 23, 42, 0.08);
-      padding: 1.2rem;
+      padding: 0.875rem;
       background: #ffffff;
       box-shadow: 0 15px 30px rgba(15, 23, 42, 0.08);
+      overflow: hidden;
+      min-width: 0;
     }
 
     .stat-card-dark {
       border-radius: 0.9rem;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 1.2rem;
+      padding: 0.875rem;
       background: #1a1a1a;
       box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .stat-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-top: 0.25rem;
+    }
+
+    @media (min-width: 640px) {
+      .stat-card, .stat-card-dark {
+        padding: 1.2rem;
+      }
+      .stat-label {
+        font-size: 0.75rem;
+      }
+      .stat-value {
+        font-size: 1.875rem;
+      }
     }
 
     .error-banner {
