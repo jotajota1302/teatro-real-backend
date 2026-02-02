@@ -1,1219 +1,892 @@
-import { Component, inject, signal, computed, DestroyRef, OnInit } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-
-import { FullCalendarModule } from '@fullcalendar/angular';
-import esLocale from '@fullcalendar/core/locales/es';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 import { ActividadService } from '../services/actividad.service';
 import { EspacioService } from '../services/espacio.service';
-import { TipoActividadService } from '../services/tipo-actividad.service';
 import { TemporadaService } from '../../../core/services/temporada.service';
-import { ThemeService } from '../../../core/services/theme.service';
+import { Actividad, Espacio } from '../models/actividad.model';
+import {
+  ActividadCalendario,
+  DiaCalendario,
+  EspacioCalendario,
+  FranjaCalendario,
+  SemanaCalendario,
+  NombreDia
+} from '../models/calendario.model';
 
-/**
- * Componente Calendario con FullCalendar integrado.
- * - Filtrado por espacio y tipo de actividad
- * - Muestra eventos reales conectados vía signals/servicio
- * - Drag&drop listo, feedback visual, estilos institucionales
- */
+import { addDays, startOfWeek, format, getISOWeek, getYear, parseISO } from 'date-fns';
+import { es } from 'date-fns/locale';
+
 @Component({
   selector: 'app-calendario',
   standalone: true,
-  imports: [CommonModule, FullCalendarModule],
+  imports: [
+    CommonModule,
+    MatProgressSpinnerModule,
+    MatIconModule,
+    MatButtonModule,
+    MatTooltipModule,
+    MatDialogModule
+  ],
   template: `
-    <div class="page" [class]="isDark() ? 'page-dark' : 'page-light'">
-      <!-- Header - mismo estilo que Espacios -->
-      <div class="header-section">
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div>
-            <h1 class="text-3xl font-semibold" [class]="isDark() ? 'text-white' : 'text-gray-800'">Calendario de Actividades</h1>
-            <p [class]="isDark() ? 'text-gray-400' : 'text-gray-500'">Visualiza y gestiona todas las actividades del Teatro Real</p>
+    <div class="cal-shell">
+      <!-- Toolbar -->
+      <div class="cal-toolbar">
+        <div class="cal-info">
+          <p class="cal-temporada">{{ temporadaLabel() }}</p>
+          <div class="cal-week-title">
+            <span>Semana nº {{ semana().numeroSemana }}</span>
           </div>
-          <button class="btn-nuevo" (click)="abrirModalNuevaActividad()">
-            <span class="material-icons text-lg">add</span>
-            Nueva Actividad
+          <p class="cal-fechas">{{ fechasLabel() }}</p>
+        </div>
+        <div class="cal-controls">
+          <button class="btn-nav" (click)="irSemanaAnterior()" matTooltip="Semana anterior">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <button class="btn-hoy" (click)="irSemanaActual()">Hoy</button>
+          <button class="btn-nav" (click)="irSemanaSiguiente()" matTooltip="Semana siguiente">
+            <mat-icon>chevron_right</mat-icon>
           </button>
         </div>
       </div>
 
-      <!-- Filtros compactos -->
-      <div class="filters-section" [class]="isDark() ? 'filters-dark' : 'filters-light'">
-        <div class="flex flex-wrap gap-3 items-center">
-          <select [class]="isDark() ? 'form-select-sm-dark' : 'form-select-sm'" [value]="selectedEspacioId()" (change)="onEspacioChange($event)">
-            <option value="">Todos los espacios</option>
-            <option *ngFor="let espacio of espacios()" [value]="espacio.id">{{ espacio.nombre }}</option>
-          </select>
-          <select [class]="isDark() ? 'form-select-sm-dark' : 'form-select-sm'" [value]="selectedTipoId()" (change)="onTipoChange($event)">
-            <option value="">Todos los tipos</option>
-            <option *ngFor="let tipo of tipos()" [value]="tipo.id">{{ tipo.nombre }}</option>
-          </select>
-          <select [class]="isDark() ? 'form-select-sm-dark' : 'form-select-sm'" [value]="selectedTemporadaId()" (change)="onTemporadaChange($event)">
-            <option value="">Todas las temporadas</option>
-            <option *ngFor="let temp of temporadas()" [value]="temp.id">{{ temp.nombre }}</option>
-          </select>
-          <button [class]="isDark() ? 'btn-sm-secondary-dark' : 'btn-sm-secondary'" (click)="resetFiltros()">Limpiar</button>
+      <!-- Loading indicator -->
+      <div class="cal-loading" *ngIf="loading()">
+        <mat-spinner diameter="40"></mat-spinner>
+        <span>Cargando actividades...</span>
+      </div>
+
+      <!-- Grid -->
+      <div class="cal-scroll" *ngIf="!loading()">
+        <div class="cal-grid" [style.grid-template-columns]="gridColumns()">
+          <!-- Header row -->
+          <div class="col-header fecha-hora">FECHA / HORA</div>
+          <div class="col-header" *ngFor="let espacio of espaciosCalendario()">
+            {{ espacio.nombre }}
+          </div>
+
+          <!-- Days and time slots -->
+          <ng-container *ngFor="let dia of semana().dias; trackBy: trackByDia">
+            <!-- Day separator -->
+            <div class="dia-separator">
+              {{ dia.nombre }} {{ dia.fecha | date:'d/MM' }}
+            </div>
+
+            <!-- Time slots for this day -->
+            <ng-container *ngFor="let franja of dia.franjas; trackBy: trackByFranja">
+              <div class="celda-hora">
+                {{ franja.horaInicio }} – {{ franja.horaFin }}
+              </div>
+              <div
+                class="celda-espacio"
+                *ngFor="let espacio of espaciosCalendario(); trackBy: trackByEspacio"
+              >
+                <ng-container *ngIf="franja.actividadesPorEspacio[espacio.id] as actividades">
+                  <div
+                    *ngFor="let actividad of actividades; trackBy: trackByActividad"
+                    class="actividad"
+                    [style.background-color]="getActividadBgColor(actividad)"
+                    [style.border-color]="getActividadBorderColor(actividad)"
+                    [class.estado-provisional]="actividad.estado === 'PROVISIONAL'"
+                    [class.estado-confirmada]="actividad.estado === 'CONFIRMADA'"
+                    [class.estado-cancelada]="actividad.estado === 'CANCELADA'"
+                    [matTooltip]="getActividadTooltip(actividad)"
+                    (click)="onActividadClick(actividad)"
+                  >
+                    <div class="actividad-titulo">{{ actividad.titulo }}</div>
+                    <div class="actividad-detalle" *ngIf="actividad.detalle">
+                      {{ actividad.detalle }}
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
+            </ng-container>
+          </ng-container>
+
+          <!-- Empty state if no activities -->
+          <div class="empty-state" *ngIf="semana().dias.length === 0 || allDaysEmpty()">
+            <mat-icon>event_busy</mat-icon>
+            <p>No hay actividades para esta semana</p>
+          </div>
         </div>
       </div>
 
-      <!-- Calendario - ocupa el resto del espacio -->
-      <div class="calendar-wrapper" [class]="isDark() ? 'calendar-wrapper-dark' : 'calendar-wrapper-light'">
-        @if (actividadService.loading()) {
-          <div class="loading-overlay" [class]="isDark() ? 'loading-overlay-dark' : ''">
-            <div class="animate-spin w-8 h-8 border-4 border-[#CF102D] border-t-transparent rounded-full"></div>
+      <!-- Activity detail dialog overlay -->
+      <div class="dialog-overlay" *ngIf="selectedActividad()" (click)="closeDialog()">
+        <div class="dialog-content" (click)="$event.stopPropagation()">
+          <div class="dialog-header" [style.background-color]="getActividadBgColor(selectedActividad()!)"
+               [style.border-left-color]="getActividadBorderColor(selectedActividad()!)">
+            <h2 class="dialog-title">{{ selectedActividad()?.titulo }}</h2>
+            <button class="dialog-close" (click)="closeDialog()">
+              <mat-icon>close</mat-icon>
+            </button>
           </div>
-        }
-        <full-calendar [options]="calendarOptions()"></full-calendar>
-      </div>
-
-      <!-- Modal Nueva Actividad -->
-      @if (modalAbierto()) {
-        <div class="modal-overlay" (click)="cerrarModal()">
-          <div [class]="isDark() ? 'modal-content modal-dark' : 'modal-content'" (click)="$event.stopPropagation()">
-            <div class="modal-header" [class]="isDark() ? 'modal-header-dark' : ''">
-              <h2 [class]="isDark() ? 'text-white' : ''">Nueva Actividad</h2>
-              <button class="modal-close" [class]="isDark() ? 'modal-close-dark' : ''" (click)="cerrarModal()">
-                <span class="material-icons">close</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <div class="form-group">
-                <label [class]="isDark() ? 'text-gray-300' : ''">Título *</label>
-                <input type="text" [class]="isDark() ? 'input-dark' : ''" [value]="formData().titulo" (input)="updateForm('titulo', $event)" placeholder="Nombre de la actividad">
-              </div>
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label [class]="isDark() ? 'text-gray-300' : ''">Tipo de Actividad *</label>
-                  <select [class]="isDark() ? 'input-dark' : ''" [value]="formData().tipoActividadId" (change)="updateForm('tipoActividadId', $event)">
-                    <option value="">Seleccionar tipo</option>
-                    <option *ngFor="let tipo of tipos()" [value]="tipo.id">{{ tipo.nombre }}</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label [class]="isDark() ? 'text-gray-300' : ''">Espacio *</label>
-                  <select [class]="isDark() ? 'input-dark' : ''" [value]="formData().espacioId" (change)="updateForm('espacioId', $event)">
-                    <option value="">Seleccionar espacio</option>
-                    <option *ngFor="let esp of espacios()" [value]="esp.id">{{ esp.nombre }}</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label [class]="isDark() ? 'text-gray-300' : ''">Fecha *</label>
-                <input type="date" [class]="isDark() ? 'input-dark' : ''" [value]="formData().fecha" (input)="updateForm('fecha', $event)">
-              </div>
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label [class]="isDark() ? 'text-gray-300' : ''">Hora Inicio *</label>
-                  <input type="time" [class]="isDark() ? 'input-dark' : ''" [value]="formData().horaInicio" (input)="updateForm('horaInicio', $event)">
-                </div>
-                <div class="form-group">
-                  <label [class]="isDark() ? 'text-gray-300' : ''">Hora Fin *</label>
-                  <input type="time" [class]="isDark() ? 'input-dark' : ''" [value]="formData().horaFin" (input)="updateForm('horaFin', $event)">
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label [class]="isDark() ? 'text-gray-300' : ''">Descripción</label>
-                <textarea rows="3" [class]="isDark() ? 'input-dark' : ''" [value]="formData().descripcion" (input)="updateForm('descripcion', $event)" placeholder="Notas adicionales..."></textarea>
+          <div class="dialog-body">
+            <div class="dialog-row">
+              <mat-icon>schedule</mat-icon>
+              <div>
+                <strong>Horario</strong>
+                <p>{{ selectedActividad()?.horaInicio }} - {{ selectedActividad()?.horaFin }}</p>
               </div>
             </div>
-            <div class="modal-footer" [class]="isDark() ? 'modal-footer-dark' : ''">
-              <button [class]="isDark() ? 'btn-cancel-dark' : 'btn-cancel'" (click)="cerrarModal()">Cancelar</button>
-              <button class="btn-save" (click)="guardarActividad()" [disabled]="guardando()">
-                @if (guardando()) {
-                  <span class="animate-spin mr-2">⏳</span>
-                }
-                Crear Actividad
-              </button>
+            <div class="dialog-row">
+              <mat-icon>event</mat-icon>
+              <div>
+                <strong>Fecha</strong>
+                <p>{{ selectedActividad()?.fecha | date:'EEEE, d MMMM yyyy':'':'es' }}</p>
+              </div>
+            </div>
+            <div class="dialog-row" *ngIf="getEspacioNombre(selectedActividad()?.espacioId)">
+              <mat-icon>place</mat-icon>
+              <div>
+                <strong>Espacio</strong>
+                <p>{{ getEspacioNombre(selectedActividad()?.espacioId) }}</p>
+              </div>
+            </div>
+            <div class="dialog-row" *ngIf="selectedActividad()?.detalle">
+              <mat-icon>notes</mat-icon>
+              <div>
+                <strong>Detalles</strong>
+                <p>{{ selectedActividad()?.detalle }}</p>
+              </div>
             </div>
           </div>
         </div>
-      }
+      </div>
     </div>
   `,
   styles: [`
     :host {
       display: block;
-      height: 100%;
-      overflow: hidden;
+      width: 100%;
+      height: auto;
+      min-height: 100%;
     }
 
-    .page {
+    /* Shell container */
+    .cal-shell {
+      background: #ffffff;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       display: flex;
       flex-direction: column;
-      height: 100%;
-      overflow: hidden;
-      padding: 1.5rem 2rem;
+      gap: 1.25rem;
+      font-family: 'Montserrat', sans-serif;
+      color: #1f2937;
+      min-height: 400px;
     }
 
-    .page-light {
-      background: #f2f4f7;
-    }
-
-    .page-dark {
-      background: #1a1a1a;
-      border-radius: 1rem;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .header-section {
+    /* Toolbar */
+    .cal-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
       flex-shrink: 0;
-      margin-bottom: 1.5rem;
     }
 
-    .stat-inline {
+    .cal-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .cal-temporada {
+      margin: 0;
+      font-weight: 600;
+      color: #6b7280;
+      letter-spacing: 0.08em;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    .cal-week-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #010101;
+    }
+
+    .badge {
+      font-size: 0.65rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      background: #d1fae5;
+      color: #065f46;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .badge.provisional {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .cal-fechas {
+      margin: 0;
+      font-size: 0.9rem;
       color: #6b7280;
     }
 
-    .filters-section {
-      flex-shrink: 0;
-      border-radius: 0.9rem;
-      padding: 1.2rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .filters-light {
-      background: #ffffff;
-      border: 1px solid rgba(15, 23, 42, 0.08);
-      box-shadow: 0 15px 30px rgba(15, 23, 42, 0.08);
-    }
-
-    .filters-dark {
-      background: #1a1a1a;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-    }
-
-    .form-select-sm {
-      padding: 0.4rem 0.6rem;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      background: white;
-      color: #374151;
-      cursor: pointer;
-      min-width: 140px;
-    }
-
-    .form-select-sm:focus {
-      outline: none;
-      border-color: #CF102D;
-    }
-
-    .form-select-sm-dark {
-      padding: 0.4rem 0.6rem;
-      border: 1px solid #374151;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      background: #262626;
-      color: #e5e7eb;
-      cursor: pointer;
-      min-width: 140px;
-    }
-
-    .form-select-sm-dark:focus {
-      outline: none;
-      border-color: #CF102D;
-    }
-
-    .form-select-sm-dark option {
-      background: #262626;
-      color: #e5e7eb;
-    }
-
-    .btn-sm-primary {
-      display: flex;
-      align-items: center;
-      padding: 0.4rem 0.6rem;
-      background: #CF102D;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .btn-sm-primary:hover {
-      background: #a80d25;
-    }
-
-    .btn-sm-secondary {
-      padding: 0.4rem 0.75rem;
-      background: #f3f4f6;
-      color: #374151;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      cursor: pointer;
-    }
-
-    .btn-sm-secondary:hover {
-      background: #e5e7eb;
-    }
-
-    .btn-sm-secondary-dark {
-      padding: 0.4rem 0.75rem;
-      background: #262626;
-      color: #e5e7eb;
-      border: 1px solid #374151;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      cursor: pointer;
-    }
-
-    .btn-sm-secondary-dark:hover {
-      background: #333333;
-    }
-
-    .btn-nuevo {
+    .cal-controls {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.75rem 1.5rem;
-      background: #CF102D;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.875rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    }
+
+    .btn-nav {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid #e5e7eb;
+      background: white;
       cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 4px 12px rgba(207, 16, 45, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      color: #374151;
     }
 
-    .btn-nuevo:hover {
-      background: #a80d25;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(207, 16, 45, 0.4);
+    .btn-nav:hover {
+      border-color: #cf102d;
+      color: #cf102d;
+      background: #fef2f2;
     }
 
-    /* Modal styles */
-    .modal-overlay {
+    .btn-nav mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    .btn-hoy {
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      border: 1px solid #e5e7eb;
+      background: white;
+      cursor: pointer;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+      transition: all 0.2s ease;
+    }
+
+    .btn-hoy:hover {
+      border-color: #cf102d;
+      color: #cf102d;
+      background: #fef2f2;
+    }
+
+    /* Loading */
+    .cal-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 3rem;
+      color: #6b7280;
+    }
+
+    /* Scroll container */
+    .cal-scroll {
+      flex: 1;
+      overflow-x: auto;
+      overflow-y: visible;
+    }
+
+    /* Grid */
+    .cal-grid {
+      display: grid;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      min-width: fit-content;
+    }
+
+    .col-header {
+      background: #f9fafb;
+      padding: 0.75rem 0.5rem;
+      text-align: center;
+      border-right: 1px solid #e5e7eb;
+      border-bottom: 1px solid #e5e7eb;
+      font-weight: 600;
+      font-size: 0.7rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #374151;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .col-header:last-child {
+      border-right: none;
+    }
+
+    .col-header.fecha-hora {
+      text-align: left;
+      padding-left: 1rem;
+      min-width: 120px;
+    }
+
+    .dia-separator {
+      grid-column: 1 / -1;
+      background: #f3f4f6;
+      padding: 0.5rem 1rem;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #1f2937;
+      border-bottom: 1px solid #e5e7eb;
+      text-transform: capitalize;
+    }
+
+    .celda-hora {
+      padding: 0.5rem 1rem;
+      border-right: 1px solid #e5e7eb;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #6b7280;
+      background: #fafafa;
+      min-width: 120px;
+    }
+
+    .celda-espacio {
+      border-right: 1px solid #e5e7eb;
+      border-bottom: 1px solid #f3f4f6;
+      min-height: 52px;
+      padding: 0.35rem;
+      min-width: 140px;
+    }
+
+    .celda-espacio:last-child {
+      border-right: none;
+    }
+
+    /* Activity chips */
+    .actividad {
+      border-radius: 0.375rem;
+      padding: 0.4rem 0.5rem;
+      margin-bottom: 0.25rem;
+      font-size: 0.75rem;
+      line-height: 1.3;
+      color: #1f2937;
+      border-left: 3px solid;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .actividad:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    .actividad:last-child {
+      margin-bottom: 0;
+    }
+
+    .actividad-titulo {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .actividad-detalle {
+      font-size: 0.65rem;
+      color: #4b5563;
+      opacity: 0.9;
+    }
+
+    /* Activity states */
+    .estado-provisional {
+      border-left-style: dashed;
+    }
+
+    .estado-confirmada {
+      border-left-style: solid;
+    }
+
+    .estado-cancelada {
+      opacity: 0.5;
+      text-decoration: line-through;
+    }
+
+    /* Empty state */
+    .empty-state {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      color: #9ca3af;
+    }
+
+    .empty-state mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 1rem;
+    }
+
+    /* Dialog overlay */
+    .dialog-overlay {
       position: fixed;
-      inset: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       background: rgba(0, 0, 0, 0.5);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 1000;
-      backdrop-filter: blur(2px);
+      animation: fadeIn 0.2s ease;
     }
 
-    .modal-content {
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .dialog-content {
       background: white;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 500px;
-      max-height: 90vh;
-      overflow-y: auto;
+      border-radius: 0.75rem;
+      min-width: 360px;
+      max-width: 480px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      animation: slideUp 0.2s ease;
+      overflow: hidden;
     }
 
-    .modal-dark {
-      background: #1a1a1a;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
     }
 
-    .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    .dialog-header {
       padding: 1.25rem 1.5rem;
-      border-bottom: 1px solid #e5e7eb;
+      border-left: 4px solid;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
     }
 
-    .modal-header-dark {
-      border-bottom-color: #333;
-    }
-
-    .modal-header h2 {
+    .dialog-title {
       margin: 0;
-      font-size: 1.25rem;
-      font-weight: 600;
+      font-size: 1.125rem;
+      font-weight: 700;
       color: #1f2937;
+      line-height: 1.4;
     }
 
-    .modal-close {
+    .dialog-close {
       background: none;
       border: none;
-      color: #6b7280;
       cursor: pointer;
       padding: 0.25rem;
-      border-radius: 4px;
-    }
-
-    .modal-close:hover {
-      background: #f3f4f6;
-      color: #1f2937;
-    }
-
-    .modal-close-dark {
-      color: #9ca3af;
-    }
-
-    .modal-close-dark:hover {
-      background: #333;
-      color: #e5e7eb;
-    }
-
-    .modal-body {
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-
-    .form-group label {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #374151;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      padding: 0.6rem 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      background: white;
-      color: #1f2937;
-      transition: border-color 0.2s;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      outline: none;
-      border-color: #CF102D;
-      box-shadow: 0 0 0 3px rgba(207, 16, 45, 0.1);
-    }
-
-    .input-dark {
-      background: #262626 !important;
-      border-color: #374151 !important;
-      color: #e5e7eb !important;
-    }
-
-    .input-dark:focus {
-      border-color: #CF102D !important;
-    }
-
-    .input-dark option {
-      background: #262626;
-      color: #e5e7eb;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.75rem;
-      padding: 1rem 1.5rem;
-      border-top: 1px solid #e5e7eb;
-      background: #f9fafb;
-      border-radius: 0 0 12px 12px;
-    }
-
-    .modal-footer-dark {
-      background: #0d0d0d;
-      border-top-color: #333;
-    }
-
-    .btn-cancel {
-      padding: 0.6rem 1rem;
-      background: white;
-      color: #374151;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-    }
-
-    .btn-cancel:hover {
-      background: #f3f4f6;
-    }
-
-    .btn-cancel-dark {
-      padding: 0.6rem 1rem;
-      background: #262626;
-      color: #e5e7eb;
-      border: 1px solid #374151;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-    }
-
-    .btn-cancel-dark:hover {
-      background: #333;
-    }
-
-    .btn-save {
-      display: flex;
-      align-items: center;
-      padding: 0.6rem 1.25rem;
-      background: #CF102D;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      cursor: pointer;
-    }
-
-    .btn-save:hover:not(:disabled) {
-      background: #a80d25;
-    }
-
-    .btn-save:disabled {
-      opacity: 0.7;
-      cursor: not-allowed;
-    }
-
-    .calendar-wrapper {
-      flex: 1 1 0;
-      min-height: 0;
-      border-radius: 1rem;
-      padding: 1.4rem;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .calendar-wrapper-light {
-      background: #ffffff;
-      border: 1px solid rgba(15, 23, 42, 0.08);
-      box-shadow: 0 20px 35px rgba(15, 23, 42, 0.1);
-    }
-
-    .calendar-wrapper-dark {
-      background: #1a1a1a;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.3);
-    }
-
-    .calendar-wrapper full-calendar {
-      flex: 1 1 0;
-      min-height: 0;
-    }
-
-    .loading-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(255, 255, 255, 0.9);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 10;
-    }
-
-    .loading-overlay-dark {
-      background: rgba(26, 26, 26, 0.9);
-    }
-
-    /* FullCalendar overrides - altura completa */
-    :host ::ng-deep .fc {
-      font-family: inherit;
-      height: 100% !important;
-    }
-
-    :host ::ng-deep .fc-view-harness {
-      height: 100% !important;
-    }
-
-    :host ::ng-deep .fc-view-harness-active > .fc-view {
-      height: 100% !important;
-    }
-
-    :host ::ng-deep .fc-scrollgrid {
-      height: 100% !important;
-      border-radius: 8px !important;
-      border: 1px solid #e5e7eb !important;
-    }
-
-    :host ::ng-deep .fc-scrollgrid-liquid {
-      height: 100% !important;
-    }
-
-    :host ::ng-deep .fc-scrollgrid > tbody {
-      height: 100%;
-    }
-
-    :host ::ng-deep .fc-scrollgrid-section-body {
-      height: 100%;
-    }
-
-    :host ::ng-deep .fc-scrollgrid-section-body > td {
-      height: 100%;
-    }
-
-    :host ::ng-deep .fc-scroller-harness {
-      height: 100% !important;
-    }
-
-    :host ::ng-deep .fc-scrollgrid td:last-child {
-      border-right: none !important;
-    }
-
-    :host ::ng-deep .fc-scrollgrid tr:last-child td {
-      border-bottom: none !important;
-    }
-
-    :host ::ng-deep .fc-theme-standard td,
-    :host ::ng-deep .fc-theme-standard th {
-      border-color: #e5e7eb !important;
-    }
-
-    /* === Vista MES (dayGridMonth) === */
-    :host ::ng-deep .fc-dayGridMonth-view {
-      height: 100% !important;
-    }
-
-    :host ::ng-deep .fc-dayGridMonth-view .fc-daygrid {
-      height: 100% !important;
-    }
-
-    :host ::ng-deep .fc-dayGridMonth-view .fc-scroller {
-      height: 100% !important;
-      overflow: hidden !important;
-    }
-
-    :host ::ng-deep .fc-dayGridMonth-view .fc-daygrid-body {
-      height: 100% !important;
-      width: 100% !important;
-    }
-
-    :host ::ng-deep .fc-dayGridMonth-view .fc-scrollgrid-sync-table {
-      height: 100% !important;
-    }
-
-    /* Ocultar celdas vacías de otros meses */
-    :host ::ng-deep .fc-day-other {
-      background: #f8f9fa !important;
-      visibility: hidden;
-    }
-
-    :host ::ng-deep .fc-daygrid-body-unbalanced .fc-daygrid-day-events {
-      min-height: 2em;
-    }
-
-    :host ::ng-deep .fc-daygrid-body-natural .fc-daygrid-day-events {
-      margin-bottom: 0;
-    }
-
-    /* === Vistas SEMANA y DÍA (timeGrid) === */
-    /* Hacer que todo el día quepa sin scroll */
-    :host ::ng-deep .fc-timeGridWeek-view,
-    :host ::ng-deep .fc-timeGridDay-view {
-      height: 100% !important;
-      overflow: hidden !important;
-    }
-
-    :host ::ng-deep .fc-timeGridWeek-view .fc-scrollgrid,
-    :host ::ng-deep .fc-timeGridDay-view .fc-scrollgrid {
-      height: 100% !important;
-    }
-
-    /* El scroller NO debe hacer scroll - todo debe caber */
-    :host ::ng-deep .fc-timeGridWeek-view .fc-scroller,
-    :host ::ng-deep .fc-timeGridDay-view .fc-scroller {
-      overflow: hidden !important;
-      position: relative !important;
-      height: 100% !important;
-    }
-
-    :host ::ng-deep .fc-timeGridWeek-view .fc-scroller-liquid-absolute,
-    :host ::ng-deep .fc-timeGridDay-view .fc-scroller-liquid-absolute {
-      position: relative !important;
-      overflow: hidden !important;
-      height: 100% !important;
-    }
-
-    /* Hacer que el timegrid-body ocupe todo el espacio */
-    :host ::ng-deep .fc-timegrid-body {
-      height: 100% !important;
-    }
-
-    /* La tabla de slots debe ocupar todo el alto disponible */
-    :host ::ng-deep .fc-timegrid-slots table {
-      height: 100% !important;
-    }
-
-    /* Slots de tiempo - altura automática para que quepan todos */
-    /* Con 32 slots (16 horas x 2), cada uno será ~2% del alto */
-    :host ::ng-deep .fc-timegrid-slot {
-      height: auto !important;
-      min-height: 0 !important;
-    }
-
-    :host ::ng-deep .fc-timegrid-slot-label {
-      vertical-align: middle;
-      font-size: 0.65rem !important;
-      padding: 0 4px !important;
-    }
-
-    /* Ajustar la columna de eventos para que coincida con los slots */
-    :host ::ng-deep .fc-timegrid-cols {
-      height: 100% !important;
-    }
-
-    :host ::ng-deep .fc-timegrid-cols table {
-      height: 100% !important;
-    }
-
-    :host ::ng-deep .fc-timegrid-col {
-      height: 100% !important;
-    }
-
-    :host ::ng-deep .fc-toolbar-title {
-      font-size: 1.1rem !important;
-      font-weight: 600;
-      color: #1f2937;
-    }
-
-    :host ::ng-deep .fc-toolbar {
-      margin-bottom: 0.75rem !important;
-    }
-
-    :host ::ng-deep .fc-button {
-      padding: 0.3rem 0.6rem !important;
-      font-size: 0.8rem !important;
-    }
-
-    :host ::ng-deep .fc-button-primary {
-      background-color: #CF102D !important;
-      border-color: #CF102D !important;
-    }
-
-    :host ::ng-deep .fc-button-primary:hover {
-      background-color: #a80d25 !important;
-      border-color: #a80d25 !important;
-    }
-
-    :host ::ng-deep .fc-button-primary:not(:disabled).fc-button-active {
-      background-color: #8a0b1e !important;
-      border-color: #8a0b1e !important;
-    }
-
-    /* Día actual - destacado con amarillo suave y borde */
-    :host ::ng-deep .fc-day-today {
-      background-color: rgba(251, 191, 36, 0.15) !important;
-    }
-
-    :host ::ng-deep .fc-day-today .fc-daygrid-day-number {
-      background: #CF102D;
-      color: white !important;
-      border-radius: 50%;
-      width: 28px;
-      height: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-    }
-
-    :host ::ng-deep .fc-event {
-      border-radius: 4px;
-      padding: 2px 6px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      border: none !important;
-      margin-bottom: 2px;
-    }
-
-    /* Eventos como bloques - texto blanco legible */
-    :host ::ng-deep .fc-daygrid-event {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    :host ::ng-deep .fc-event-title {
-      color: white !important;
-      font-weight: 500;
-    }
-
-    :host ::ng-deep .fc-event-time {
-      color: rgba(255,255,255,0.9) !important;
-      font-weight: 400;
-    }
-
-    :host ::ng-deep .fc-event:hover {
-      filter: brightness(1.1);
-      transform: scale(1.02);
+      border-radius: 0.375rem;
+      color: #6b7280;
       transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    /* Link "+X más" */
-    :host ::ng-deep .fc-daygrid-more-link {
-      color: #CF102D !important;
-      font-weight: 600;
+    .dialog-close:hover {
+      background: rgba(0, 0, 0, 0.05);
+      color: #1f2937;
+    }
+
+    .dialog-close mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    .dialog-body {
+      padding: 1rem 1.5rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .dialog-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .dialog-row mat-icon {
+      color: #CF102D;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .dialog-row div {
+      flex: 1;
+    }
+
+    .dialog-row strong {
       font-size: 0.75rem;
-    }
-
-    :host ::ng-deep .fc-daygrid-day-number {
-      font-weight: 500;
-      color: #374151;
-    }
-
-    :host ::ng-deep .fc-col-header-cell-cushion {
       font-weight: 600;
       color: #6b7280;
       text-transform: uppercase;
-      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      display: block;
+      margin-bottom: 0.125rem;
     }
 
-    /* Asegurar que todo el calendario tenga texto oscuro */
-    :host ::ng-deep .fc {
-      color: #374151;
+    .dialog-row p {
+      margin: 0;
+      font-size: 0.9375rem;
+      color: #1f2937;
     }
 
-    :host ::ng-deep .fc-toolbar-title {
-      color: #1f2937 !important;
+    /* Responsive */
+    @media (max-width: 1200px) {
+      .col-header.fecha-hora,
+      .celda-hora {
+        min-width: 100px;
+      }
+      .celda-espacio {
+        min-width: 120px;
+      }
     }
 
-    /* Estilos para vista semanal/diaria (timeGrid) */
-    :host ::ng-deep .fc-timegrid-slot-label {
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: #6b7280;
-    }
+    @media (max-width: 768px) {
+      .cal-shell {
+        padding: 1rem;
+      }
 
-    :host ::ng-deep .fc-timegrid-event {
-      border-radius: 4px;
-      border: none !important;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    }
+      .cal-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
 
-    :host ::ng-deep .fc-timegrid-event .fc-event-main {
-      padding: 4px 6px;
-    }
+      .cal-controls {
+        width: 100%;
+        justify-content: flex-end;
+      }
 
-    :host ::ng-deep .fc-timegrid-event .fc-event-title {
-      font-weight: 500;
-      font-size: 0.75rem;
-    }
+      .cal-week-title {
+        font-size: 1.25rem;
+      }
 
-    :host ::ng-deep .fc-timegrid-event .fc-event-time {
-      font-size: 0.7rem;
-      opacity: 0.9;
-    }
+      .col-header.fecha-hora,
+      .celda-hora {
+        min-width: 80px;
+        padding: 0.4rem 0.5rem;
+      }
 
-    /* Línea de hora actual */
-    :host ::ng-deep .fc-timegrid-now-indicator-line {
-      border-color: #CF102D !important;
-      border-width: 2px;
-    }
+      .celda-espacio {
+        min-width: 100px;
+      }
 
-    :host ::ng-deep .fc-timegrid-now-indicator-arrow {
-      border-color: #CF102D !important;
-    }
-
-    /* ========================================= */
-    /* DARK MODE FULLCALENDAR OVERRIDES */
-    /* ========================================= */
-    :host ::ng-deep .calendar-wrapper-dark .fc {
-      color: #e5e7eb;
-    }
-
-    :host ::ng-deep .calendar-wrapper-dark .fc-toolbar-title {
-      color: #e5e7eb !important;
-    }
-
-    :host ::ng-deep .calendar-wrapper-dark .fc-scrollgrid {
-      border-color: #374151 !important;
-    }
-
-    :host ::ng-deep .calendar-wrapper-dark .fc-theme-standard td,
-    :host ::ng-deep .calendar-wrapper-dark .fc-theme-standard th {
-      border-color: #374151 !important;
-    }
-
-    :host ::ng-deep .calendar-wrapper-dark .fc-col-header-cell-cushion {
-      color: #9ca3af;
-    }
-
-    :host ::ng-deep .calendar-wrapper-dark .fc-daygrid-day-number {
-      color: #e5e7eb;
-    }
-
-    :host ::ng-deep .calendar-wrapper-dark .fc-day-other {
-      background: #0d0d0d !important;
-    }
-
-    :host ::ng-deep .calendar-wrapper-dark .fc-day-today {
-      background-color: rgba(207, 16, 45, 0.15) !important;
-    }
-
-    :host ::ng-deep .calendar-wrapper-dark .fc-daygrid-more-link {
-      color: #CF102D !important;
-    }
-
-    :host ::ng-deep .calendar-wrapper-dark .fc-timegrid-slot-label {
-      color: #9ca3af;
-    }
-
-    :host ::ng-deep .calendar-wrapper-dark .fc-button-primary {
-      background-color: #CF102D !important;
-      border-color: #CF102D !important;
-    }
-
-    :host ::ng-deep .calendar-wrapper-dark .fc-button-primary:hover {
-      background-color: #a80d25 !important;
-      border-color: #a80d25 !important;
-    }
-
-    :host ::ng-deep .calendar-wrapper-dark .fc-button-primary:not(:disabled).fc-button-active {
-      background-color: #8a0b1e !important;
-      border-color: #8a0b1e !important;
+      .actividad {
+        font-size: 0.7rem;
+        padding: 0.3rem 0.4rem;
+      }
     }
   `]
 })
 export class CalendarioComponent implements OnInit {
-  // Inyecta servicios de dominio
-  actividadService = inject(ActividadService);
+  private actividadService = inject(ActividadService);
   private espacioService = inject(EspacioService);
-  private tipoActividadService = inject(TipoActividadService);
   private temporadaService = inject(TemporadaService);
   private destroyRef = inject(DestroyRef);
-  private themeService = inject(ThemeService);
+  private dialog = inject(MatDialog);
 
-  // Dark mode
-  isDark = this.themeService.isDark;
+  // Selected activity for dialog
+  selectedActividad = signal<ActividadCalendario | null>(null);
 
-  // State signals para filtros seleccionados
-  selectedEspacioId = signal<string | ''>('');
-  selectedTipoId = signal<string | ''>('');
-  selectedTemporadaId = signal<string | ''>('');
+  // Current week start (Monday)
+  private currentWeekStart = signal<Date>(startOfWeek(new Date(), { weekStartsOn: 1 }));
 
-  // State signals para modal de nueva actividad
-  modalAbierto = signal(false);
-  guardando = signal(false);
-  formData = signal({
-    titulo: '',
-    tipoActividadId: '',
-    espacioId: '',
-    fecha: new Date().toISOString().slice(0, 10),
-    horaInicio: '09:00',
-    horaFin: '13:00',
-    descripcion: ''
+  // Loading state
+  loading = signal(false);
+
+  // Raw activities from backend
+  private actividadesRaw = signal<Actividad[]>([]);
+
+  // Fixed calendar columns in the exact order from the design
+  private readonly columnasCalendario: EspacioCalendario[] = [
+    { id: 1, nombre: 'ESCENARIO', codigo: 'ESCENARIO' },
+    { id: 5, nombre: 'SALA GAYARRE', codigo: 'SALA_GAYARRE' },
+    { id: 14, nombre: 'S.E.P.E', codigo: 'SEPE' },
+    { id: 4, nombre: 'SALA BALLET', codigo: 'SALA_BALLET' },
+    { id: 2, nombre: 'SALA ORQUESTA / CORO', codigo: 'ORQUESTA_CORO' },
+    { id: 15, nombre: 'OTRAS SALAS', codigo: 'OTRAS' }
+  ];
+
+  // Mapping from actual database space IDs to calendar column IDs
+  private readonly espacioToColumnaMap: Record<number, number> = {
+    1: 1,   // Escenario -> ESCENARIO
+    5: 5,   // Sala Gayarre -> SALA GAYARRE
+    14: 14, // S.E.P.E -> S.E.P.E
+    4: 4,   // Sala de Ensayo Ballet -> SALA BALLET
+    2: 2,   // Sala Orquesta/Coro -> SALA ORQUESTA / CORO
+    3: 2,   // Sala de Ensayo Coro -> SALA ORQUESTA / CORO (merged)
+    15: 15, // Otras Salas -> OTRAS SALAS
+    // Default any other sala to "Otras Salas"
+  };
+
+  // Computed: espacios for calendar columns (fixed columns)
+  espaciosCalendario = computed<EspacioCalendario[]>(() => {
+    return this.columnasCalendario;
   });
 
-  // Signals públicas para el template
-  espacios = this.espacioService.espacios;
-  tipos = this.tipoActividadService.tipos;
-  temporadas = this.temporadaService.temporadas;
+  // Grid columns CSS
+  gridColumns = computed(() => {
+    const numEspacios = this.espaciosCalendario().length;
+    return `120px repeat(${numEspacios}, minmax(140px, 1fr))`;
+  });
 
-  // Signal para el rango actualmente visible
-  private rangeStart = signal<string>(new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0,10));
-  private rangeEnd = signal<string>(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().slice(0,10));
+  // Computed: transform activities to calendar week structure
+  semana = computed<SemanaCalendario>(() => {
+    const weekStart = this.currentWeekStart();
+    const actividades = this.actividadesRaw();
+    const espacios = this.espaciosCalendario();
 
-  // Flag para evitar carga inicial múltiple - FullCalendar disparará datesSet
-  private initialLoadDone = false;
+    const dias: DiaCalendario[] = [];
+    const diasNombres: NombreDia[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
-  constructor() {
-    // Solo cargamos datos de catálogo (espacios/tipos), NO actividades
-    // Las actividades se cargarán cuando FullCalendar dispare datesSet()
-  }
+    for (let i = 0; i < 7; i++) {
+      const fecha = addDays(weekStart, i);
+      const fechaStr = format(fecha, 'yyyy-MM-dd');
 
-  ngOnInit(): void {
-    // Carga espacios/tipos/temporadas si no hay - con gestión de suscripción
-    if (this.espacioService.espacios().length === 0) {
-      this.espacioService.loadEspacios()
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe();
+      // Filter activities for this day
+      const actividadesDia = actividades.filter(a => a.fecha === fechaStr);
+
+      // Group by unique time slots
+      const franjasMap = new Map<string, FranjaCalendario>();
+
+      actividadesDia.forEach(act => {
+        const key = `${act.horaInicio}-${act.horaFin}`;
+        if (!franjasMap.has(key)) {
+          franjasMap.set(key, {
+            horaInicio: act.horaInicio,
+            horaFin: act.horaFin,
+            actividadesPorEspacio: {}
+          });
+        }
+
+        const franja = franjasMap.get(key)!;
+        const originalEspacioId = act.espacio?.id || 0;
+        // Map the space ID to the calendar column ID
+        const columnaId = this.espacioToColumnaMap[originalEspacioId] || 15; // Default to "Otras Salas"
+
+        if (!franja.actividadesPorEspacio[columnaId]) {
+          franja.actividadesPorEspacio[columnaId] = [];
+        }
+
+        franja.actividadesPorEspacio[columnaId].push(this.mapToCalendarioActividad(act, columnaId));
+      });
+
+      // Sort franjas by hora inicio
+      const franjas = Array.from(franjasMap.values()).sort((a, b) =>
+        a.horaInicio.localeCompare(b.horaInicio)
+      );
+
+      dias.push({
+        nombre: diasNombres[i],
+        fecha: fechaStr,
+        franjas
+      });
     }
-    if (this.tipoActividadService.tipos().length === 0) {
-      this.tipoActividadService.loadTiposActividad()
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe();
-    }
-    // Cargar temporadas con lazy load
-    this.temporadaService.ensureLoaded();
-    // NOTA: NO llamamos loadActividades() aquí - FullCalendar lo hará via datesSet
-  }
-
-  // Carga actividades para un rango opcional de fechas
-  loadActividades(rangoInicio?: string, rangoFin?: string): void {
-    const inicio = rangoInicio ?? this.rangeStart();
-    const fin = rangoFin ?? this.rangeEnd();
-
-    const filtro = {
-      fechaInicio: inicio,
-      fechaFin: fin,
-      espacioId: this.selectedEspacioId() ? Number(this.selectedEspacioId()) : undefined,
-      tipoActividadId: this.selectedTipoId() || undefined, // UUID string - no convertir a número
-      temporadaId: this.selectedTemporadaId() ? Number(this.selectedTemporadaId()) : undefined
-    };
-
-    this.actividadService.loadActividades(filtro).pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe({
-      next: () => {
-        this.initialLoadDone = true;
-      },
-      error: (err) => {
-        this.initialLoadDone = true;
-        console.error('[Calendario] ❌ Error cargando actividades:', err);
-      }
-    });
-  }
-
-  // Event handlers - ahora disparan carga explícitamente
-  onEspacioChange(e: Event): void {
-    const val = (e.target as HTMLSelectElement).value;
-    this.selectedEspacioId.set(val);
-    this.loadActividades(); // Carga explícita al cambiar filtro
-  }
-
-  onTipoChange(e: Event): void {
-    const val = (e.target as HTMLSelectElement).value;
-    this.selectedTipoId.set(val);
-    this.loadActividades(); // Carga explícita al cambiar filtro
-  }
-
-  onTemporadaChange(e: Event): void {
-    const val = (e.target as HTMLSelectElement).value;
-    this.selectedTemporadaId.set(val);
-    this.loadActividades(); // Carga explícita al cambiar filtro
-  }
-
-  resetFiltros(): void {
-    this.selectedEspacioId.set('');
-    this.selectedTipoId.set('');
-    this.selectedTemporadaId.set('');
-    this.loadActividades(); // Carga explícita al resetear
-  }
-
-  // --- Métodos del modal de nueva actividad ---
-  abrirModalNuevaActividad(): void {
-    // Reset form con valores por defecto
-    this.formData.set({
-      titulo: '',
-      tipoActividadId: this.tipos()[0]?.id?.toString() || '',
-      espacioId: this.espacios()[0]?.id?.toString() || '',
-      fecha: new Date().toISOString().slice(0, 10),
-      horaInicio: '09:00',
-      horaFin: '13:00',
-      descripcion: ''
-    });
-    this.modalAbierto.set(true);
-  }
-
-  cerrarModal(): void {
-    this.modalAbierto.set(false);
-  }
-
-  updateForm(field: string, event: Event): void {
-    const value = (event.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement).value;
-    this.formData.update(f => ({ ...f, [field]: value }));
-  }
-
-  guardarActividad(): void {
-    const form = this.formData();
-
-    // Validación básica
-    if (!form.titulo || !form.tipoActividadId || !form.espacioId || !form.fecha) {
-      alert('Por favor, completa los campos obligatorios');
-      return;
-    }
-
-    this.guardando.set(true);
-
-    const actividadData = {
-      titulo: form.titulo,
-      tipoActividadId: form.tipoActividadId,
-      espacioId: Number(form.espacioId),
-      fecha: form.fecha,
-      horaInicio: form.horaInicio,
-      horaFin: form.horaFin,
-      descripcion: form.descripcion || undefined
-    };
-
-    this.actividadService.create(actividadData).pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe({
-      next: () => {
-        this.guardando.set(false);
-        this.cerrarModal();
-        // Recargar actividades para ver la nueva
-        this.loadActividades();
-      },
-      error: (err) => {
-        this.guardando.set(false);
-        console.error('[Calendario] Error creando actividad:', err);
-        alert('Error al crear la actividad: ' + (err.message || 'Error desconocido'));
-      }
-    });
-  }
-
-  // Opciones calculadas de FullCalendar
-  calendarOptions = computed(() => {
-    const self = this;
-    const actividades = this.actividadService.actividades();
-
-    const eventos = actividades.map(act => ({
-      id: act.id,
-      title: act.titulo,
-      start: act.fecha + 'T' + act.horaInicio,
-      end: act.fecha + 'T' + act.horaFin,
-      color: act.tipoActividad?.colorHex || '#CF102D',
-      extendedProps: {
-        espacio: act.espacio?.nombre,
-        tipo: act.tipoActividad?.nombre,
-        departamento: act.departamento?.nombre,
-        estado: act.estado,
-        horaInicio: act.horaInicio,
-        horaFin: act.horaFin,
-        descripcion: act.descripcion
-      }
-    }));
 
     return {
-      plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
-      initialView: 'dayGridMonth',
-      locale: esLocale,
-      height: 'parent', // 'parent' funciona mejor con flex containers
-      expandRows: true, // Expande las filas para llenar todo el espacio disponible
-      headerToolbar: {
-        left: 'prev,next today',
-        center: 'title',
-        right: 'dayGridMonth,timeGridWeek,timeGridDay'
-      },
-      editable: true,
-      selectable: true,
-      themeSystem: 'standard',
-      events: eventos,
-      // No mostrar días de otros meses
-      showNonCurrentDates: false,
-      fixedWeekCount: false,
-      // Mostrar máximo 3 eventos, luego "+X más"
-      dayMaxEvents: 3,
-      // Configuración por vista
-      views: {
-        dayGridMonth: {
-          displayEventTime: false // Ocultar hora en vista mes (se ve al hacer clic)
-        },
-        timeGridWeek: {
-          dayHeaderFormat: { weekday: 'short' as const, day: 'numeric' as const }
-        },
-        timeGridDay: {
-          dayHeaderFormat: { weekday: 'long' as const, day: 'numeric' as const, month: 'long' as const }
-        }
-      },
-      // Forzar eventos como bloques de color
-      eventDisplay: 'block',
-      // Mostrar solo hora de inicio en el bloque
-      eventTimeFormat: {
-        hour: '2-digit' as const,
-        minute: '2-digit' as const,
-        hour12: false
-      },
-      // Configuración para vista semanal/diaria
-      slotMinTime: '08:00:00', // Empezar a las 8:00
-      slotMaxTime: '24:00:00', // Terminar a medianoche
-      slotEventOverlap: false, // Evitar superposición de eventos
-      slotDuration: '00:30:00', // Slots de 30 minutos
-      // Formato de etiquetas de hora en la columna izquierda
-      slotLabelFormat: {
-        hour: '2-digit' as const,
-        minute: '2-digit' as const,
-        hour12: false
-      },
-      // Mostrar línea de hora actual
-      nowIndicator: true,
-      // Tooltip al pasar el ratón
-      eventDidMount(info: any) {
-        const props = info.event.extendedProps;
-        const hora = `${props.horaInicio || ''} - ${props.horaFin || ''}`;
-        info.el.setAttribute('title',
-          `${info.event.title}\n📍 ${props.espacio || 'Sin espacio'}\n🕐 ${hora}\n📋 ${props.tipo || 'Sin tipo'}`
-        );
-      },
-      datesSet(arg: any) {
-        // Solo cargar si el rango ha cambiado realmente
-        const newStart = arg.startStr.slice(0, 10);
-        const newEnd = arg.endStr.slice(0, 10);
-        const currentStart = self.rangeStart();
-        const currentEnd = self.rangeEnd();
-
-        if (newStart !== currentStart || newEnd !== currentEnd) {
-          self.rangeStart.set(newStart);
-          self.rangeEnd.set(newEnd);
-          self.loadActividades(newStart, newEnd);
-        } else if (!self.initialLoadDone) {
-          // Primera carga cuando el calendario se inicializa
-          self.loadActividades(newStart, newEnd);
-        }
-      },
-      eventClick: (info: any) => {
-        const props = info.event.extendedProps;
-        const hora = `${props.horaInicio || ''} - ${props.horaFin || ''}`;
-
-        // Modal con mejor formato
-        const modal = document.createElement('div');
-        modal.innerHTML = `
-          <div style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999">
-            <div style="background:white;border-radius:12px;padding:24px;max-width:400px;width:90%;box-shadow:0 20px 40px rgba(0,0,0,0.3)">
-              <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-                <div style="width:12px;height:12px;border-radius:50%;background:${info.event.backgroundColor}"></div>
-                <h3 style="margin:0;font-size:1.25rem;color:#1f2937">${info.event.title}</h3>
-              </div>
-              <div style="display:grid;gap:12px;color:#4b5563">
-                <div style="display:flex;align-items:center;gap:8px">
-                  <span style="font-size:1.2rem">📍</span>
-                  <span><strong>Espacio:</strong> ${props.espacio || 'No asignado'}</span>
-                </div>
-                <div style="display:flex;align-items:center;gap:8px">
-                  <span style="font-size:1.2rem">🕐</span>
-                  <span><strong>Horario:</strong> ${hora}</span>
-                </div>
-                <div style="display:flex;align-items:center;gap:8px">
-                  <span style="font-size:1.2rem">📋</span>
-                  <span><strong>Tipo:</strong> ${props.tipo || 'No especificado'}</span>
-                </div>
-                <div style="display:flex;align-items:center;gap:8px">
-                  <span style="font-size:1.2rem">📊</span>
-                  <span><strong>Estado:</strong> ${props.estado || 'Pendiente'}</span>
-                </div>
-                ${props.descripcion ? `
-                <div style="margin-top:8px;padding-top:12px;border-top:1px solid #e5e7eb">
-                  <p style="margin:0;font-size:0.875rem;color:#6b7280">${props.descripcion}</p>
-                </div>` : ''}
-              </div>
-              <button onclick="this.closest('div[style*=fixed]').remove()"
-                style="margin-top:20px;width:100%;padding:10px;background:#CF102D;color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer">
-                Cerrar
-              </button>
-            </div>
-          </div>
-        `;
-        document.body.appendChild(modal);
-      },
-      eventDrop: (info: any) => {
-        // TODO: Implementar persistencia del drag & drop
-      }
+      numeroSemana: getISOWeek(weekStart),
+      anioSemana: getYear(weekStart),
+      fechaInicio: format(weekStart, 'yyyy-MM-dd'),
+      fechaFin: format(addDays(weekStart, 6), 'yyyy-MM-dd'),
+      estado: 'DEFINITIVA',
+      dias
     };
   });
+
+  // Computed: temporada label
+  temporadaLabel = computed(() => {
+    const temporada = this.temporadaService.temporadaActiva();
+    return temporada ? `TEMPORADA ${temporada.nombre}` : 'TEMPORADA 2025-2026';
+  });
+
+  // Computed: date range label
+  fechasLabel = computed(() => {
+    const weekStart = this.currentWeekStart();
+    const weekEnd = addDays(weekStart, 6);
+    return `${format(weekStart, 'd MMM yyyy', { locale: es })} – ${format(weekEnd, 'd MMM yyyy', { locale: es })}`;
+  });
+
+  ngOnInit(): void {
+    // Ensure temporadas are loaded for the header label
+    this.temporadaService.ensureLoaded();
+    this.loadData();
+  }
+
+  private loadData(): void {
+    this.loading.set(true);
+
+    // Load espacios first
+    this.espacioService.loadEspacios().pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: () => this.loadActividades(),
+      error: () => this.loadActividades() // Load activities even if spaces fail
+    });
+  }
+
+  private loadActividades(): void {
+    const weekStart = this.currentWeekStart();
+    const fechaInicio = format(weekStart, 'yyyy-MM-dd');
+    const fechaFin = format(addDays(weekStart, 6), 'yyyy-MM-dd');
+
+    this.actividadService.loadActividades({ fechaInicio, fechaFin }).pipe(
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe({
+      next: (actividades) => {
+        this.actividadesRaw.set(actividades);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.actividadesRaw.set([]);
+        this.loading.set(false);
+      }
+    });
+  }
+
+  private mapToCalendarioActividad(act: Actividad, columnaId?: number): ActividadCalendario {
+    // Map tipo from tipoActividad
+    const tipoNombre = act.tipoActividad?.nombre?.toUpperCase().replace(/\s+/g, '_') || 'OTRO';
+
+    return {
+      id: parseInt(act.id) || 0,
+      fecha: act.fecha,
+      horaInicio: act.horaInicio,
+      horaFin: act.horaFin,
+      espacioId: columnaId ?? act.espacio?.id ?? 0,
+      tipo: tipoNombre as any,
+      estado: 'CONFIRMADA',
+      titulo: act.titulo,
+      detalle: act.produccionNombre || act.notas || undefined,
+      colorHex: act.tipoActividad?.colorHex
+    };
+  }
+
+  // Navigation
+  irSemanaAnterior(): void {
+    this.currentWeekStart.update(d => addDays(d, -7));
+    this.loadActividades();
+  }
+
+  irSemanaActual(): void {
+    this.currentWeekStart.set(startOfWeek(new Date(), { weekStartsOn: 1 }));
+    this.loadActividades();
+  }
+
+  irSemanaSiguiente(): void {
+    this.currentWeekStart.update(d => addDays(d, 7));
+    this.loadActividades();
+  }
+
+  // Activity colors
+  getActividadBgColor(actividad: ActividadCalendario): string {
+    if (actividad.colorHex) {
+      return actividad.colorHex + '20'; // 20 = ~12% opacity
+    }
+    // Default colors by type
+    const colorMap: Record<string, string> = {
+      'FUNCION': '#1E3A5F20',
+      'ENSAYO': '#2E7D3220',
+      'ENSAYO_PIANO': '#C8E6C940',
+      'ENSAYO_MUSICAL': '#FFCDD240',
+      'MONTAJE': '#FFE0B2',
+      'DESMONTAJE': '#EEEEEE',
+      'EVENTO': '#AD145720',
+      'EVENTO_EXTERNO': '#BBDEFB',
+      'RESERVA': '#C8E6C9',
+      'PAUSA_TECNICA': '#E0E0E0'
+    };
+    return colorMap[actividad.tipo] || '#F3F4F6';
+  }
+
+  getActividadBorderColor(actividad: ActividadCalendario): string {
+    if (actividad.colorHex) {
+      return actividad.colorHex;
+    }
+    const colorMap: Record<string, string> = {
+      'FUNCION': '#1E3A5F',
+      'ENSAYO': '#2E7D32',
+      'ENSAYO_PIANO': '#4CAF50',
+      'ENSAYO_MUSICAL': '#E91E63',
+      'MONTAJE': '#FF9800',
+      'DESMONTAJE': '#9E9E9E',
+      'EVENTO': '#AD1457',
+      'EVENTO_EXTERNO': '#2196F3',
+      'RESERVA': '#4CAF50',
+      'PAUSA_TECNICA': '#757575'
+    };
+    return colorMap[actividad.tipo] || '#9CA3AF';
+  }
+
+  getActividadTooltip(actividad: ActividadCalendario): string {
+    let tooltip = actividad.titulo;
+    tooltip += `\n${actividad.horaInicio} - ${actividad.horaFin}`;
+    if (actividad.detalle) {
+      tooltip += `\n${actividad.detalle}`;
+    }
+    return tooltip;
+  }
+
+  onActividadClick(actividad: ActividadCalendario): void {
+    this.selectedActividad.set(actividad);
+  }
+
+  closeDialog(): void {
+    this.selectedActividad.set(null);
+  }
+
+  getEspacioNombre(espacioId: number | undefined): string {
+    if (!espacioId) return '';
+    const espacio = this.espaciosCalendario().find(e => e.id === espacioId);
+    return espacio?.nombre || '';
+  }
+
+  allDaysEmpty(): boolean {
+    return this.semana().dias.every(d => d.franjas.length === 0);
+  }
+
+  // TrackBy functions for performance
+  trackByDia(index: number, dia: DiaCalendario): string {
+    return dia.fecha;
+  }
+
+  trackByFranja(index: number, franja: FranjaCalendario): string {
+    return `${franja.horaInicio}-${franja.horaFin}`;
+  }
+
+  trackByEspacio(index: number, espacio: EspacioCalendario): number {
+    return espacio.id;
+  }
+
+  trackByActividad(index: number, actividad: ActividadCalendario): number {
+    return actividad.id;
+  }
 }
