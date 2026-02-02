@@ -202,3 +202,168 @@ body, html {
   background: transparent !important;
   box-shadow: none !important;
 }
+
+/* -----------------------------------------------
+   Angular Material - Override colores azules
+-------------------------------------------------*/
+
+/* Form fields - bordes grises por defecto, carmesí en focus */
+.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__leading,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__notch,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__trailing {
+  border-color: #d1d5db !important;
+}
+
+.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-notched-outline .mdc-notched-outline__leading,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-notched-outline .mdc-notched-outline__notch,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-notched-outline .mdc-notched-outline__trailing {
+  border-color: #9ca3af !important;
+}
+
+.mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__leading,
+.mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__notch,
+.mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__trailing {
+  border-color: var(--color-primary) !important;
+}
+
+/* Labels - color gris por defecto, carmesí en focus */
+.mdc-floating-label,
+.mat-mdc-floating-label {
+  color: #6b7280 !important;
+}
+
+.mdc-text-field--focused .mdc-floating-label,
+.mat-mdc-form-field.mat-focused .mat-mdc-floating-label {
+  color: var(--color-primary) !important;
+}
+
+/* Form field label (mat-label) */
+.mat-mdc-form-field-label,
+.mdc-floating-label--float-above,
+.mat-mdc-form-field .mdc-text-field .mdc-floating-label,
+.mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mat-mdc-floating-label {
+  color: #6b7280 !important;
+}
+
+.mat-mdc-form-field.mat-focused .mat-mdc-form-field-label,
+.mat-mdc-form-field.mat-focused .mdc-floating-label--float-above,
+.mat-mdc-form-field.mat-focused .mdc-text-field .mdc-floating-label,
+.mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper .mat-mdc-form-field-flex .mat-mdc-floating-label {
+  color: var(--color-primary) !important;
+}
+
+/* Override primary color en labels */
+.mat-primary .mdc-floating-label,
+.mat-mdc-form-field.mat-primary .mdc-floating-label {
+  color: #6b7280 !important;
+}
+
+.mat-primary.mat-focused .mdc-floating-label,
+.mat-mdc-form-field.mat-primary.mat-focused .mdc-floating-label {
+  color: var(--color-primary) !important;
+}
+
+/* Ripple y underline color */
+.mat-mdc-form-field-focus-overlay {
+  background-color: transparent !important;
+}
+
+/* Select arrow */
+.mat-mdc-select-arrow {
+  color: #6b7280 !important;
+}
+
+/* Select panel - opción seleccionada */
+.mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) .mdc-list-item__primary-text {
+  color: var(--color-primary) !important;
+}
+
+.mat-pseudo-checkbox-checked.mat-pseudo-checkbox-minimal::after {
+  color: var(--color-primary) !important;
+}
+
+/* Checkbox y radio */
+.mat-mdc-checkbox.mat-accent .mdc-checkbox__native-control:enabled:checked ~ .mdc-checkbox__background {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+
+/* Progress spinner */
+.mat-mdc-progress-spinner.mat-warn circle {
+  stroke: var(--color-primary) !important;
+}
+
+/* Buttons - override primary and warn colors */
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary,
+.mat-mdc-flat-button.mat-primary {
+  --mdc-filled-button-container-color: var(--color-primary) !important;
+  --mdc-filled-button-label-text-color: white !important;
+  --mdc-protected-button-container-color: var(--color-primary) !important;
+  --mdc-protected-button-label-text-color: white !important;
+  background-color: var(--color-primary) !important;
+  color: white !important;
+}
+
+.mat-mdc-raised-button.mat-primary:hover,
+.mat-mdc-unelevated-button.mat-primary:hover,
+.mat-mdc-flat-button.mat-primary:hover {
+  --mdc-filled-button-container-color: var(--color-primary-dark) !important;
+  --mdc-protected-button-container-color: var(--color-primary-dark) !important;
+  background-color: var(--color-primary-dark) !important;
+}
+
+.mat-mdc-raised-button.mat-warn,
+.mat-mdc-unelevated-button.mat-warn,
+.mat-mdc-flat-button.mat-warn {
+  --mdc-filled-button-container-color: var(--color-primary);
+  --mdc-filled-button-label-text-color: white;
+}
+
+.mat-mdc-raised-button.mat-warn:hover,
+.mat-mdc-unelevated-button.mat-warn:hover,
+.mat-mdc-flat-button.mat-warn:hover {
+  --mdc-filled-button-container-color: var(--color-primary-dark);
+}
+
+/* Stroked buttons */
+.mat-mdc-outlined-button.mat-primary,
+.mat-stroked-button.mat-primary {
+  --mdc-outlined-button-label-text-color: var(--color-primary) !important;
+  --mdc-outlined-button-outline-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary) !important;
+}
+
+.mat-mdc-outlined-button.mat-primary:hover,
+.mat-stroked-button.mat-primary:hover {
+  background-color: rgba(207, 16, 45, 0.08) !important;
+}
+
+/* Menu items - tipografía */
+.mat-mdc-menu-item {
+  font-family: var(--font-family) !important;
+}
+
+.mat-mdc-menu-item .mat-icon {
+  margin-right: 12px;
+}
+
+/* Dialog - tipografía */
+.mat-mdc-dialog-title {
+  font-family: var(--font-family) !important;
+}
+
+.mat-mdc-dialog-content {
+  font-family: var(--font-family) !important;
+}
+
+/* Snackbar */
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-color: var(--color-gray-900);
+}
+
+/* Tooltip */
+.mat-mdc-tooltip {
+  font-family: var(--font-family) !important;
+}

@@ -24,6 +24,7 @@ public class Rol {
     public Long getId() { return id; }
     public RolNombre getNombre() { return nombre; }
     public void setNombre(RolNombre nombre) { this.nombre = nombre; }
+    public String getNombreStr() { return nombre != null ? nombre.name() : null; }
     public String getDescripcion() { return descripcion; }
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
     public Set<String> getPermisos() { return permisos; }

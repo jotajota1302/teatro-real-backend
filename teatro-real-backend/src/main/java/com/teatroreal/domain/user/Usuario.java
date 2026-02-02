@@ -30,6 +30,9 @@ public class Usuario {
     @JoinColumn(name = "departamento_id")
     private Departamento departamento;
 
+    @Column(name = "password_hash")
+    private String passwordHash;
+
     private Boolean activo = true;
 
     private LocalDateTime ultimoAcceso;
@@ -89,6 +92,13 @@ public class Usuario {
     }
     public void setAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
     public LocalDateTime getUltimoAcceso() {

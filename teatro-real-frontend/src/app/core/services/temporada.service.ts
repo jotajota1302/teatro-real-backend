@@ -15,14 +15,14 @@ export class TemporadaService {
   private readonly mockTemporadas: Temporada[] = [
     {
       id: 1,
-      nombre: 'Temporada 2024-2025',
+      nombre: '2024/2025',
       fechaInicio: '2024-09-01',
       fechaFin: '2025-07-31',
       activa: true
     },
     {
       id: 2,
-      nombre: 'Temporada 2023-2024',
+      nombre: '2023/2024',
       fechaInicio: '2023-09-01',
       fechaFin: '2024-07-31',
       activa: false
