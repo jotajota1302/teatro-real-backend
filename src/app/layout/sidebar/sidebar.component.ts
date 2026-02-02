@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { ThemeService } from '../../core/services/theme.service';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -25,64 +26,70 @@ import { ThemeService } from '../../core/services/theme.service';
       <!-- Navigation - scrollable -->
       <nav class="flex-1 overflow-y-auto px-4 pb-4">
         <!-- TEMPO Section -->
-        <div class="mb-4">
-          <p class="mx-3 mt-4 mb-2 text-xs font-bold uppercase tracking-wider" [class]="textMutedClass()">
-            Tempo
-          </p>
-          <ul class="flex flex-col gap-1">
-            <li>
-              <a routerLink="/tempo/espacios" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
-                <mat-icon class="nav-icon">location_city</mat-icon>
-                <span>Espacios</span>
-              </a>
-            </li>
-            <li>
-              <a routerLink="/tempo/calendario" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
-                <mat-icon class="nav-icon">calendar_month</mat-icon>
-                <span>Calendario</span>
-              </a>
-            </li>
-            <li>
-              <a routerLink="/tempo/movimientos" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
-                <mat-icon class="nav-icon">local_shipping</mat-icon>
-                <span>Logística</span>
-              </a>
-            </li>
-            <li>
-              <a routerLink="/tempo/carteleria" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
-                <mat-icon class="nav-icon">tv</mat-icon>
-                <span>Cartelería</span>
-              </a>
-            </li>
-          </ul>
-        </div>
+        @if (canAccessTempo()) {
+          <div class="mb-4">
+            <p class="mx-3 mt-4 mb-2 text-xs font-bold uppercase tracking-wider" [class]="textMutedClass()">
+              Tempo
+            </p>
+            <ul class="flex flex-col gap-1">
+              <li>
+                <a routerLink="/tempo/espacios" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
+                  <mat-icon class="nav-icon">location_city</mat-icon>
+                  <span>Espacios</span>
+                </a>
+              </li>
+              <li>
+                <a routerLink="/tempo/calendario" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
+                  <mat-icon class="nav-icon">calendar_month</mat-icon>
+                  <span>Calendario</span>
+                </a>
+              </li>
+              <li>
+                <a routerLink="/tempo/movimientos" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
+                  <mat-icon class="nav-icon">local_shipping</mat-icon>
+                  <span>Logística</span>
+                </a>
+              </li>
+              <li>
+                <a routerLink="/tempo/carteleria" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
+                  <mat-icon class="nav-icon">tv</mat-icon>
+                  <span>Cartelería</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        }
 
         <!-- TOPS Section -->
-        <div class="mb-4">
-          <p class="mx-3 mt-4 mb-2 text-xs font-bold uppercase tracking-wider" [class]="textMutedClass()">
-            Tops
-          </p>
-          <ul class="flex flex-col gap-1">
-            <li>
-              <a routerLink="/tops" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item" [class]="navItemClass()">
-                <mat-icon class="nav-icon">description</mat-icon>
-                <span>Guiones Técnicos</span>
-              </a>
-            </li>
-          </ul>
-        </div>
+        @if (canAccessTops()) {
+          <div class="mb-4">
+            <p class="mx-3 mt-4 mb-2 text-xs font-bold uppercase tracking-wider" [class]="textMutedClass()">
+              Tops
+            </p>
+            <ul class="flex flex-col gap-1">
+              <li>
+                <a routerLink="/tops" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item" [class]="navItemClass()">
+                  <mat-icon class="nav-icon">description</mat-icon>
+                  <span>Guiones Técnicos</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        }
 
         <!-- Admin Section -->
-        <div class="mt-6">
-          <ul class="flex flex-col gap-1">
-            <li>
-              <a routerLink="/admin" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
-                <mat-icon class="nav-icon">admin_panel_settings</mat-icon>
-                <span>Admin</span>
-              </a>
-            </li>
-          </ul>
-        </div>
+        @if (canAccessAdmin()) {
+          <div class="mt-6">
+            <ul class="flex flex-col gap-1">
+              <li>
+                <a routerLink="/admin" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
+                  <mat-icon class="nav-icon">admin_panel_settings</mat-icon>
+                  <span>Admin</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        }
       </nav>
 
       <!-- Footer -->
@@ -141,8 +148,14 @@ import { ThemeService } from '../../core/services/theme.service';
 })
 export class SidebarComponent {
   private theme = inject(ThemeService);
+  private auth = inject(AuthService);
 
   isDark = this.theme.isDark;
+
+  // Permission checks as computed signals
+  canAccessTempo = computed(() => this.auth.canAccessModule('TEMPO'));
+  canAccessTops = computed(() => this.auth.canAccessModule('TOPS'));
+  canAccessAdmin = computed(() => this.auth.canAccessModule('ADMIN'));
 
   sidenavClasses = computed(() => {
     return this.isDark()

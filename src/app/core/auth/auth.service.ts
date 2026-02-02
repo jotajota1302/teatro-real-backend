@@ -15,7 +15,11 @@ interface UsuarioResponse {
   id: number;
   nombre: string;
   email: string;
-  rol: RolNombre;
+  rol: {
+    id: number;
+    nombre: RolNombre;
+    descripcion: string;
+  };
 }
 
 @Injectable({ providedIn: 'root' })
@@ -64,9 +68,9 @@ export class AuthService {
               email: usuarioResp.email,
               nombre: usuarioResp.nombre,
               rol: {
-                id: 1,
-                nombre: usuarioResp.rol,
-                descripcion: usuarioResp.rol,
+                id: usuarioResp.rol?.id || 1,
+                nombre: usuarioResp.rol?.nombre || 'VISUALIZADOR',
+                descripcion: usuarioResp.rol?.descripcion || '',
                 permisos: []
               },
               activo: true
@@ -133,9 +137,9 @@ export class AuthService {
               email: usuarioResp.email,
               nombre: usuarioResp.nombre,
               rol: {
-                id: 1,
-                nombre: usuarioResp.rol,
-                descripcion: usuarioResp.rol,
+                id: usuarioResp.rol?.id || 1,
+                nombre: usuarioResp.rol?.nombre || 'VISUALIZADOR',
+                descripcion: usuarioResp.rol?.descripcion || '',
                 permisos: []
               },
               activo: true

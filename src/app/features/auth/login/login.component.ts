@@ -19,13 +19,10 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
     <div class="login-bg">
       <div class="login-card">
         <div class="login-logo-legacy">
-          <svg width="70" height="70" viewBox="0 0 44 44" fill="none" aria-label="Teatro Real logo" class="login-logo-svg">
-            <circle cx="22" cy="22" r="20" fill="#FFF" stroke="#CF102D" stroke-width="2.5"/>
-            <text x="22" y="28" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="18" fill="#010101" font-weight="700">T</text>
-            <text x="22" y="28" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-size="18" fill="#CF102D" font-weight="700" dx="8">R</text>
-            <circle cx="35" cy="12" r="4" fill="#CF102D"/>
-          </svg>
-          <div class="login-logo-text-legacy">TEATRO REAL</div>
+          <img
+            src="/assets/images/teatro-real-logo.svg"
+            alt="Teatro Real"
+            class="login-logo-img" />
         </div>
         <div class="login-title-legacy">Acceder a tu cuenta</div>
         <div class="login-desc-legacy">
@@ -34,13 +31,13 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
         <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off" class="login-form-legacy">
           <label class="form-label-legacy" for="email">Correo electrónico</label>
           <mat-form-field appearance="outline" class="login-form-field-legacy">
-            <input matInput id="email" type="email" formControlName="email" placeholder="ejemplo@teatroreal.es" autocomplete="email" required aria-required="true" />
+            <input matInput id="email" type="email" formControlName="email" placeholder="correo@ejemplo.com" autocomplete="email" required aria-required="true" />
             <mat-error *ngIf="email.hasError('required')">El correo es obligatorio</mat-error>
             <mat-error *ngIf="email.hasError('email')">El formato de correo no es válido</mat-error>
           </mat-form-field>
           <label class="form-label-legacy" for="password">Contraseña</label>
           <mat-form-field appearance="outline" class="login-form-field-legacy">
-            <input matInput id="password" type="password" formControlName="password" placeholder="Contraseña secreta" autocomplete="current-password" required aria-required="true" />
+            <input matInput id="password" type="password" formControlName="password" placeholder="••••••••" autocomplete="current-password" required aria-required="true" />
             <mat-error *ngIf="password.hasError('required')">La contraseña es obligatoria</mat-error>
           </mat-form-field>
           <button mat-raised-button color="primary" class="btn-primary-legacy" type="submit" [disabled]="form.invalid || loading()">
@@ -50,11 +47,20 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
             ENTRAR CON GOOGLE
           </button>
         </form>
-        <!-- Boton DEV para desarrollo rapido -->
+        <!-- Botones DEV para desarrollo rápido -->
         <div class="dev-section">
-          <button mat-flat-button class="btn-dev" type="button" (click)="devLogin()">
-            ENTRAR COMO ADMIN (DEV)
-          </button>
+          <p class="dev-title">Acceso rápido (desarrollo)</p>
+          <div class="dev-buttons">
+            <button mat-flat-button class="btn-dev btn-admin" type="button" (click)="quickLogin('admin')">
+              ADMIN (Todo)
+            </button>
+            <button mat-flat-button class="btn-dev btn-tempo" type="button" (click)="quickLogin('tempo')">
+              TEMPO
+            </button>
+            <button mat-flat-button class="btn-dev btn-tops" type="button" (click)="quickLogin('tops')">
+              TOPS
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -62,7 +68,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
   styles: [`
     .login-bg {
       min-height: 100vh;
-      background: #000;
+      background: #f8f9fa;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -88,22 +94,11 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-bottom: 2px;
+      margin-bottom: 12px;
     }
-    .login-logo-svg {
-      width: 64px;
-      height: 64px;
-      margin-bottom: 2px;
-      display: block;
-    }
-    .login-logo-text-legacy {
-      font-family: 'Montserrat', sans-serif;
-      font-weight: 700;
-      font-size: 1.35rem;
-      letter-spacing: 0.07em;
-      color: #010101;
-      margin-top: 2px;
-      text-align: center;
+    .login-logo-img {
+      height: 56px;
+      width: auto;
     }
     .login-title-legacy {
       font-size: 1.34rem;
@@ -130,18 +125,40 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
       gap: 8px;
     }
     .form-label-legacy {
-      font-size: 1rem;
+      font-size: 0.875rem;
       font-family: 'Montserrat', sans-serif;
       font-weight: 600;
-      color: #232323;
-      margin-bottom: 2px;
+      color: #374151 !important;
+      margin-bottom: 6px;
       margin-left: 2px;
       letter-spacing: 0.01em;
+      display: block;
     }
     .login-form-field-legacy {
       width: 100%;
       background: #fff;
       border-radius: 4px;
+    }
+    :host ::ng-deep .login-form-field-legacy .mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__leading,
+    :host ::ng-deep .login-form-field-legacy .mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__notch,
+    :host ::ng-deep .login-form-field-legacy .mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__trailing {
+      border-color: #d1d5db !important;
+    }
+    :host ::ng-deep .login-form-field-legacy .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-notched-outline .mdc-notched-outline__leading,
+    :host ::ng-deep .login-form-field-legacy .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-notched-outline .mdc-notched-outline__notch,
+    :host ::ng-deep .login-form-field-legacy .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-notched-outline .mdc-notched-outline__trailing {
+      border-color: #9ca3af !important;
+    }
+    :host ::ng-deep .login-form-field-legacy .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__leading,
+    :host ::ng-deep .login-form-field-legacy .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__notch,
+    :host ::ng-deep .login-form-field-legacy .mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__trailing {
+      border-color: #CF102D !important;
+    }
+    :host ::ng-deep .login-form-field-legacy .mat-mdc-form-field-focus-overlay {
+      background-color: transparent !important;
+    }
+    :host ::ng-deep .login-form-field-legacy .mdc-text-field--outlined {
+      background-color: #fff !important;
     }
     :host ::ng-deep .login-form-field-legacy .mat-mdc-form-field-infix {
       padding: 12px 0 !important;
@@ -159,8 +176,10 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
       line-height: 1.4;
     }
     :host ::ng-deep .login-form-field-legacy input::placeholder {
-      color: #999;
-      font-size: 0.95rem;
+      color: #9ca3af;
+      font-size: 0.9rem;
+      font-weight: 400;
+      font-family: 'Montserrat', sans-serif;
     }
     :host ::ng-deep .login-form-field-legacy .mdc-notched-outline__notch {
       border-right: none;
@@ -239,6 +258,44 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
       background: #e0e0e0 !important;
       color: #333 !important;
     }
+    .dev-title {
+      font-size: 0.75rem;
+      color: #999;
+      text-align: center;
+      margin-bottom: 8px;
+      font-family: 'Montserrat', sans-serif;
+    }
+    .dev-buttons {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+    .btn-dev {
+      flex: 1;
+      font-size: 0.7rem !important;
+      padding: 8px 4px !important;
+    }
+    .btn-admin {
+      background: #CF102D !important;
+      color: #fff !important;
+    }
+    .btn-admin:hover {
+      background: #A00D24 !important;
+    }
+    .btn-tempo {
+      background: #1565C0 !important;
+      color: #fff !important;
+    }
+    .btn-tempo:hover {
+      background: #0D47A1 !important;
+    }
+    .btn-tops {
+      background: #2E7D32 !important;
+      color: #fff !important;
+    }
+    .btn-tops:hover {
+      background: #1B5E20 !important;
+    }
     /* Error y validaciones */
     .mat-mdc-form-field-error, .mat-mdc-form-field-error[role="alert"] {
       color: #C62828 !important;
@@ -261,7 +318,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
       .login-bg {
         padding: 0;
       }
-      .login-logo-text-legacy { font-size: 1.07rem; }
+      .login-logo-img { height: 48px; }
       .login-title-legacy { font-size: 1.1rem; }
     }
   `]
@@ -311,5 +368,28 @@ export class LoginComponent {
 
   devLogin() {
     this.auth.devLogin();
+  }
+
+  quickLogin(type: 'admin' | 'tempo' | 'tops') {
+    const credentials: Record<string, { email: string; password: string }> = {
+      admin: { email: 'admin@teatroreal.es', password: 'password123' },
+      tempo: { email: 'tempo@teatroreal.es', password: 'password123' },
+      tops: { email: 'tops@teatroreal.es', password: 'password123' }
+    };
+
+    const cred = credentials[type];
+    this.loading.set(true);
+    this.auth.login(cred.email, cred.password).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.router.navigate(['/']);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.snackBar.open('Error al iniciar sesión. ¿Está el backend encendido?', 'Cerrar', {
+          duration: 3500
+        });
+      }
+    });
   }
 }
