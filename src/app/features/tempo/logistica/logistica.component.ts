@@ -127,22 +127,22 @@ const ESTADO_LABELS: Record<string, string> = {
 
         <!-- Operations List -->
         <div class="space-y-4">
-          <article *ngFor="let operacion of operacionesFiltradas()" [class]="isDark() ? 'card-dark card-hover' : 'card card-hover'">
-            <div class="flex gap-4">
-              <div class="icon-circle" [style.background]="operacion.estadoColor + '20'">
+          <article *ngFor="let operacion of operacionesFiltradas()" [class]="isDark() ? 'card-dark card-hover' : 'card card-hover'" class="operation-card">
+            <div class="operation-layout">
+              <div class="icon-circle flex-shrink-0 hidden sm:flex" [style.background]="operacion.estadoColor + '20'">
                 <span class="material-icons text-2xl" [style.color]="operacion.estadoColor">{{ operacion.icon }}</span>
               </div>
-              <div class="flex-1">
-                <div class="flex items-center gap-3 mb-1">
-                  <h2 class="text-lg font-semibold" [class]="isDark() ? 'text-white' : 'text-gray-900'">{{ operacion.nombre }}</h2>
-                  <span class="badge-pill" [style.background]="operacion.estadoColor + '22'" [style.color]="operacion.estadoColor">
+              <div class="operation-content min-w-0">
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                  <h2 class="text-base sm:text-lg font-semibold truncate" [class]="isDark() ? 'text-white' : 'text-gray-900'">{{ operacion.nombre }}</h2>
+                  <span class="badge-pill flex-shrink-0" [style.background]="operacion.estadoColor + '22'" [style.color]="operacion.estadoColor">
                     {{ operacion.estadoLabel || getEstadoLabel(operacion.estado) }}
                   </span>
                 </div>
-                <p class="mb-2" [class]="isDark() ? 'text-gray-300' : 'text-gray-600'">
+                <p class="mb-2 text-sm sm:text-base truncate" [class]="isDark() ? 'text-gray-300' : 'text-gray-600'">
                   {{ operacion.desde }} <span [class]="isDark() ? 'text-gray-500' : 'text-gray-400'">→</span> {{ operacion.hacia }}
                 </p>
-                <div class="flex flex-wrap gap-4 text-sm" [class]="isDark() ? 'text-gray-400' : 'text-gray-500'">
+                <div class="flex flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm" [class]="isDark() ? 'text-gray-400' : 'text-gray-500'">
                   <span class="flex items-center gap-1">
                     <span class="material-icons text-base">calendar_month</span>
                     {{ operacion.fecha }} · {{ operacion.hora }}
@@ -152,9 +152,9 @@ const ESTADO_LABELS: Record<string, string> = {
                     {{ operacion.camiones }} camiones
                   </span>
                 </div>
-                <p class="text-sm mt-2" [class]="isDark() ? 'text-gray-400' : 'text-gray-500'">{{ operacion.detalle }}</p>
+                <p class="text-xs sm:text-sm mt-2 line-clamp-2" [class]="isDark() ? 'text-gray-400' : 'text-gray-500'">{{ operacion.detalle }}</p>
               </div>
-              <div class="flex flex-col gap-2">
+              <div class="operation-actions">
                 <button [class]="isDark() ? 'btn-outline-dark' : 'btn-outline'" (click)="verDetalle(operacion)">Ver detalle</button>
                 <button
                   *ngIf="operacion.estado === 'PENDIENTE'"
@@ -162,7 +162,8 @@ const ESTADO_LABELS: Record<string, string> = {
                   (click)="iniciarTransito(operacion)"
                   [disabled]="procesando">
                   <span class="material-icons text-sm">play_arrow</span>
-                  Iniciar Tránsito
+                  <span class="hidden sm:inline">Iniciar Tránsito</span>
+                  <span class="sm:hidden">Iniciar</span>
                 </button>
                 <button
                   *ngIf="operacion.estado === 'EN_TRANSITO'"
@@ -921,6 +922,73 @@ const ESTADO_LABELS: Record<string, string> = {
     .tipo-btn-dark:hover {
       border-color: #CF102D;
       color: #CF102D;
+    }
+
+    /* Operation card responsive layout */
+    .operation-card {
+      overflow: hidden;
+    }
+
+    .operation-layout {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .operation-content {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .operation-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+      .operation-layout {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .operation-content {
+        width: 100%;
+      }
+
+      .operation-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 100%;
+        margin-top: 0.5rem;
+        padding-top: 0.75rem;
+        border-top: 1px solid rgba(128, 128, 128, 0.2);
+      }
+
+      .operation-actions button {
+        flex: 1;
+        min-width: 100px;
+        justify-content: center;
+      }
+
+      .page {
+        padding: 1rem;
+      }
+
+      .card, .card-dark {
+        padding: 1rem;
+      }
+    }
+
+    /* Line clamp utility */
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
   `]
 })
