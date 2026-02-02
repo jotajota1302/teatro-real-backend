@@ -1,6 +1,6 @@
 // teatro-real-frontend/src/app/features/tops/guion-list/guion-list.component.ts
 
-import { Component, OnInit, inject, computed } from '@angular/core';
+import { Component, OnInit, inject, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -219,11 +219,37 @@ export class GuionListComponent implements OnInit {
     this.guiones().reduce((sum, g) => sum + (g.totalTops || 0), 0)
   );
 
+  private guionesLoaded = false;
+
+  constructor() {
+    // Effect que reacciona cuando la temporada esté disponible
+    effect(() => {
+      const temporada = this.temporadaService.temporadaActiva();
+      // Solo cargar una vez cuando la temporada esté lista
+      if (temporada && !this.guionesLoaded) {
+        this.guionesLoaded = true;
+        // Usar setTimeout para salir del contexto del effect
+        setTimeout(() => {
+          this.guionService.loadGuiones(temporada.nombre).subscribe();
+        }, 0);
+      }
+    });
+  }
+
   ngOnInit(): void {
-    this.loadGuiones();
+    // Asegurar que las temporadas se carguen primero
+    this.temporadaService.ensureLoaded();
+
+    // Si no hay temporada configurada, cargar guiones sin filtro después de un breve delay
+    setTimeout(() => {
+      if (!this.guionesLoaded) {
+        this.loadGuiones();
+      }
+    }, 500);
   }
 
   loadGuiones(): void {
+    this.guionesLoaded = true;
     const temporada = this.temporadaService.temporadaActiva();
     this.guionService.loadGuiones(temporada?.nombre).subscribe();
   }
