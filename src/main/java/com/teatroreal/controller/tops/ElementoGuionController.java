@@ -26,5 +26,25 @@ public class ElementoGuionController {
         return ResponseEntity.status(201).body(elemento);
     }
 
-    // Otros endpoints...
+    @DeleteMapping("/{elementoId}")
+    public ResponseEntity<Void> eliminarElemento(@PathVariable String escenaId, @PathVariable String elementoId) {
+        elementoGuionService.eliminarElemento(escenaId, elementoId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{elementoId}")
+    public ResponseEntity<ElementoGuion> actualizarElemento(
+            @PathVariable String escenaId,
+            @PathVariable String elementoId,
+            @RequestBody ElementoGuionRequest request) {
+        ElementoGuion elemento = elementoGuionService.actualizarElemento(
+            escenaId,
+            elementoId,
+            request.getTexto(),
+            request.getTipoElemento(),
+            request.getOrden(),
+            request.getColorHex()
+        );
+        return ResponseEntity.ok(elemento);
+    }
 }

@@ -30,5 +30,32 @@ public class ElementoGuionService {
         return elementoGuionRepository.save(elemento);
     }
 
-    // Otros métodos CRUD o de batch update si se requieren...
+    public void eliminarElemento(String escenaId, String elementoId) {
+        ElementoGuion elemento = elementoGuionRepository.findById(elementoId)
+                .orElseThrow(() -> new EntityNotFoundException("Elemento no encontrado"));
+
+        // Verify the element belongs to the specified scene
+        if (!elemento.getEscena().getId().equals(escenaId)) {
+            throw new IllegalArgumentException("El elemento no pertenece a la escena especificada");
+        }
+
+        elementoGuionRepository.deleteById(elementoId);
+    }
+
+    public ElementoGuion actualizarElemento(String escenaId, String elementoId, String descripcion, String tipoElemento, Integer orden, String colorHex) {
+        ElementoGuion elemento = elementoGuionRepository.findById(elementoId)
+                .orElseThrow(() -> new EntityNotFoundException("Elemento no encontrado"));
+
+        // Verify the element belongs to the specified scene
+        if (!elemento.getEscena().getId().equals(escenaId)) {
+            throw new IllegalArgumentException("El elemento no pertenece a la escena especificada");
+        }
+
+        if (descripcion != null) elemento.setDescripcion(descripcion);
+        if (tipoElemento != null) elemento.setTipoElemento(ElementoGuion.TipoElemento.valueOf(tipoElemento));
+        if (orden != null) elemento.setOrden(orden);
+        if (colorHex != null) elemento.setColorHex(colorHex);
+
+        return elementoGuionRepository.save(elemento);
+    }
 }
