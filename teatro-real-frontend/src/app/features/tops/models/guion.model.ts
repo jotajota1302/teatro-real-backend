@@ -193,6 +193,7 @@ export interface ElementoGuionBackendRequest {
   departamento?: string;
   encabezado?: string;
   contenido?: string;
+  imagen?: string;
   orden?: number;
 }
 
@@ -209,6 +210,7 @@ export function toBackendRequest(data: ElementoGuionFormData): ElementoGuionBack
     departamento: data.departamento,
     encabezado: data.descripcion,
     contenido: data.observaciones,
+    imagen: data.imagen,
     orden: data.orden
   };
 }

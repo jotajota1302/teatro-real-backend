@@ -406,12 +406,26 @@ export class GuionService {
 
   /**
    * Actualiza un elemento de guion
+   * Para actualizaciones parciales, convierte solo los campos presentes
    */
-  updateElemento(escenaId: string, id: string, data: ElementoGuionFormData): Observable<ElementoGuion> {
-    const backendData = toBackendRequest(data);
+  updateElemento(escenaId: string, id: string, data: Partial<ElementoGuionFormData>): Observable<ElementoGuion> {
+    // Convertir nombres de campos del frontend al backend solo para los campos presentes
+    const backendData: Record<string, any> = {};
+
+    if (data.tipoElemento !== undefined) backendData['tipoElemento'] = data.tipoElemento;
+    if (data.numero !== undefined) backendData['numeroTop'] = data.numero;
+    if (data.refPagina !== undefined) backendData['refPagina'] = data.refPagina;
+    if (data.refCompas !== undefined) backendData['refCompas'] = data.refCompas;
+    if (data.refTimecode !== undefined) backendData['refTimecode'] = data.refTimecode;
+    if (data.departamento !== undefined) backendData['departamento'] = data.departamento;
+    if (data.descripcion !== undefined) backendData['encabezado'] = data.descripcion;
+    if (data.observaciones !== undefined) backendData['contenido'] = data.observaciones;
+    if (data.imagen !== undefined) backendData['imagen'] = data.imagen;
+    if (data.orden !== undefined) backendData['orden'] = data.orden;
+
     return this.api.put<ElementoGuion>(`/api/tops/elementos/${id}`, backendData).pipe(
       tap(updated => this.updateElementosInGuion(escenaId, elementos =>
-        elementos.map(e => e.id === id ? updated : e)
+        elementos.map(e => e.id === id ? { ...e, ...updated } : e)
       ))
     );
   }

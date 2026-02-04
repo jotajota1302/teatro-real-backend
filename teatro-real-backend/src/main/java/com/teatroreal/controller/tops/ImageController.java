@@ -3,8 +3,6 @@ package com.teatroreal.controller.tops;
 import com.teatroreal.domain.tops.GuionImage;
 import com.teatroreal.service.tops.GuionImageService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,9 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -58,7 +53,7 @@ public class ImageController {
 
         try {
             GuionImage savedImage = guionImageService.uploadImage(
-                    file, guionId, entityType, entityId, 1L // TODO: Get from security context
+                    file, guionId, entityType, entityId, null // Usuario opcional
             );
             return ResponseEntity.status(HttpStatus.CREATED).body(savedImage);
         } catch (IOException e) {
@@ -70,24 +65,19 @@ public class ImageController {
 
     /**
      * GET /api/tops/images/{id}
-     * Descarga una imagen por ID
+     * Descarga una imagen por ID (desde base de datos)
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Resource> getImage(@PathVariable Long id) {
+    public ResponseEntity<byte[]> getImage(@PathVariable Long id) {
         try {
             GuionImage image = guionImageService.obtenerImagen(id);
-            Path filePath = Paths.get(image.getStoragePath());
-            Resource resource = new UrlResource(filePath.toUri());
-
-            if (!resource.exists() || !resource.isReadable()) {
-                return ResponseEntity.notFound().build();
-            }
 
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(image.getMimeType()))
                     .header(HttpHeaders.CONTENT_DISPOSITION,
                             "inline; filename=\"" + image.getFilename() + "\"")
-                    .body(resource);
+                    .header(HttpHeaders.CACHE_CONTROL, "max-age=86400") // Cache 1 día
+                    .body(image.getImageData());
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }

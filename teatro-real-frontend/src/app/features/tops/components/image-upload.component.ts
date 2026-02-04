@@ -70,17 +70,17 @@ export interface GuionImage {
             (change)="onFileSelected($event)">
 
           @if (uploading()) {
-            <div class="space-y-2">
+            <div class="space-y-1">
               <mat-progress-bar mode="determinate" [value]="uploadProgress()"></mat-progress-bar>
-              <span class="text-sm text-gray-500">Subiendo... {{ uploadProgress() }}%</span>
+              <span class="text-xs text-gray-500">{{ uploadProgress() }}%</span>
             </div>
           } @else {
-            <mat-icon class="!text-3xl text-gray-400 mb-2">cloud_upload</mat-icon>
-            <p class="text-sm text-gray-500">
-              Arrastra una imagen o haz clic para seleccionar
+            <mat-icon class="!text-2xl text-gray-400 mb-1">cloud_upload</mat-icon>
+            <p class="text-xs text-gray-500 leading-tight">
+              Clic o arrastra
             </p>
-            <p class="text-xs text-gray-400 mt-1">
-              JPG, PNG o WebP (máx. 5MB)
+            <p class="text-xs text-gray-400">
+              JPG, PNG, WebP
             </p>
           }
         </div>
