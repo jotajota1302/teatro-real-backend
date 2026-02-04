@@ -37,6 +37,8 @@ public class ElementoGuionResponse {
 
     private String colorHex;
 
+    private String imagen;
+
     /**
      * Mapea desde entidad a DTO
      */
@@ -54,6 +56,7 @@ public class ElementoGuionResponse {
                 .departamento(elemento.getDepartamento())
                 .orden(elemento.getOrden())
                 .colorHex(elemento.getColorHex())
+                .imagen(elemento.getImagen())
                 .build();
     }
 }

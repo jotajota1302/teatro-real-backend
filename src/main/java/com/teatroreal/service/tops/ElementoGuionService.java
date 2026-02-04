@@ -123,6 +123,7 @@ public class ElementoGuionService {
         elemento.setContenido(request.getContenido());
         elemento.setDepartamento(request.getDepartamento());
         elemento.setOrden(request.getOrden() != null ? request.getOrden() : 0);
+        elemento.setImagen(request.getImagen());
 
         // Asignar color según tipo de elemento
         String colorHex = getColorForType(request.getTipoElemento());
@@ -144,7 +145,7 @@ public class ElementoGuionService {
     }
 
     /**
-     * Actualiza un elemento existente
+     * Actualiza un elemento existente (update parcial - solo campos no nulos)
      *
      * @param id ID del elemento
      * @param request DTO con datos actualizados
@@ -154,19 +155,42 @@ public class ElementoGuionService {
         ElementoGuion elemento = elementoGuionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Elemento no encontrado: " + id));
 
-        elemento.setTipoElemento(request.getTipoElemento());
-        elemento.setNumeroTop(request.getNumeroTop());
-        elemento.setRefPagina(request.getRefPagina());
-        elemento.setRefCompas(request.getRefCompas());
-        elemento.setRefTimecode(request.getRefTimecode());
-        elemento.setEncabezado(request.getEncabezado());
-        elemento.setContenido(request.getContenido());
-        elemento.setDepartamento(request.getDepartamento());
-        elemento.setOrden(request.getOrden() != null ? request.getOrden() : 0);
-
-        // Actualizar color si cambió el tipo
-        String colorHex = getColorForType(request.getTipoElemento());
-        elemento.setColorHex(colorHex);
+        // Update parcial: solo actualizar campos que vienen en el request
+        if (request.getTipoElemento() != null) {
+            elemento.setTipoElemento(request.getTipoElemento());
+            // Actualizar color si cambió el tipo
+            String colorHex = getColorForType(request.getTipoElemento());
+            elemento.setColorHex(colorHex);
+        }
+        if (request.getNumeroTop() != null) {
+            elemento.setNumeroTop(request.getNumeroTop());
+        }
+        if (request.getRefPagina() != null) {
+            elemento.setRefPagina(request.getRefPagina());
+        }
+        if (request.getRefCompas() != null) {
+            elemento.setRefCompas(request.getRefCompas());
+        }
+        if (request.getRefTimecode() != null) {
+            elemento.setRefTimecode(request.getRefTimecode());
+        }
+        if (request.getEncabezado() != null) {
+            elemento.setEncabezado(request.getEncabezado());
+        }
+        if (request.getContenido() != null) {
+            elemento.setContenido(request.getContenido());
+        }
+        if (request.getDepartamento() != null) {
+            elemento.setDepartamento(request.getDepartamento());
+        }
+        if (request.getOrden() != null) {
+            elemento.setOrden(request.getOrden());
+        }
+        // Imagen: solo actualizar si viene explícitamente en el request
+        // String vacío = borrar imagen, String con valor = nueva URL
+        if (request.getImagen() != null) {
+            elemento.setImagen(request.getImagen().isEmpty() ? null : request.getImagen());
+        }
 
         ElementoGuion saved = elementoGuionRepository.save(elemento);
         return ElementoGuionResponse.fromEntity(saved);

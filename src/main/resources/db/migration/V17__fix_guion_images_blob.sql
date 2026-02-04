@@ -1,12 +1,13 @@
 -- =====================================================
--- V17: Corregir tipos en guion_images
--- Los IDs en el sistema usan VARCHAR(36) (UUID), no BIGINT
+-- V17: Recrear guion_images con almacenamiento BLOB
+-- - Cambia IDs de BIGINT a VARCHAR(36) para UUIDs
+-- - Almacena imágenes como BLOB en lugar de archivos
 -- =====================================================
 
 -- Eliminar tabla existente (no hay datos en producción aún)
 DROP TABLE IF EXISTS guion_images;
 
--- Recrear con tipos correctos
+-- Recrear con almacenamiento BLOB
 CREATE TABLE guion_images (
     id BIGSERIAL PRIMARY KEY,
     guion_id VARCHAR(36) NOT NULL,
@@ -15,7 +16,7 @@ CREATE TABLE guion_images (
     filename VARCHAR(255) NOT NULL,
     mime_type VARCHAR(100) NOT NULL,
     file_size BIGINT NOT NULL,
-    storage_path VARCHAR(500) NOT NULL,
+    image_data BLOB NOT NULL,
     uploaded_by BIGINT,
     uploaded_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_image_guion FOREIGN KEY (guion_id) REFERENCES guiones(id) ON DELETE CASCADE,
@@ -35,5 +36,5 @@ VALUES (
     'EXECUTE',
     'system@teatro-real.es',
     CURRENT_TIMESTAMP,
-    '{"version": "V17", "description": "Fix guion_images types: BIGINT -> VARCHAR(36) for UUID compatibility"}'
+    '{"version": "V17", "description": "Guion images: BLOB storage, UUID IDs"}'
 );

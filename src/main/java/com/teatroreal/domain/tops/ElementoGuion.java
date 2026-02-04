@@ -70,6 +70,13 @@ public class ElementoGuion {
     private String colorHex;
 
     /**
+     * URL o ID de imagen asociada al elemento
+     * Almacena la URL del endpoint de imagen: /api/tops/images/{id}
+     */
+    @Column(name = "imagen", length = 500)
+    private String imagen;
+
+    /**
      * Devuelve PIE formateado como "x/y/z"
      * Usado para validación y display
      *

@@ -69,14 +69,14 @@ public class ElementoGuionController {
 
     /**
      * PUT /api/tops/elementos/{id}
-     * Actualiza un elemento existente
+     * Actualiza un elemento existente (soporta updates parciales)
      */
     @PutMapping("/{id}")
     public ResponseEntity<ElementoGuionResponse> update(
             @PathVariable String id,
             @RequestBody ElementoGuionRequest request) {
 
-        // Validar PIE si está presente
+        // Validar PIE si está presente (todos los componentes deben existir)
         if (request.getRefPagina() != null && request.getRefCompas() != null && request.getRefTimecode() != null) {
             String pieFormato = request.getPieFormateado();
             if (pieFormato != null) {
@@ -85,17 +85,19 @@ public class ElementoGuionController {
         }
 
         // Validar TOP E/M si está presente
-        if (request.getNumeroTop() != null) {
+        if (request.getNumeroTop() != null && !request.getNumeroTop().isEmpty()) {
             validacionService.validarTopEM(request.getNumeroTop());
         }
 
         // Validar departamento si está presente
-        if (request.getDepartamento() != null) {
+        if (request.getDepartamento() != null && !request.getDepartamento().isEmpty()) {
             validacionService.validarDepartamento(request.getDepartamento());
         }
 
-        // Validar encabezado obligatorio
-        validacionService.validarEncabezadoObligatorio(request.getEncabezado(), request.getTipoElemento().toString());
+        // Validar encabezado obligatorio solo si se envía tipoElemento
+        if (request.getTipoElemento() != null && request.getEncabezado() != null) {
+            validacionService.validarEncabezadoObligatorio(request.getEncabezado(), request.getTipoElemento().toString());
+        }
 
         return ResponseEntity.ok(elementoGuionService.update(id, request));
     }

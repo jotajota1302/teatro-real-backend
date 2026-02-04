@@ -36,6 +36,8 @@ public class ElementoGuionRequest {
 
     private Integer orden = 0;
 
+    private String imagen;             // URL de imagen asociada
+
     /**
      * Devuelve PIE formateado como "x/y/z" desde los componentes
      */
