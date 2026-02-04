@@ -8,9 +8,9 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 export interface GuionImage {
   id: number;
-  guionId: number;
+  guionId: string;
   entityType: string;
-  entityId: number;
+  entityId: string;
   filename: string;
   mimeType: string;
   fileSize: number;
@@ -113,9 +113,9 @@ export class ImageUploadComponent {
   private http = inject(HttpClient);
   private snackBar = inject(MatSnackBar);
 
-  @Input() guionId!: number;
+  @Input() guionId!: string;
   @Input() entityType!: string; // TOP, PASADA_ITEM, ESCENA
-  @Input() entityId!: number;
+  @Input() entityId!: string;
   @Input() currentImageUrl: string | null = null;
   @Input() currentImageId: number | null = null;
   @Input() disabled = false;
@@ -178,9 +178,9 @@ export class ImageUploadComponent {
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('guionId', this.guionId.toString());
+    formData.append('guionId', this.guionId);
     formData.append('entityType', this.entityType);
-    formData.append('entityId', this.entityId.toString());
+    formData.append('entityId', this.entityId);
 
     this.http.post<GuionImage>('/api/tops/images/upload', formData, {
       reportProgress: true,

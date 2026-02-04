@@ -16,7 +16,8 @@ import {
   ElementoGuionFormData,
   Acto,
   ActoFormData,
-  EstadoGuion
+  EstadoGuion,
+  toBackendRequest
 } from '../models/guion.model';
 
 /**
@@ -245,6 +246,61 @@ export class GuionService {
     );
   }
 
+  // ==================== Actos ====================
+
+  /**
+   * Crea un nuevo acto en un guion
+   */
+  createActo(guionId: string, data: ActoFormData): Observable<Acto> {
+    return this.api.post<Acto>(`/api/guiones/${guionId}/actos`, data).pipe(
+      tap(nuevo => {
+        this.guionActualSignal.update(guion => {
+          if (!guion || guion.id !== guionId) return guion;
+          return {
+            ...guion,
+            actos: [...guion.actos, { ...nuevo, pasada: [], escenas: [] }]
+          };
+        });
+      })
+    );
+  }
+
+  /**
+   * Actualiza un acto
+   */
+  updateActo(guionId: string, actoId: string, data: ActoFormData): Observable<Acto> {
+    return this.api.put<Acto>(`/api/guiones/${guionId}/actos/${actoId}`, data).pipe(
+      tap(updated => {
+        this.guionActualSignal.update(guion => {
+          if (!guion) return null;
+          return {
+            ...guion,
+            actos: guion.actos.map(a =>
+              a.id === actoId ? { ...a, ...updated } : a
+            )
+          };
+        });
+      })
+    );
+  }
+
+  /**
+   * Elimina un acto
+   */
+  deleteActo(guionId: string, actoId: string): Observable<void> {
+    return this.api.delete<void>(`/api/guiones/${guionId}/actos/${actoId}`).pipe(
+      tap(() => {
+        this.guionActualSignal.update(guion => {
+          if (!guion) return null;
+          return {
+            ...guion,
+            actos: guion.actos.filter(a => a.id !== actoId)
+          };
+        });
+      })
+    );
+  }
+
   // ==================== Pasada Items ====================
 
   /**
@@ -340,8 +396,10 @@ export class GuionService {
   /**
    * Crea un nuevo elemento de guion
    */
-  createElemento(escenaId: string, data: ElementoGuionFormData): Observable<ElementoGuion> {
-    return this.api.post<ElementoGuion>(`/api/escenas/${escenaId}/elementos`, data).pipe(
+  createElemento(escenaId: string, data: ElementoGuionFormData, guionId?: string): Observable<ElementoGuion> {
+    const gId = guionId || this.guionActualSignal()?.id || '';
+    const backendData = toBackendRequest(data);
+    return this.api.post<ElementoGuion>(`/api/tops/elementos?escenaId=${escenaId}&guionId=${gId}`, backendData).pipe(
       tap(nuevo => this.updateElementosInGuion(escenaId, elementos => [...elementos, nuevo]))
     );
   }
@@ -350,7 +408,8 @@ export class GuionService {
    * Actualiza un elemento de guion
    */
   updateElemento(escenaId: string, id: string, data: ElementoGuionFormData): Observable<ElementoGuion> {
-    return this.api.put<ElementoGuion>(`/api/escenas/${escenaId}/elementos/${id}`, data).pipe(
+    const backendData = toBackendRequest(data);
+    return this.api.put<ElementoGuion>(`/api/tops/elementos/${id}`, backendData).pipe(
       tap(updated => this.updateElementosInGuion(escenaId, elementos =>
         elementos.map(e => e.id === id ? updated : e)
       ))
@@ -361,7 +420,7 @@ export class GuionService {
    * Elimina un elemento de guion
    */
   deleteElemento(escenaId: string, id: string): Observable<void> {
-    return this.api.delete<void>(`/api/escenas/${escenaId}/elementos/${id}`).pipe(
+    return this.api.delete<void>(`/api/tops/elementos/${id}`).pipe(
       tap(() => this.updateElementosInGuion(escenaId, elementos =>
         elementos.filter(e => e.id !== id)
       ))

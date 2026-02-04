@@ -56,9 +56,9 @@ public class GuionImageService {
      */
     public GuionImage uploadImage(
             MultipartFile file,
-            Long guionId,
+            String guionId,
             String entityType,
-            Long entityId,
+            String entityId,
             Long uploadedBy
     ) throws IOException {
         // Validar archivo
@@ -93,14 +93,14 @@ public class GuionImageService {
     /**
      * Obtiene todas las imágenes de una entidad
      */
-    public List<GuionImage> obtenerImagenesPorEntidad(String entityType, Long entityId) {
+    public List<GuionImage> obtenerImagenesPorEntidad(String entityType, String entityId) {
         return guionImageRepository.findByEntityTypeAndEntityId(entityType, entityId);
     }
 
     /**
      * Obtiene todas las imágenes de un guion
      */
-    public List<GuionImage> obtenerImagenesPorGuion(Long guionId) {
+    public List<GuionImage> obtenerImagenesPorGuion(String guionId) {
         return guionImageRepository.findByGuionId(guionId);
     }
 
@@ -134,9 +134,9 @@ public class GuionImageService {
     /**
      * Elimina todas las imágenes de una entidad
      */
-    public void eliminarImagenesPorEntidad(String entityType, Long entityId) {
+    public void eliminarImagenesPorEntidad(String entityType, String entityId) {
         List<GuionImage> imagenes = guionImageRepository.findByEntityTypeAndEntityId(entityType, entityId);
-        
+
         imagenes.forEach(imagen -> {
             try {
                 Path rutaArchivo = Paths.get(imagen.getStoragePath());
@@ -152,7 +152,7 @@ public class GuionImageService {
     /**
      * Elimina todas las imágenes de un guion
      */
-    public void eliminarImagenesPorGuion(Long guionId) {
+    public void eliminarImagenesPorGuion(String guionId) {
         List<GuionImage> imagenes = guionImageRepository.findByGuionId(guionId);
 
         imagenes.forEach(imagen -> {

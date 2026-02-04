@@ -2,6 +2,7 @@
 
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,6 +17,7 @@ import { GuionService } from '../services/guion.service';
 import { EditableCellComponent } from '../components/editable-cell.component';
 import { EditableTextComponent } from '../components/editable-text.component';
 import { AuditLogPanelComponent } from '../components/audit-log-panel.component';
+import { ImageUploadComponent, GuionImage } from '../components/image-upload.component';
 import {
   GuionCompleto,
   Acto,
@@ -35,6 +37,7 @@ import { AuthService } from '../../../core/auth/auth.service';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
@@ -43,7 +46,8 @@ import { AuthService } from '../../../core/auth/auth.service';
     DragDropModule,
     EditableCellComponent,
     EditableTextComponent,
-    AuditLogPanelComponent
+    AuditLogPanelComponent,
+    ImageUploadComponent
   ],
   template: `
     <!-- Viewport tipo Word (fondo gris) -->
@@ -258,13 +262,40 @@ import { AuthService } from '../../../core/auth/auth.service';
                         (valueChange)="updatePasadaItem(acto.id, item.id, 'lugar', $event)"
                         placeholder="Varas"
                       />
-                      <app-editable-cell
-                        [value]="item.descripcion || ''"
-                        (valueChange)="updatePasadaItem(acto.id, item.id, 'descripcion', $event)"
-                        placeholder="Descripción del setup..."
-                        [multiline]="true"
-                        [imagen]="item.imagen || null"
-                      />
+                      <td class="border border-black p-1.5 align-top">
+                        <!-- Descripción editable -->
+                        <div class="mb-2">
+                          @if (editing === 'pasada-' + item.id) {
+                            <textarea
+                              [(ngModel)]="editValue"
+                              (blur)="savePasadaDescripcion(acto.id, item.id)"
+                              (keydown.escape)="cancelEdit()"
+                              class="w-full border-none bg-yellow-50 outline-none font-serif text-xs p-0 m-0 resize-none min-h-16"
+                              rows="3"
+                            ></textarea>
+                          } @else {
+                            <span
+                              class="block whitespace-pre-wrap cursor-text min-h-4"
+                              [class.text-gray-400]="!item.descripcion"
+                              (click)="startEdit('pasada-' + item.id, item.descripcion || '')">
+                              {{ item.descripcion || 'Descripción del setup...' }}
+                            </span>
+                          }
+                        </div>
+                        <!-- Upload de imagen -->
+                        @if (canEdit()) {
+                          <app-image-upload
+                            [guionId]="guionId || ''"
+                            entityType="PASADA_ITEM"
+                            [entityId]="item.id"
+                            [currentImageUrl]="item.imagen || null"
+                            (imageUploaded)="onPasadaImageUploaded(acto.id, item.id, $event)"
+                            (imageRemoved)="onPasadaImageRemoved(acto.id, item.id)"
+                          />
+                        } @else if (item.imagen) {
+                          <img [src]="item.imagen" alt="Imagen" class="max-w-full max-h-32 rounded border">
+                        }
+                      </td>
                       <td class="border border-black p-1 text-center whitespace-nowrap">
                         @if (canEdit()) {
                           <button class="w-6 h-6 inline-flex items-center justify-center rounded hover:bg-blue-100 opacity-40 hover:opacity-100 transition-opacity"
@@ -443,6 +474,10 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
   exporting = signal(false);
   showHistorial = signal(false);
 
+  // Para edición inline de descripciones
+  editing: string | null = null;
+  editValue: string = '';
+
   estadoLabel = computed(() => {
     const estado = this.guion()?.estado;
     return estado ? ESTADO_LABELS[estado] : '';
@@ -527,9 +562,12 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
   }
 
   updateActo(actoId: string, field: string, value: string): void {
-    if (!this.canEdit()) return;
-    // TODO: Implementar cuando tengamos ActoService
-    console.log('updateActo', actoId, field, value);
+    if (!this.canEdit() || !this.guionId) return;
+    const data: any = {};
+    data[field] = value;
+    this.guionService.updateActo(this.guionId, actoId, data).subscribe({
+      error: () => this.showError('Error al actualizar acto')
+    });
   }
 
   addPasadaItem(actoId: string): void {
@@ -611,8 +649,29 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
 
   insertElemento(escenaId: string, afterOrden: number): void {
     if (!this.canEdit()) return;
-    // TODO: Implementar inserción en posición
-    this.addElemento(escenaId);
+    // Crear elemento y luego reordenar para insertarlo en la posición correcta
+    this.guionService.createElemento(escenaId, {
+      tipoElemento: 'TOP',
+      numero: '',
+      descripcion: '',
+      orden: afterOrden + 1
+    }).subscribe({
+      next: (newElem) => {
+        // Obtener la escena y reordenar
+        const acto = this.guion()?.actos.find(a =>
+          a.escenas.some(e => e.id === escenaId)
+        );
+        const escena = acto?.escenas.find(e => e.id === escenaId);
+        if (escena) {
+          // Construir nuevo orden: elementos antes, nuevo, elementos después
+          const before = escena.elementos.filter(e => e.orden <= afterOrden);
+          const after = escena.elementos.filter(e => e.orden > afterOrden && e.id !== newElem.id);
+          const newOrder = [...before.map(e => e.id), newElem.id, ...after.map(e => e.id)];
+          this.guionService.reorderElementos(escenaId, newOrder).subscribe();
+        }
+      },
+      error: () => this.showError('Error al insertar elemento')
+    });
   }
 
   updateElemento(escenaId: string, elementoId: string, field: string, value: string): void {
@@ -641,10 +700,15 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
   }
 
   addActo(): void {
-    if (!this.canEdit()) return;
-    // TODO: Implementar cuando tengamos endpoint
-    console.log('addActo');
-    this.showError('Crear acto aún no implementado');
+    if (!this.canEdit() || !this.guionId) return;
+    const numActos = this.guion()?.actos?.length || 0;
+    this.guionService.createActo(this.guionId, {
+      nombre: `ACTO ${numActos + 1}`,
+      orden: numActos + 1
+    }).subscribe({
+      next: () => this.showSuccess('Acto creado'),
+      error: () => this.showError('Error al crear acto')
+    });
   }
 
   // ==================== Drag & Drop ====================
@@ -702,4 +766,37 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
   private showError(message: string): void {
     this.snackBar.open(message, 'Cerrar', { duration: 5000, panelClass: 'snackbar-error' });
   }
+
+  // ==================== Edición Inline ====================
+
+  startEdit(key: string, value: string): void {
+    if (!this.canEdit()) return;
+    this.editing = key;
+    this.editValue = value;
+  }
+
+  cancelEdit(): void {
+    this.editing = null;
+    this.editValue = '';
+  }
+
+  savePasadaDescripcion(actoId: string, itemId: string): void {
+    if (this.editing === 'pasada-' + itemId) {
+      this.updatePasadaItem(actoId, itemId, 'descripcion', this.editValue);
+      this.cancelEdit();
+    }
+  }
+
+  // ==================== Imágenes de Pasada ====================
+
+  onPasadaImageUploaded(actoId: string, itemId: string, image: GuionImage): void {
+    // Actualizar el item con la URL de la imagen
+    const imageUrl = `/api/tops/images/${image.id}`;
+    this.updatePasadaItem(actoId, itemId, 'imagen', imageUrl);
+  }
+
+  onPasadaImageRemoved(actoId: string, itemId: string): void {
+    this.updatePasadaItem(actoId, itemId, 'imagen', '');
+  }
+
 }
