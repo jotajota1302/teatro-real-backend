@@ -75,6 +75,20 @@ public class PasadaItemService {
         pasadaItemRepository.deleteById(id);
     }
 
+    /**
+     * Reordena los items de pasada según la lista de IDs ordenada
+     */
+    public void reorder(String actoId, List<String> orderedIds) {
+        for (int i = 0; i < orderedIds.size(); i++) {
+            final int newOrden = i + 1;
+            pasadaItemRepository.findById(orderedIds.get(i))
+                .ifPresent(item -> {
+                    item.setOrden(newOrden);
+                    pasadaItemRepository.save(item);
+                });
+        }
+    }
+
     private void mapRequestToEntity(PasadaItemRequest request, PasadaItem item) {
         if (request.getDepartamento() != null) {
             item.setDepartamento(request.getDepartamento());

@@ -295,6 +295,13 @@ export class GuionService {
     );
   }
 
+  /**
+   * Reordena items de pasada
+   */
+  reorderPasadaItems(actoId: string, orderedIds: string[]): Observable<void> {
+    return this.api.post<void>(`/api/actos/${actoId}/pasada/reorder`, orderedIds);
+  }
+
   // ==================== Escenas ====================
 
   /**
@@ -359,6 +366,13 @@ export class GuionService {
         elementos.filter(e => e.id !== id)
       ))
     );
+  }
+
+  /**
+   * Reordena elementos de una escena
+   */
+  reorderElementos(escenaId: string, orderedIds: string[]): Observable<void> {
+    return this.api.post<void>(`/api/tops/elementos/escena/${escenaId}/reorder`, orderedIds);
   }
 
   // ==================== Helpers para actualizar guion actual ====================

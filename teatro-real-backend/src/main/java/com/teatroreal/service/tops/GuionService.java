@@ -5,6 +5,7 @@ import com.teatroreal.domain.user.Usuario;
 import com.teatroreal.dto.request.GuionRequest;
 import com.teatroreal.dto.response.GuionResponse;
 import com.teatroreal.dto.response.GuionCompletoResponse;
+import com.teatroreal.exception.ValidationException;
 import com.teatroreal.repository.tops.*;
 import com.teatroreal.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,9 @@ public class GuionService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private AuditLogService auditLogService;
+
     // ==================== CRUD Básico ====================
 
     public List<GuionResponse> findAll() {
@@ -66,10 +70,24 @@ public class GuionService {
 
     /**
      * Obtiene el guion completo con todo el árbol para el editor
+     * Carga los datos en múltiples queries para evitar problemas con Hibernate
      */
+    @Transactional(readOnly = true)
     public GuionCompletoResponse findByIdCompleto(String id) {
-        Guion guion = guionRepository.findByIdCompleto(id)
+        // Primero cargar guion con actos
+        Guion guion = guionRepository.findByIdWithActos(id)
                 .orElseThrow(() -> new RuntimeException("Guion no encontrado: " + id));
+
+        // Cargar cada acto con sus pasada items y escenas
+        for (Acto acto : guion.getActos()) {
+            // Forzar inicialización de colecciones lazy
+            acto.getPasadaItems().size();
+            for (Escena escena : acto.getEscenas()) {
+                // Forzar inicialización de elementos
+                escena.getElementos().size();
+            }
+        }
+
         return GuionCompletoResponse.fromEntity(guion);
     }
 
@@ -78,12 +96,25 @@ public class GuionService {
         mapRequestToEntity(request, guion);
         guion.setEstado(Guion.EstadoGuion.BORRADOR);
 
+        Usuario createdBy = null;
         if (createdById != null) {
-            Usuario createdBy = usuarioRepository.findById(createdById).orElse(null);
+            createdBy = usuarioRepository.findById(createdById).orElse(null);
             guion.setCreatedBy(createdBy);
         }
 
         Guion saved = guionRepository.save(guion);
+
+        // Auditar creación
+        if (createdBy != null) {
+            auditLogService.registrarAccion(
+                "GUION",
+                saved.getId(),
+                "CREATE",
+                createdBy.getId(),
+                createdBy.getEmail()
+            );
+        }
+
         return GuionResponse.fromEntity(saved, 0L);
     }
 
@@ -112,12 +143,27 @@ public class GuionService {
         return GuionResponse.fromEntity(saved, 0L);
     }
 
-    public GuionResponse update(String id, GuionRequest request) {
+    public GuionResponse update(String id, GuionRequest request, String userId) {
         Guion guion = guionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Guion no encontrado: " + id));
 
         mapRequestToEntity(request, guion);
         Guion saved = guionRepository.save(guion);
+
+        // Auditar actualización
+        if (userId != null) {
+            Usuario user = usuarioRepository.findById(userId).orElse(null);
+            if (user != null) {
+                auditLogService.registrarAccion(
+                    "GUION",
+                    saved.getId(),
+                    "UPDATE",
+                    user.getId(),
+                    user.getEmail()
+                );
+            }
+        }
+
         Long totalTops = guionRepository.countTopsByGuionId(id);
         return GuionResponse.fromEntity(saved, totalTops);
     }
@@ -151,6 +197,16 @@ public class GuionService {
         guion.setEstado(Guion.EstadoGuion.EN_EDICION);
 
         Guion saved = guionRepository.save(guion);
+
+        // Auditar bloqueo
+        auditLogService.registrarAccion(
+            "GUION",
+            guionId,
+            "LOCK",
+            user.getId(),
+            user.getEmail()
+        );
+
         Long totalTops = guionRepository.countTopsByGuionId(guionId);
         return GuionResponse.fromEntity(saved, totalTops);
     }
@@ -176,6 +232,19 @@ public class GuionService {
         }
 
         Guion saved = guionRepository.save(guion);
+
+        // Auditar desbloqueo
+        Usuario user = usuarioRepository.findById(userId).orElse(null);
+        if (user != null) {
+            auditLogService.registrarAccion(
+                "GUION",
+                guionId,
+                "UNLOCK",
+                user.getId(),
+                user.getEmail()
+            );
+        }
+
         Long totalTops = guionRepository.countTopsByGuionId(guionId);
         return GuionResponse.fromEntity(saved, totalTops);
     }

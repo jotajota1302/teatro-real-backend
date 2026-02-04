@@ -74,7 +74,7 @@ public class GuionCompletoResponse {
 
         public static ActoDto fromEntity(Acto acto) {
             ActoDto dto = new ActoDto();
-            dto.setId(acto.getId());
+            dto.setId(String.valueOf(acto.getId()));
             dto.setNombre(acto.getNombre());
             dto.setOrden(acto.getOrden());
 
@@ -115,7 +115,7 @@ public class GuionCompletoResponse {
 
         public static PasadaItemDto fromEntity(PasadaItem item) {
             PasadaItemDto dto = new PasadaItemDto();
-            dto.setId(item.getId());
+            dto.setId(String.valueOf(item.getId()));
             dto.setDepartamento(item.getDepartamento());
             dto.setLugar(item.getLugar());
             dto.setDescripcion(item.getDescripcion());
@@ -147,7 +147,7 @@ public class GuionCompletoResponse {
 
         public static EscenaDto fromEntity(Escena escena) {
             EscenaDto dto = new EscenaDto();
-            dto.setId(escena.getId());
+            dto.setId(String.valueOf(escena.getId()));
             dto.setNombre(escena.getNombre());
             dto.setDuracion(escena.getDuracion());
             dto.setOrden(escena.getOrden());
@@ -190,17 +190,17 @@ public class GuionCompletoResponse {
 
         public static ElementoDto fromEntity(ElementoGuion elem) {
             ElementoDto dto = new ElementoDto();
-            dto.setId(elem.getId());
+            dto.setId(String.valueOf(elem.getId()));
             dto.setTipoElemento(elem.getTipoElemento() != null ? elem.getTipoElemento().name() : null);
-            dto.setNumero(elem.getNumero());
+            dto.setNumero(elem.getNumeroTop());
             dto.setRefPagina(elem.getRefPagina());
             dto.setRefCompas(elem.getRefCompas());
             dto.setRefTimecode(elem.getRefTimecode());
-            dto.setPagina(elem.getRefPartituraFormateada()); // PIE formateado
+            dto.setPagina(elem.getPieFormateado());
             dto.setDepartamento(elem.getDepartamento());
-            dto.setDescripcion(elem.getDescripcion());
-            dto.setObservaciones(elem.getObservaciones());
-            dto.setImagen(elem.getImagen());
+            dto.setDescripcion(elem.getEncabezado());
+            dto.setObservaciones(elem.getContenido());
+            dto.setImagen(null);
             dto.setColorHex(elem.getColorHex());
             dto.setOrden(elem.getOrden());
             return dto;

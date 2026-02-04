@@ -17,6 +17,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+import com.teatroreal.service.tops.ExportWordService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+
 @RestController
 @RequestMapping("/api/guiones")
 @Tag(name = "Guiones", description = "Gestión de guiones técnicos - TOPS")
@@ -24,6 +28,9 @@ public class GuionController {
 
     @Autowired
     private GuionService guionService;
+
+    @Autowired
+    private ExportWordService exportWordService;
 
     @GetMapping
     @Operation(summary = "Listar todos los guiones")
@@ -65,8 +72,10 @@ public class GuionController {
     @Operation(summary = "Actualizar guion")
     public ResponseEntity<GuionResponse> update(
             @PathVariable String id,
-            @Valid @RequestBody GuionRequest request) {
-        return ResponseEntity.ok(guionService.update(id, request));
+            @Valid @RequestBody GuionRequest request,
+            Authentication authentication) {
+        String userId = authentication != null ? authentication.getName() : null;
+        return ResponseEntity.ok(guionService.update(id, request, userId));
     }
 
     @DeleteMapping("/{id}")
@@ -140,5 +149,37 @@ public class GuionController {
                 "estado", guion.getEstado(),
                 "locked", guion.isLocked()
         ));
+    }
+
+    // ==================== Export Word ====================
+
+    @GetMapping("/{id}/export")
+    @Operation(summary = "Exportar guion a Word (.docx)")
+    public ResponseEntity<byte[]> exportToWord(@PathVariable String id) {
+        try {
+            byte[] docxBytes = exportWordService.exportToWord(id);
+
+            GuionResponse guion = guionService.findById(id);
+            String filename = "guion_" + sanitizeFilename(guion.getProduccionNombre()) + "_" + id + ".docx";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType(
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document"));
+            headers.setContentDispositionFormData("attachment", filename);
+            headers.setContentLength(docxBytes.length);
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(docxBytes);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    private String sanitizeFilename(String name) {
+        if (name == null) return "guion";
+        return name.replaceAll("[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\\s-]", "")
+                   .replaceAll("\\s+", "_")
+                   .toLowerCase();
     }
 }
