@@ -10,7 +10,8 @@ echo ========================================
 echo.
 
 REM Configurar Java 17
-set JAVA_HOME=C:\Program Files\Java\jdk-17
+set JAVA_HOME=C:\dev\ENTORNO\jdk-17.0.13
+set MAVEN_HOME=C:\dev\ENTORNO\apache-maven-3.9.6
 
 REM Verificar que Java 17 existe
 if not exist "%JAVA_HOME%\bin\java.exe" (
@@ -22,7 +23,16 @@ if not exist "%JAVA_HOME%\bin\java.exe" (
     exit /b 1
 )
 
-set PATH=%JAVA_HOME%\bin;%PATH%
+REM Verificar que Maven existe
+if not exist "%MAVEN_HOME%\bin\mvn.cmd" (
+    echo [ERROR] No se encuentra Maven en: %MAVEN_HOME%
+    echo.
+    echo Por favor, instala Maven o modifica MAVEN_HOME en este script.
+    pause
+    exit /b 1
+)
+
+set PATH=%JAVA_HOME%\bin;%MAVEN_HOME%\bin;%PATH%
 
 echo [OK] JAVA_HOME = %JAVA_HOME%
 java -version

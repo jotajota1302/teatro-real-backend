@@ -63,4 +63,13 @@ public class PasadaItemController {
         pasadaItemService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/reorder")
+    @Operation(summary = "Reordenar items de pasada")
+    public ResponseEntity<Void> reorder(
+            @PathVariable String actoId,
+            @RequestBody List<String> orderedIds) {
+        pasadaItemService.reorder(actoId, orderedIds);
+        return ResponseEntity.noContent().build();
+    }
 }
