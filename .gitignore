@@ -52,3 +52,7 @@ teatro_real_proyecto/
 
 # Backups locales
 _backup_local/
+
+# Claude Code
+.claude/
+*/claude/
