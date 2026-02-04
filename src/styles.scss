@@ -367,3 +367,56 @@ body, html {
 .mat-mdc-tooltip {
   font-family: var(--font-family) !important;
 }
+
+/* -----------------------------------------------
+   CDK Drag & Drop Styles for Guion Editor
+-------------------------------------------------*/
+
+/* Style the row while it's being dragged */
+.cdk-drag-preview {
+  box-sizing: border-box;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: white !important;
+  display: table;
+  table-layout: fixed;
+  border-collapse: collapse;
+  opacity: 1;
+}
+
+.cdk-drag-preview td,
+.cdk-drag-preview app-editable-cell {
+  display: table-cell;
+  border: 1px solid #000;
+  padding: 4px 6px;
+  background: white;
+  vertical-align: middle;
+  font-size: 11px;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+/* Placeholder shows where the item will be dropped */
+.cdk-drag-placeholder {
+  background: #fef3c7 !important;
+  min-height: 28px;
+}
+
+.cdk-drag-placeholder td,
+.cdk-drag-placeholder app-editable-cell {
+  border: 1px dashed #f59e0b !important;
+  background: #fef3c7 !important;
+}
+
+/* Animate items as they're being sorted */
+.cdk-drag-animating {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* Animate surrounding items when dragging */
+.cdk-drop-list-dragging tr:not(.cdk-drag-placeholder) {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+/* Dim the original row while dragging */
+.cdk-drop-list-dragging .cdk-drag {
+  opacity: 0.3;
+}

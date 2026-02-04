@@ -2,16 +2,20 @@
 
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import { saveAs } from 'file-saver';
 
 import { GuionService } from '../services/guion.service';
 import { EditableCellComponent } from '../components/editable-cell.component';
 import { EditableTextComponent } from '../components/editable-text.component';
+import { AuditLogPanelComponent } from '../components/audit-log-panel.component';
 import {
   GuionCompleto,
   Acto,
@@ -36,8 +40,10 @@ import { AuthService } from '../../../core/auth/auth.service';
     MatProgressSpinnerModule,
     MatSnackBarModule,
     MatTooltipModule,
+    DragDropModule,
     EditableCellComponent,
-    EditableTextComponent
+    EditableTextComponent,
+    AuditLogPanelComponent
   ],
   template: `
     <!-- Viewport tipo Word (fondo gris) -->
@@ -82,13 +88,44 @@ import { AuthService } from '../../../core/auth/auth.service';
           </button>
         }
 
-        <button class="inline-flex items-center gap-1 px-4 py-2 text-sm font-semibold bg-gray-300 text-gray-500 rounded cursor-not-allowed"
-                disabled
-                matTooltip="Próximamente">
-          <mat-icon class="!text-lg">download</mat-icon>
+        <button class="inline-flex items-center gap-1 px-4 py-2 text-sm font-semibold border-2 border-green-600 text-green-600 rounded hover:bg-green-600 hover:text-white transition-colors"
+                (click)="exportarWord()"
+                [disabled]="exporting()"
+                matTooltip="Descargar documento Word">
+          @if (exporting()) {
+            <mat-spinner diameter="16" class="!text-green-600"></mat-spinner>
+          } @else {
+            <mat-icon class="!text-lg">download</mat-icon>
+          }
           Exportar Word
         </button>
+
+        <button class="inline-flex items-center gap-1 px-3 py-2 text-sm border border-gray-300 text-gray-600 rounded hover:bg-gray-100 transition-colors"
+                (click)="toggleHistorial()"
+                matTooltip="Ver historial de cambios">
+          <mat-icon class="!text-lg">history</mat-icon>
+        </button>
       </div>
+
+      <!-- Panel de historial (sidebar) -->
+      @if (showHistorial()) {
+        <!-- Backdrop para cerrar al hacer clic fuera -->
+        <div class="fixed inset-0 bg-black/30 z-40" (click)="toggleHistorial()"></div>
+        <!-- Panel -->
+        <div class="fixed right-0 top-0 h-full w-80 bg-white shadow-lg z-50 overflow-y-auto">
+          <div class="p-4 border-b flex items-center justify-between sticky top-0 bg-white">
+            <h3 class="font-semibold">Historial</h3>
+            <button type="button"
+                    class="p-1 rounded hover:bg-gray-100 transition-colors"
+                    (click)="toggleHistorial(); $event.stopPropagation()">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+          <div class="p-4">
+            <app-audit-log-panel [guionId]="guionId || ''"></app-audit-log-panel>
+          </div>
+        </div>
+      }
 
       <!-- Loading -->
       @if (guionService.loading()) {
@@ -192,15 +229,25 @@ import { AuthService } from '../../../core/auth/auth.service';
               <table class="w-full border-collapse mb-4 text-xs">
                 <thead>
                   <tr>
+                    @if (canEdit()) {
+                      <th class="border border-black p-0 bg-gray-100 w-6"></th>
+                    }
                     <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[10%]">DPTO</th>
                     <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[12%]">LUGAR</th>
-                    <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[70%]">DESCRIPCIÓN</th>
+                    <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[68%]">DESCRIPCIÓN</th>
                     <th class="border border-black p-1.5 text-center font-bold bg-gray-100 w-[8%]"></th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody cdkDropList [cdkDropListData]="acto.pasada" (cdkDropListDropped)="dropPasada($event, acto.id)">
                   @for (item of acto.pasada || []; track item.id) {
-                    <tr>
+                    <tr cdkDrag [cdkDragDisabled]="!canEdit()" class="hover:bg-gray-50 bg-white group">
+                      @if (canEdit()) {
+                        <td cdkDragHandle class="border border-black p-0 text-center cursor-grab active:cursor-grabbing w-6 bg-gray-50 hover:bg-gray-200">
+                          <div class="flex items-center justify-center h-full py-1">
+                            <span class="text-gray-400 group-hover:text-gray-600 text-xs select-none">⋮⋮</span>
+                          </div>
+                        </td>
+                      }
                       <app-editable-cell
                         [value]="item.departamento || ''"
                         (valueChange)="updatePasadaItem(acto.id, item.id, 'departamento', $event)"
@@ -237,7 +284,7 @@ import { AuthService } from '../../../core/auth/auth.service';
                   <!-- Fila agregar -->
                   @if (canEdit()) {
                     <tr>
-                      <td colspan="4"
+                      <td [attr.colspan]="canEdit() ? 5 : 4"
                           class="border border-black p-2 text-center text-gray-500 text-xs cursor-pointer opacity-50 hover:opacity-100 hover:bg-gray-50"
                           (click)="addPasadaItem(acto.id)">
                         + Agregar línea de pasada
@@ -277,17 +324,25 @@ import { AuthService } from '../../../core/auth/auth.service';
                   <table class="w-full border-collapse mb-4 text-xs">
                     <thead>
                       <tr>
+                        @if (canEdit()) {
+                          <th class="border border-black p-0 bg-gray-100 w-6"></th>
+                        }
                         <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[10%]">PIE</th>
                         <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[8%]">TOP</th>
                         <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[10%]">DPTO</th>
-                        <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[32%]">QUIEN/QUE</th>
-                        <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[32%]">OBSERVACIONES</th>
+                        <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[30%]">QUIEN/QUE</th>
+                        <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[30%]">OBSERVACIONES</th>
                         <th class="border border-black p-1.5 text-center font-bold bg-gray-100 w-[8%]"></th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody cdkDropList [cdkDropListData]="escena.elementos" (cdkDropListDropped)="dropElemento($event, escena.id)">
                       @for (elem of escena.elementos || []; track elem.id) {
-                        <tr>
+                        <tr cdkDrag [cdkDragDisabled]="!canEdit()" class="hover:bg-gray-50 bg-white">
+                          @if (canEdit()) {
+                            <td cdkDragHandle class="border border-black p-1 text-center cursor-grab active:cursor-grabbing w-8">
+                              <mat-icon class="!text-base text-gray-400 hover:text-gray-600">drag_indicator</mat-icon>
+                            </td>
+                          }
                           <app-editable-cell
                             [value]="elem.pagina || ''"
                             (valueChange)="updateElemento(escena.id, elem.id, 'pagina', $event)"
@@ -333,7 +388,7 @@ import { AuthService } from '../../../core/auth/auth.service';
                       <!-- Fila agregar -->
                       @if (canEdit()) {
                         <tr>
-                          <td colspan="6"
+                          <td [attr.colspan]="canEdit() ? 7 : 6"
                               class="border border-black p-2 text-center text-gray-500 text-xs cursor-pointer opacity-50 hover:opacity-100 hover:bg-gray-50"
                               (click)="addElemento(escena.id)">
                             + Agregar fila (Tab desde última celda)
@@ -379,11 +434,14 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private snackBar = inject(MatSnackBar);
+  private http = inject(HttpClient);
   private authService = inject(AuthService);
 
   guionService = inject(GuionService);
 
   guion = this.guionService.guionActual;
+  exporting = signal(false);
+  showHistorial = signal(false);
 
   estadoLabel = computed(() => {
     const estado = this.guion()?.estado;
@@ -403,7 +461,7 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
     return this.isLockedByMe() || !this.isLocked();
   });
 
-  private guionId: string | null = null;
+  guionId: string | null = null;
 
   ngOnInit(): void {
     this.guionId = this.route.snapshot.paramMap.get('id');
@@ -429,6 +487,10 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     this.router.navigate(['/tops']);
+  }
+
+  toggleHistorial(): void {
+    this.showHistorial.update(v => !v);
   }
 
   lockGuion(): void {
@@ -583,6 +645,54 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
     // TODO: Implementar cuando tengamos endpoint
     console.log('addActo');
     this.showError('Crear acto aún no implementado');
+  }
+
+  // ==================== Drag & Drop ====================
+
+  dropPasada(event: CdkDragDrop<any[]>, actoId: string): void {
+    if (!this.canEdit() || event.previousIndex === event.currentIndex) return;
+
+    const items = event.container.data;
+    moveItemInArray(items, event.previousIndex, event.currentIndex);
+
+    // Actualizar orden en backend - IDs son strings (UUIDs)
+    const orderedIds = items.map((item: any) => item.id);
+    this.guionService.reorderPasadaItems(actoId, orderedIds).subscribe({
+      error: () => this.showError('Error al reordenar')
+    });
+  }
+
+  dropElemento(event: CdkDragDrop<any[]>, escenaId: string): void {
+    if (!this.canEdit() || event.previousIndex === event.currentIndex) return;
+
+    const items = event.container.data;
+    moveItemInArray(items, event.previousIndex, event.currentIndex);
+
+    // Actualizar orden en backend - IDs son strings (UUIDs)
+    const orderedIds = items.map((item: any) => item.id);
+    this.guionService.reorderElementos(escenaId, orderedIds).subscribe({
+      error: () => this.showError('Error al reordenar')
+    });
+  }
+
+  exportarWord(): void {
+    if (!this.guionId || this.exporting()) return;
+
+    this.exporting.set(true);
+    this.http.get(`/api/guiones/${this.guionId}/export`, {
+      responseType: 'blob'
+    }).subscribe({
+      next: (blob) => {
+        const filename = `guion_${this.guion()?.produccionNombre || 'documento'}_${this.guionId}.docx`;
+        saveAs(blob, filename.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_-]/g, ''));
+        this.showSuccess('Documento exportado correctamente');
+        this.exporting.set(false);
+      },
+      error: () => {
+        this.showError('Error al exportar documento');
+        this.exporting.set(false);
+      }
+    });
   }
 
   private showSuccess(message: string): void {
