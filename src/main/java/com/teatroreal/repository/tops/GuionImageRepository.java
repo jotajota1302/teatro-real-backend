@@ -16,25 +16,25 @@ public interface GuionImageRepository extends JpaRepository<GuionImage, Long> {
     /**
      * Obtiene todas las imágenes de una entidad específica
      */
-    List<GuionImage> findByEntityTypeAndEntityId(String entityType, Long entityId);
+    List<GuionImage> findByEntityTypeAndEntityId(String entityType, String entityId);
 
     /**
      * Obtiene todas las imágenes de un guion
      */
-    List<GuionImage> findByGuionId(Long guionId);
+    List<GuionImage> findByGuionId(String guionId);
 
     /**
      * Obtiene todas las imágenes de una entidad en un guion específico
      */
-    List<GuionImage> findByGuionIdAndEntityTypeAndEntityId(Long guionId, String entityType, Long entityId);
+    List<GuionImage> findByGuionIdAndEntityTypeAndEntityId(String guionId, String entityType, String entityId);
 
     /**
      * Elimina todas las imágenes de una entidad
      */
-    long deleteByEntityTypeAndEntityId(String entityType, Long entityId);
+    long deleteByEntityTypeAndEntityId(String entityType, String entityId);
 
     /**
      * Elimina todas las imágenes de un guion
      */
-    long deleteByGuionId(Long guionId);
+    long deleteByGuionId(String guionId);
 }

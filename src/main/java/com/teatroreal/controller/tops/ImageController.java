@@ -42,9 +42,9 @@ public class ImageController {
     @PostMapping("/upload")
     public ResponseEntity<GuionImage> uploadImage(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("guionId") Long guionId,
+            @RequestParam("guionId") String guionId,
             @RequestParam("entityType") String entityType,
-            @RequestParam("entityId") Long entityId) {
+            @RequestParam("entityId") String entityId) {
 
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().build();
@@ -100,7 +100,7 @@ public class ImageController {
     @GetMapping("/entity/{entityType}/{entityId}")
     public ResponseEntity<List<GuionImage>> getImagesByEntity(
             @PathVariable String entityType,
-            @PathVariable Long entityId) {
+            @PathVariable String entityId) {
         List<GuionImage> images = guionImageService.obtenerImagenesPorEntidad(entityType, entityId);
         return ResponseEntity.ok(images);
     }
@@ -110,7 +110,7 @@ public class ImageController {
      * Lista todas las imágenes de un guión
      */
     @GetMapping("/guion/{guionId}")
-    public ResponseEntity<List<GuionImage>> getImagesByGuion(@PathVariable Long guionId) {
+    public ResponseEntity<List<GuionImage>> getImagesByGuion(@PathVariable String guionId) {
         List<GuionImage> images = guionImageService.obtenerImagenesPorGuion(guionId);
         return ResponseEntity.ok(images);
     }
