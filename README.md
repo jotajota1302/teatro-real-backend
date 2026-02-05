@@ -138,45 +138,38 @@ Password: (vacío)
 | GitHub Backend | https://github.com/jotajota1302/teatro-real-backend | Espejo para deploy en Render |
 | GitHub Frontend | https://github.com/jotajota1302/teatro-real-frontend | Espejo para deploy en Vercel |
 
-### Script de Deploy
+### Deploy a Producción
 
-Para desplegar cambios a producción, usa el script `deploy.sh`:
+El deploy se realiza subiendo los cambios a GitHub, donde Render (backend) y Vercel (frontend) despliegan automáticamente.
 
+#### 1. Push a GitLab (repositorio principal)
 ```bash
-# Deploy completo (backend + frontend)
-./deploy.sh
-
-# Solo backend
-./deploy.sh backend
-
-# Solo frontend
-./deploy.sh frontend
-
-# Solo a GitHub (sin push a GitLab)
-./deploy.sh --no-push-origin
-```
-
-El script automáticamente:
-1. Hace push a GitLab (origin/development)
-2. Sincroniza el backend con GitHub → Render redespliega automáticamente
-3. Despliega el frontend a Vercel
-
-### Deploy Manual
-
-Si prefieres hacerlo manualmente:
-
-```bash
-# 1. Push a GitLab
 git push origin development
-
-# 2. Backend → GitHub (Render)
-git subtree split --prefix=teatro-real-backend -b backend-only --rejoin
-git push github backend-only:main --force
-
-# 3. Frontend → Vercel
-cd teatro-real-frontend
-vercel --prod --yes
 ```
+
+#### 2. Deploy Backend → Render
+```bash
+cd teatro-real-backend
+git init --initial-branch=main
+git remote add origin https://github.com/jotajota1302/teatro-real-backend.git
+git add -A
+git commit -m "Deploy: descripción del cambio"
+git push origin main --force
+cd .. && rm -rf teatro-real-backend/.git
+```
+
+#### 3. Deploy Frontend → Vercel
+```bash
+cd teatro-real-frontend
+git init --initial-branch=main
+git remote add origin https://github.com/jotajota1302/teatro-real-frontend.git
+git add -A
+git commit -m "Deploy: descripción del cambio"
+git push origin main --force
+cd .. && rm -rf teatro-real-frontend/.git
+```
+
+> **Nota:** Se crea un repo git temporal en cada subcarpeta, se hace push a GitHub, y luego se elimina el .git para no tener repos anidados.
 
 ### Variables de Entorno
 
