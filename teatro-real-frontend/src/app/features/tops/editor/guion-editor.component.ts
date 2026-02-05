@@ -258,6 +258,9 @@ import { environment } from '../../../../environments/environment';
                               <button class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px]"
                                       (click)="deletePasadaImage(acto.id, item.id); $event.stopPropagation()"
                                       title="Eliminar imagen">✕</button>
+                              <button class="absolute -top-1 -left-1 w-4 h-4 bg-blue-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px]"
+                                      (click)="toggleImageUpload('pasada-' + item.id); $event.stopPropagation()"
+                                      title="Cambiar imagen">↺</button>
                             }
                           </div>
                         } @else if (canEdit()) {
@@ -405,6 +408,9 @@ import { environment } from '../../../../environments/environment';
                                   <button class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px]"
                                           (click)="deleteElementoImage(escena.id, elem.id); $event.stopPropagation()"
                                           title="Eliminar imagen">✕</button>
+                                  <button class="absolute -top-1 -left-1 w-4 h-4 bg-blue-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px]"
+                                          (click)="toggleImageUpload('elem-' + elem.id); $event.stopPropagation()"
+                                          title="Cambiar imagen">↺</button>
                                 }
                               </div>
                             } @else if (canEdit()) {
