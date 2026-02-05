@@ -215,7 +215,8 @@ import { AuthService } from '../../../core/auth/auth.service';
                     }
                     <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[10%]">DPTO</th>
                     <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[12%]">LUGAR</th>
-                    <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[68%]">DESCRIPCIÓN</th>
+                    <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[50%]">DESCRIPCIÓN</th>
+                    <th class="border border-black p-1.5 text-center font-bold bg-gray-100 w-[18%]">IMAGEN</th>
                     <th class="border border-black p-1.5 text-center font-bold bg-gray-100 w-[8%]"></th>
                   </tr>
                 </thead>
@@ -242,22 +243,36 @@ import { AuthService } from '../../../core/auth/auth.service';
                       <app-editable-cell
                         [value]="item.descripcion || ''"
                         (valueChange)="updatePasadaItem(acto.id, item.id, 'descripcion', $event)"
-                        (imagenDelete)="deletePasadaImage(acto.id, item.id)"
                         placeholder="Descripción del setup..."
                         [multiline]="true"
-                        [imagen]="item.imagen || null"
                         [enableVoice]="true"
                       />
-                      <td class="border border-black p-1 text-center whitespace-nowrap relative">
+                      <!-- Columna IMAGEN -->
+                      <td class="border border-black p-2 text-center align-middle">
+                        @if (item.imagen) {
+                          <div class="relative inline-block group">
+                            <img [src]="item.imagen" alt="Imagen" class="max-w-full max-h-20 rounded border border-gray-300 object-contain mx-auto">
+                            @if (canEdit()) {
+                              <button class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs"
+                                      (click)="deletePasadaImage(acto.id, item.id); $event.stopPropagation()"
+                                      title="Eliminar imagen">✕</button>
+                            }
+                          </div>
+                        } @else if (canEdit()) {
+                          <app-image-upload
+                            [guionId]="guionId || ''"
+                            entityType="PASADA_ITEM"
+                            [entityId]="item.id"
+                            [currentImageUrl]="null"
+                            (imageUploaded)="onPasadaImageUploaded(acto.id, item.id, $event)"
+                          />
+                        } @else {
+                          <span class="text-gray-300 text-xs">-</span>
+                        }
+                      </td>
+                      <!-- Columna Acciones -->
+                      <td class="border border-black p-1 text-center whitespace-nowrap">
                         @if (canEdit()) {
-                          <!-- Botón imagen -->
-                          <button class="w-6 h-6 inline-flex items-center justify-center rounded hover:bg-purple-100 opacity-40 hover:opacity-100 transition-opacity"
-                                  (click)="toggleImageUpload('pasada-' + item.id); $event.stopPropagation()"
-                                  [title]="item.imagen ? 'Cambiar imagen' : 'Añadir imagen'">
-                            <mat-icon class="!text-base" [class.text-purple-600]="!item.imagen" [class.text-green-600]="item.imagen">
-                              {{ item.imagen ? 'image' : 'add_photo_alternate' }}
-                            </mat-icon>
-                          </button>
                           <button class="w-6 h-6 inline-flex items-center justify-center rounded hover:bg-blue-100 opacity-40 hover:opacity-100 transition-opacity"
                                   (click)="insertPasadaItem(acto.id, item.orden); $event.stopPropagation()"
                                   title="Insertar fila">
@@ -269,32 +284,13 @@ import { AuthService } from '../../../core/auth/auth.service';
                             <mat-icon class="!text-base text-red-600">delete</mat-icon>
                           </button>
                         }
-                        <!-- Panel de upload (se muestra al hacer clic en el botón) -->
-                        @if (showImageUpload === 'pasada-' + item.id && canEdit()) {
-                          <div class="absolute right-0 top-full mt-1 p-2 bg-white border rounded shadow-lg z-50 w-48"
-                               (click)="$event.stopPropagation()">
-                            <div class="text-xs text-gray-600 mb-1 font-medium">Imagen</div>
-                            <app-image-upload
-                              [guionId]="guionId || ''"
-                              entityType="PASADA_ITEM"
-                              [entityId]="item.id"
-                              [currentImageUrl]="item.imagen || null"
-                              (imageUploaded)="onPasadaImageUploaded(acto.id, item.id, $event)"
-                              (imageRemoved)="onPasadaImageRemoved(acto.id, item.id)"
-                            />
-                            <button class="mt-2 text-xs text-gray-400 hover:text-gray-600 w-full text-center"
-                                    (click)="showImageUpload = null">
-                              Cerrar
-                            </button>
-                          </div>
-                        }
                       </td>
                     </tr>
                   }
                   <!-- Fila agregar -->
                   @if (canEdit()) {
                     <tr>
-                      <td [attr.colspan]="canEdit() ? 5 : 4"
+                      <td [attr.colspan]="canEdit() ? 6 : 5"
                           class="border border-black p-2 text-center text-gray-500 text-xs cursor-pointer opacity-50 hover:opacity-100 hover:bg-gray-50"
                           (click)="addPasadaItem(acto.id)">
                         + Agregar línea de pasada
@@ -337,11 +333,12 @@ import { AuthService } from '../../../core/auth/auth.service';
                         @if (canEdit()) {
                           <th class="border border-black p-0 bg-gray-100 w-6"></th>
                         }
-                        <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[10%]">PIE</th>
-                        <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[8%]">TOP</th>
-                        <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[10%]">DPTO</th>
-                        <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[30%]">QUIEN/QUE</th>
-                        <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[30%]">OBSERVACIONES</th>
+                        <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[8%]">PIE</th>
+                        <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[6%]">TOP</th>
+                        <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[8%]">DPTO</th>
+                        <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[24%]">QUIEN/QUE</th>
+                        <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[24%]">OBSERVACIONES</th>
+                        <th class="border border-black p-1.5 text-center font-bold bg-gray-100 w-[18%]">IMAGEN</th>
                         <th class="border border-black p-1.5 text-center font-bold bg-gray-100 w-[8%]"></th>
                       </tr>
                     </thead>
@@ -378,22 +375,36 @@ import { AuthService } from '../../../core/auth/auth.service';
                           <app-editable-cell
                             [value]="elem.observaciones || ''"
                             (valueChange)="updateElemento(escena.id, elem.id, 'observaciones', $event)"
-                            (imagenDelete)="deleteElementoImage(escena.id, elem.id)"
                             placeholder=""
                             [multiline]="true"
-                            [imagen]="elem.imagen || null"
                             [enableVoice]="true"
                           />
-                          <td class="border border-black p-1 text-center whitespace-nowrap relative">
+                          <!-- Columna IMAGEN -->
+                          <td class="border border-black p-2 text-center align-middle">
+                            @if (elem.imagen) {
+                              <div class="relative inline-block group">
+                                <img [src]="elem.imagen" alt="Imagen" class="max-w-full max-h-16 rounded border border-gray-300 object-contain mx-auto">
+                                @if (canEdit()) {
+                                  <button class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs"
+                                          (click)="deleteElementoImage(escena.id, elem.id); $event.stopPropagation()"
+                                          title="Eliminar imagen">✕</button>
+                                }
+                              </div>
+                            } @else if (canEdit()) {
+                              <app-image-upload
+                                [guionId]="guionId || ''"
+                                entityType="TOP"
+                                [entityId]="elem.id"
+                                [currentImageUrl]="null"
+                                (imageUploaded)="onElementoImageUploaded(escena.id, elem.id, $event)"
+                              />
+                            } @else {
+                              <span class="text-gray-300 text-xs">-</span>
+                            }
+                          </td>
+                          <!-- Columna Acciones -->
+                          <td class="border border-black p-1 text-center whitespace-nowrap">
                             @if (canEdit()) {
-                              <!-- Botón imagen -->
-                              <button class="w-5 h-5 inline-flex items-center justify-center rounded hover:bg-purple-100 opacity-40 hover:opacity-100 transition-opacity"
-                                      (click)="toggleImageUpload('elem-' + elem.id); $event.stopPropagation()"
-                                      [title]="elem.imagen ? 'Cambiar imagen' : 'Añadir imagen'">
-                                <mat-icon class="!text-sm" [class.text-purple-600]="!elem.imagen" [class.text-green-600]="elem.imagen">
-                                  {{ elem.imagen ? 'image' : 'add_photo_alternate' }}
-                                </mat-icon>
-                              </button>
                               <button class="w-5 h-5 inline-flex items-center justify-center rounded hover:bg-blue-100 opacity-40 hover:opacity-100 transition-opacity"
                                       (click)="insertElemento(escena.id, elem.orden); $event.stopPropagation()"
                                       title="Insertar fila">
@@ -405,32 +416,13 @@ import { AuthService } from '../../../core/auth/auth.service';
                                 <mat-icon class="!text-sm text-red-600">delete</mat-icon>
                               </button>
                             }
-                            <!-- Panel de upload para elemento -->
-                            @if (showImageUpload === 'elem-' + elem.id && canEdit()) {
-                              <div class="absolute right-0 top-full mt-1 p-2 bg-white border rounded shadow-lg z-50 w-48"
-                                   (click)="$event.stopPropagation()">
-                                <div class="text-xs text-gray-600 mb-1 font-medium">Imagen</div>
-                                <app-image-upload
-                                  [guionId]="guionId || ''"
-                                  entityType="TOP"
-                                  [entityId]="elem.id"
-                                  [currentImageUrl]="elem.imagen || null"
-                                  (imageUploaded)="onElementoImageUploaded(escena.id, elem.id, $event)"
-                                  (imageRemoved)="onElementoImageRemoved(escena.id, elem.id)"
-                                />
-                                <button class="mt-2 text-xs text-gray-400 hover:text-gray-600 w-full text-center"
-                                        (click)="showImageUpload = null">
-                                  Cerrar
-                                </button>
-                              </div>
-                            }
                           </td>
                         </tr>
                       }
                       <!-- Fila agregar -->
                       @if (canEdit()) {
                         <tr>
-                          <td [attr.colspan]="canEdit() ? 7 : 6"
+                          <td [attr.colspan]="canEdit() ? 8 : 7"
                               class="border border-black p-2 text-center text-gray-500 text-xs cursor-pointer opacity-50 hover:opacity-100 hover:bg-gray-50"
                               (click)="addElemento(escena.id)">
                             + Agregar fila (Tab desde última celda)
