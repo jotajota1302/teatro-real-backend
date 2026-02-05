@@ -1,5 +1,6 @@
 package com.teatroreal.domain.tops;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -39,6 +40,7 @@ public class GuionImage {
 
     @Lob
     @Column(nullable = false)
+    @JsonIgnore
     private byte[] imageData;
 
     @Column(name = "uploaded_by")
