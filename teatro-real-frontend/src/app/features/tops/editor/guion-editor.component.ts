@@ -399,7 +399,7 @@ import { environment } from '../../../../environments/environment';
                           <td class="border border-black p-1 text-center align-middle relative">
                             @if (elem.imagen) {
                               <div class="relative inline-block group">
-                                <img [src]="elem.imagen" alt="Imagen" class="max-w-full max-h-12 rounded border border-gray-300 object-contain mx-auto cursor-pointer"
+                                <img [src]="elem.imagen" alt="Imagen" class="max-w-full max-h-16 rounded border border-gray-300 object-contain mx-auto cursor-pointer"
                                      (click)="toggleImageUpload('elem-' + elem.id); $event.stopPropagation()">
                                 @if (canEdit()) {
                                   <button class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px]"
@@ -408,10 +408,10 @@ import { environment } from '../../../../environments/environment';
                                 }
                               </div>
                             } @else if (canEdit()) {
-                              <button class="w-5 h-5 inline-flex items-center justify-center rounded hover:bg-purple-100 opacity-50 hover:opacity-100 transition-opacity"
+                              <button class="w-6 h-6 inline-flex items-center justify-center rounded hover:bg-purple-100 opacity-50 hover:opacity-100 transition-opacity"
                                       (click)="toggleImageUpload('elem-' + elem.id); $event.stopPropagation()"
                                       title="Añadir imagen">
-                                <mat-icon class="!text-sm text-purple-600">add_photo_alternate</mat-icon>
+                                <mat-icon class="!text-base text-purple-600">add_photo_alternate</mat-icon>
                               </button>
                             } @else {
                               <span class="text-gray-300">-</span>
