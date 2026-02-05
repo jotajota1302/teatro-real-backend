@@ -3,6 +3,7 @@
 import { Component, Input, Output, EventEmitter, ViewChild, ElementRef, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { VoiceInputButtonComponent } from '../../../shared/components/voice-input-button.component';
 
 /**
  * EditableCell - Celda editable tipo Word
@@ -11,7 +12,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-editable-cell',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, VoiceInputButtonComponent],
   template: `
     <td
       [class]="className"
@@ -27,27 +28,35 @@ import { FormsModule } from '@angular/forms';
     >
       <!-- Modo edición -->
       @if (editing) {
-        @if (multiline) {
-          <textarea
-            #inputRef
-            [(ngModel)]="localValue"
-            [placeholder]="placeholder"
-            (blur)="onBlur()"
-            (keydown)="onKeyDown($event)"
-            rows="4"
-            class="w-full border-none bg-transparent outline-none font-serif text-sm p-0 m-0 resize-none min-h-20"
-          ></textarea>
-        } @else {
-          <input
-            #inputRef
-            type="text"
-            [(ngModel)]="localValue"
-            [placeholder]="placeholder"
-            (blur)="onBlur()"
-            (keydown)="onKeyDown($event)"
-            class="w-full border-none bg-transparent outline-none font-serif text-sm p-0 m-0"
-          />
-        }
+        <div class="flex items-start gap-2">
+          @if (multiline) {
+            <textarea
+              #inputRef
+              [(ngModel)]="localValue"
+              [placeholder]="placeholder"
+              (blur)="onBlur($event)"
+              (keydown)="onKeyDown($event)"
+              rows="4"
+              class="flex-1 border-none bg-transparent outline-none font-serif text-sm p-0 m-0 resize-none min-h-20"
+            ></textarea>
+          } @else {
+            <input
+              #inputRef
+              type="text"
+              [(ngModel)]="localValue"
+              [placeholder]="placeholder"
+              (blur)="onBlur($event)"
+              (keydown)="onKeyDown($event)"
+              class="flex-1 border-none bg-transparent outline-none font-serif text-sm p-0 m-0"
+            />
+          }
+          @if (enableVoice) {
+            <app-voice-input-button
+              (mousedown)="$event.preventDefault()"
+              (transcript)="onVoiceTranscript($event)"
+            />
+          }
+        </div>
       } @else {
         <!-- Modo visualización -->
         <span
@@ -101,6 +110,7 @@ export class EditableCellComponent implements OnChanges {
   @Input() imagen: string | null = null;
   @Input() bold: boolean = false;
   @Input() color: string | null = null;
+  @Input() enableVoice: boolean = false;
 
   @Output() valueChange = new EventEmitter<string>();
   @Output() imagenDelete = new EventEmitter<void>();
@@ -125,7 +135,13 @@ export class EditableCellComponent implements OnChanges {
     setTimeout(() => this.inputRef?.nativeElement?.focus(), 0);
   }
 
-  onBlur(): void {
+  onBlur(event?: FocusEvent): void {
+    // No cerrar si el foco va al botón de voz (dentro del mismo contenedor)
+    const relatedTarget = event?.relatedTarget as HTMLElement;
+    if (relatedTarget?.closest('.voice-btn')) {
+      return;
+    }
+
     this.editing = false;
     if (this.localValue !== this.value) {
       this.valueChange.emit(this.localValue);
@@ -150,5 +166,19 @@ export class EditableCellComponent implements OnChanges {
     event.stopPropagation();
     event.preventDefault();
     this.imagenDelete.emit();
+  }
+
+  /**
+   * Recibe transcripción de voz y la añade al valor actual
+   */
+  onVoiceTranscript(text: string): void {
+    // Añadir espacio si ya hay contenido
+    if (this.localValue && this.localValue.trim()) {
+      this.localValue = this.localValue.trim() + ' ' + text;
+    } else {
+      this.localValue = text;
+    }
+    // Emitir cambio inmediatamente
+    this.valueChange.emit(this.localValue);
   }
 }

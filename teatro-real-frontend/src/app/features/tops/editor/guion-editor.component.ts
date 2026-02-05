@@ -246,6 +246,7 @@ import { AuthService } from '../../../core/auth/auth.service';
                         placeholder="Descripción del setup..."
                         [multiline]="true"
                         [imagen]="item.imagen || null"
+                        [enableVoice]="true"
                       />
                       <td class="border border-black p-1 text-center whitespace-nowrap relative">
                         @if (canEdit()) {
@@ -372,13 +373,16 @@ import { AuthService } from '../../../core/auth/auth.service';
                             [value]="elem.descripcion || ''"
                             (valueChange)="updateElemento(escena.id, elem.id, 'descripcion', $event)"
                             placeholder="Descripción..."
+                            [enableVoice]="true"
                           />
                           <app-editable-cell
                             [value]="elem.observaciones || ''"
                             (valueChange)="updateElemento(escena.id, elem.id, 'observaciones', $event)"
                             (imagenDelete)="deleteElementoImage(escena.id, elem.id)"
                             placeholder=""
+                            [multiline]="true"
                             [imagen]="elem.imagen || null"
+                            [enableVoice]="true"
                           />
                           <td class="border border-black p-1 text-center whitespace-nowrap relative">
                             @if (canEdit()) {
