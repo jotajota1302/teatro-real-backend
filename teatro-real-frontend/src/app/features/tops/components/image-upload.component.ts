@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { environment } from '../../../../environments/environment';
 
 export interface GuionImage {
   id: number;
@@ -182,7 +183,7 @@ export class ImageUploadComponent {
     formData.append('entityType', this.entityType);
     formData.append('entityId', this.entityId);
 
-    this.http.post<GuionImage>('/api/tops/images/upload', formData, {
+    this.http.post<GuionImage>(`${environment.apiUrl}/tops/images/upload`, formData, {
       reportProgress: true,
       observe: 'events'
     }).subscribe({
@@ -213,7 +214,7 @@ export class ImageUploadComponent {
       return;
     }
 
-    this.http.delete(`/api/tops/images/${this.currentImageId}`).subscribe({
+    this.http.delete(`${environment.apiUrl}/tops/images/${this.currentImageId}`).subscribe({
       next: () => {
         this.imageRemoved.emit();
         this.snackBar.open('Imagen eliminada', 'OK', { duration: 3000 });

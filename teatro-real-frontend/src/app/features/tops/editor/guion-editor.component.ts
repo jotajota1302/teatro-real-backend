@@ -27,6 +27,7 @@ import {
   ESTADO_LABELS
 } from '../models/guion.model';
 import { AuthService } from '../../../core/auth/auth.service';
+import { environment } from '../../../../environments/environment';
 
 /**
  * GuionEditor - Editor tipo Word para guiones técnicos
@@ -775,7 +776,7 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
     if (!this.guionId || this.exporting()) return;
 
     this.exporting.set(true);
-    this.http.get(`/api/guiones/${this.guionId}/export`, {
+    this.http.get(`${environment.apiUrl}/guiones/${this.guionId}/export`, {
       responseType: 'blob'
     }).subscribe({
       next: (blob) => {
@@ -807,7 +808,7 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
 
   onPasadaImageUploaded(actoId: string, itemId: string, image: GuionImage): void {
     // Actualizar el item con la URL de la imagen
-    const imageUrl = `/api/tops/images/${image.id}`;
+    const imageUrl = `${environment.apiUrl}/tops/images/${image.id}`;
     this.updatePasadaItem(actoId, itemId, 'imagen', imageUrl);
     this.showImageUpload = null; // Cerrar panel
   }
@@ -822,12 +823,12 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
     const acto = this.guion()?.actos.find(a => a.id === actoId);
     const item = acto?.pasada?.find(p => p.id === itemId);
     if (item?.imagen) {
-      // Extraer ID de la imagen de la URL (/api/tops/images/123)
-      const match = item.imagen.match(/\/api\/tops\/images\/(\d+)/);
+      // Extraer ID de la imagen de la URL (puede ser /api/tops/images/123 o URL completa)
+      const match = item.imagen.match(/\/tops\/images\/(\d+)/);
       if (match) {
         const imageId = match[1];
         // Borrar de la BD
-        this.http.delete(`/api/tops/images/${imageId}`).subscribe({
+        this.http.delete(`${environment.apiUrl}/tops/images/${imageId}`).subscribe({
           next: () => {
             this.updatePasadaItem(actoId, itemId, 'imagen', '');
             this.showSuccess('Imagen eliminada');
@@ -844,7 +845,7 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
   // ==================== Imágenes de Elementos ====================
 
   onElementoImageUploaded(escenaId: string, elemId: string, image: GuionImage): void {
-    const imageUrl = `/api/tops/images/${image.id}`;
+    const imageUrl = `${environment.apiUrl}/tops/images/${image.id}`;
     this.updateElemento(escenaId, elemId, 'imagen', imageUrl);
     this.showImageUpload = null;
   }
@@ -862,11 +863,11 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
     const escena = acto?.escenas.find(e => e.id === escenaId);
     const elem = escena?.elementos.find(e => e.id === elemId);
     if (elem?.imagen) {
-      // Extraer ID de la imagen de la URL
-      const match = elem.imagen.match(/\/api\/tops\/images\/(\d+)/);
+      // Extraer ID de la imagen de la URL (puede ser /api/tops/images/123 o URL completa)
+      const match = elem.imagen.match(/\/tops\/images\/(\d+)/);
       if (match) {
         const imageId = match[1];
-        this.http.delete(`/api/tops/images/${imageId}`).subscribe({
+        this.http.delete(`${environment.apiUrl}/tops/images/${imageId}`).subscribe({
           next: () => {
             this.updateElemento(escenaId, elemId, 'imagen', '');
             this.showSuccess('Imagen eliminada');

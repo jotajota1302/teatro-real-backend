@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { environment } from '../../../../environments/environment';
 
 export interface AuditLog {
   id: number;
@@ -139,7 +140,7 @@ export class AuditLogPanelComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.http.get<AuditLog[]>(`/api/tops/audit/guion/${this.guionId}`).subscribe({
+    this.http.get<AuditLog[]>(`${environment.apiUrl}/tops/audit/guion/${this.guionId}`).subscribe({
       next: (logs) => {
         // Ordenar por fecha descendente
         this.logs.set(logs.sort((a, b) =>
