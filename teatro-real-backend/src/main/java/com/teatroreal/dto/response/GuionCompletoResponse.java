@@ -110,7 +110,7 @@ public class GuionCompletoResponse {
         private String departamento;
         private String lugar;
         private String descripcion;
-        private String imagen;
+        private List<String> imagenes = new ArrayList<>();
         private Integer orden;
 
         public static PasadaItemDto fromEntity(PasadaItem item) {
@@ -119,8 +119,8 @@ public class GuionCompletoResponse {
             dto.setDepartamento(item.getDepartamento());
             dto.setLugar(item.getLugar());
             dto.setDescripcion(item.getDescripcion());
-            dto.setImagen(item.getImagen());
             dto.setOrden(item.getOrden());
+            // imagenes se poblarán después desde GuionImageService
             return dto;
         }
 
@@ -132,8 +132,8 @@ public class GuionCompletoResponse {
         public void setLugar(String lugar) { this.lugar = lugar; }
         public String getDescripcion() { return descripcion; }
         public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
-        public String getImagen() { return imagen; }
-        public void setImagen(String imagen) { this.imagen = imagen; }
+        public List<String> getImagenes() { return imagenes; }
+        public void setImagenes(List<String> imagenes) { this.imagenes = imagenes; }
         public Integer getOrden() { return orden; }
         public void setOrden(Integer orden) { this.orden = orden; }
     }
@@ -184,7 +184,7 @@ public class GuionCompletoResponse {
         private String departamento;
         private String descripcion;
         private String observaciones;
-        private String imagen;
+        private List<String> imagenes = new ArrayList<>();
         private String colorHex;
         private Integer orden;
 
@@ -200,9 +200,9 @@ public class GuionCompletoResponse {
             dto.setDepartamento(elem.getDepartamento());
             dto.setDescripcion(elem.getEncabezado());
             dto.setObservaciones(elem.getContenido());
-            dto.setImagen(null);
             dto.setColorHex(elem.getColorHex());
             dto.setOrden(elem.getOrden());
+            // imagenes se poblarán después desde GuionImageService
             return dto;
         }
 
@@ -226,8 +226,8 @@ public class GuionCompletoResponse {
         public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
         public String getObservaciones() { return observaciones; }
         public void setObservaciones(String observaciones) { this.observaciones = observaciones; }
-        public String getImagen() { return imagen; }
-        public void setImagen(String imagen) { this.imagen = imagen; }
+        public List<String> getImagenes() { return imagenes; }
+        public void setImagenes(List<String> imagenes) { this.imagenes = imagenes; }
         public String getColorHex() { return colorHex; }
         public void setColorHex(String colorHex) { this.colorHex = colorHex; }
         public Integer getOrden() { return orden; }

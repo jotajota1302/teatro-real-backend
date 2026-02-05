@@ -41,6 +41,9 @@ public class GuionService {
     @Autowired
     private AuditLogService auditLogService;
 
+    @Autowired
+    private GuionImageService guionImageService;
+
     // ==================== CRUD Básico ====================
 
     public List<GuionResponse> findAll() {
@@ -88,7 +91,38 @@ public class GuionService {
             }
         }
 
-        return GuionCompletoResponse.fromEntity(guion);
+        GuionCompletoResponse response = GuionCompletoResponse.fromEntity(guion);
+
+        // Cargar todas las imágenes del guion y poblarlas en el response
+        List<GuionImage> allImages = guionImageService.obtenerImagenesPorGuion(id);
+
+        // Crear mapa de imágenes por entityType:entityId
+        java.util.Map<String, List<String>> imagesByEntity = new java.util.HashMap<>();
+        for (GuionImage img : allImages) {
+            String key = img.getEntityType() + ":" + img.getEntityId();
+            imagesByEntity.computeIfAbsent(key, k -> new java.util.ArrayList<>())
+                    .add("/api/tops/images/" + img.getId());
+        }
+
+        // Poblar imágenes en pasada items y elementos
+        for (GuionCompletoResponse.ActoDto acto : response.getActos()) {
+            for (GuionCompletoResponse.PasadaItemDto pasada : acto.getPasada()) {
+                String key = "PASADA_ITEM:" + pasada.getId();
+                if (imagesByEntity.containsKey(key)) {
+                    pasada.setImagenes(imagesByEntity.get(key));
+                }
+            }
+            for (GuionCompletoResponse.EscenaDto escena : acto.getEscenas()) {
+                for (GuionCompletoResponse.ElementoDto elem : escena.getElementos()) {
+                    String key = "TOP:" + elem.getId();
+                    if (imagesByEntity.containsKey(key)) {
+                        elem.setImagenes(imagesByEntity.get(key));
+                    }
+                }
+            }
+        }
+
+        return response;
     }
 
     public GuionResponse create(GuionRequest request, String createdById) {

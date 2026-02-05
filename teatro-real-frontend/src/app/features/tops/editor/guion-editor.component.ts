@@ -250,29 +250,29 @@ import { environment } from '../../../../environments/environment';
                       />
                       <!-- Columna IMÁGENES -->
                       <td class="border border-black p-1 text-center align-middle relative">
-                        @if (item.imagen) {
-                          <div class="relative inline-block group">
-                            <img [src]="item.imagen" alt="Imagen" class="max-w-full max-h-16 rounded border border-gray-300 object-contain mx-auto cursor-pointer hover:opacity-80 transition-opacity"
-                                 (click)="lightboxImage.set(item.imagen); $event.stopPropagation()"
-                                 title="Clic para ampliar">
-                            @if (canEdit()) {
-                              <button class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px]"
-                                      (click)="deletePasadaImage(acto.id, item.id); $event.stopPropagation()"
-                                      title="Eliminar imagen">✕</button>
-                              <button class="absolute -top-1 -left-1 w-4 h-4 bg-blue-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px]"
-                                      (click)="toggleImageUpload('pasada-' + item.id); $event.stopPropagation()"
-                                      title="Cambiar imagen">↺</button>
-                            }
-                          </div>
-                        } @else if (canEdit()) {
-                          <button class="w-6 h-6 inline-flex items-center justify-center rounded hover:bg-purple-100 opacity-50 hover:opacity-100 transition-opacity"
-                                  (click)="toggleImageUpload('pasada-' + item.id); $event.stopPropagation()"
-                                  title="Añadir imagen">
-                            <mat-icon class="!text-base text-purple-600">add_photo_alternate</mat-icon>
-                          </button>
-                        } @else {
-                          <span class="text-gray-300">-</span>
-                        }
+                        <div class="flex flex-wrap gap-1 items-center justify-center">
+                          @for (img of item.imagenes || []; track img) {
+                            <div class="relative inline-block group">
+                              <img [src]="img" alt="Imagen" class="w-12 h-12 rounded border border-gray-300 object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                                   (click)="lightboxImage.set(img); $event.stopPropagation()"
+                                   title="Clic para ampliar">
+                              @if (canEdit()) {
+                                <button class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px]"
+                                        (click)="deletePasadaImageByUrl(acto.id, item.id, img); $event.stopPropagation()"
+                                        title="Eliminar imagen">✕</button>
+                              }
+                            </div>
+                          }
+                          @if (canEdit()) {
+                            <button class="w-8 h-8 inline-flex items-center justify-center rounded border border-dashed border-gray-300 hover:border-purple-400 hover:bg-purple-50 opacity-60 hover:opacity-100 transition-all"
+                                    (click)="toggleImageUpload('pasada-' + item.id); $event.stopPropagation()"
+                                    title="Añadir imagen">
+                              <mat-icon class="!text-base text-purple-600">add</mat-icon>
+                            </button>
+                          } @else if (!item.imagenes?.length) {
+                            <span class="text-gray-300">-</span>
+                          }
+                        </div>
                         <!-- Popup de upload -->
                         @if (showImageUpload === 'pasada-' + item.id && canEdit()) {
                           <div class="absolute left-1/2 -translate-x-1/2 top-full mt-1 p-2 bg-white border rounded shadow-lg z-50 w-48"
@@ -281,7 +281,6 @@ import { environment } from '../../../../environments/environment';
                               [guionId]="guionId || ''"
                               entityType="PASADA_ITEM"
                               [entityId]="item.id"
-                              [currentImageUrl]="item.imagen || null"
                               (imageUploaded)="onPasadaImageUploaded(acto.id, item.id, $event)"
                               (imageRemoved)="onPasadaImageRemoved(acto.id, item.id)"
                             />
@@ -401,29 +400,29 @@ import { environment } from '../../../../environments/environment';
                           />
                           <!-- Columna IMÁGENES -->
                           <td class="border border-black p-1 text-center align-middle relative">
-                            @if (elem.imagen) {
-                              <div class="relative inline-block group">
-                                <img [src]="elem.imagen" alt="Imagen" class="max-w-full max-h-16 rounded border border-gray-300 object-contain mx-auto cursor-pointer hover:opacity-80 transition-opacity"
-                                     (click)="lightboxImage.set(elem.imagen); $event.stopPropagation()"
-                                     title="Clic para ampliar">
-                                @if (canEdit()) {
-                                  <button class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px]"
-                                          (click)="deleteElementoImage(escena.id, elem.id); $event.stopPropagation()"
-                                          title="Eliminar imagen">✕</button>
-                                  <button class="absolute -top-1 -left-1 w-4 h-4 bg-blue-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px]"
-                                          (click)="toggleImageUpload('elem-' + elem.id); $event.stopPropagation()"
-                                          title="Cambiar imagen">↺</button>
-                                }
-                              </div>
-                            } @else if (canEdit()) {
-                              <button class="w-6 h-6 inline-flex items-center justify-center rounded hover:bg-purple-100 opacity-50 hover:opacity-100 transition-opacity"
-                                      (click)="toggleImageUpload('elem-' + elem.id); $event.stopPropagation()"
-                                      title="Añadir imagen">
-                                <mat-icon class="!text-base text-purple-600">add_photo_alternate</mat-icon>
-                              </button>
-                            } @else {
-                              <span class="text-gray-300">-</span>
-                            }
+                            <div class="flex flex-wrap gap-1 items-center justify-center">
+                              @for (img of elem.imagenes || []; track img) {
+                                <div class="relative inline-block group">
+                                  <img [src]="img" alt="Imagen" class="w-12 h-12 rounded border border-gray-300 object-cover cursor-pointer hover:opacity-80 transition-opacity"
+                                       (click)="lightboxImage.set(img); $event.stopPropagation()"
+                                       title="Clic para ampliar">
+                                  @if (canEdit()) {
+                                    <button class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px]"
+                                            (click)="deleteElementoImageByUrl(escena.id, elem.id, img); $event.stopPropagation()"
+                                            title="Eliminar imagen">✕</button>
+                                  }
+                                </div>
+                              }
+                              @if (canEdit()) {
+                                <button class="w-8 h-8 inline-flex items-center justify-center rounded border border-dashed border-gray-300 hover:border-purple-400 hover:bg-purple-50 opacity-60 hover:opacity-100 transition-all"
+                                        (click)="toggleImageUpload('elem-' + elem.id); $event.stopPropagation()"
+                                        title="Añadir imagen">
+                                  <mat-icon class="!text-base text-purple-600">add</mat-icon>
+                                </button>
+                              } @else if (!elem.imagenes?.length) {
+                                <span class="text-gray-300">-</span>
+                              }
+                            </div>
                             <!-- Popup de upload -->
                             @if (showImageUpload === 'elem-' + elem.id && canEdit()) {
                               <div class="absolute left-1/2 -translate-x-1/2 top-full mt-1 p-2 bg-white border rounded shadow-lg z-50 w-48"
@@ -432,7 +431,6 @@ import { environment } from '../../../../environments/environment';
                                   [guionId]="guionId || ''"
                                   entityType="TOP"
                                   [entityId]="elem.id"
-                                  [currentImageUrl]="elem.imagen || null"
                                   (imageUploaded)="onElementoImageUploaded(escena.id, elem.id, $event)"
                                   (imageRemoved)="onElementoImageRemoved(escena.id, elem.id)"
                                 />
@@ -834,77 +832,102 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
   }
 
   onPasadaImageUploaded(actoId: string, itemId: string, image: GuionImage): void {
-    // Actualizar el item con la URL de la imagen
+    // Añadir imagen al array existente
     const imageUrl = `${environment.apiUrl}/tops/images/${image.id}`;
-    this.updatePasadaItem(actoId, itemId, 'imagen', imageUrl);
-    this.showImageUpload = null; // Cerrar panel
+    const acto = this.guion()?.actos.find(a => a.id === actoId);
+    const item = acto?.pasada?.find(p => p.id === itemId);
+    const currentImages = item?.imagenes || [];
+    this.updatePasadaItemImages(actoId, itemId, [...currentImages, imageUrl]);
+    this.showImageUpload = null;
   }
 
   onPasadaImageRemoved(actoId: string, itemId: string): void {
-    this.updatePasadaItem(actoId, itemId, 'imagen', '');
-    this.showImageUpload = null; // Cerrar panel
+    this.showImageUpload = null;
   }
 
-  deletePasadaImage(actoId: string, itemId: string): void {
-    // Obtener la URL de la imagen actual
-    const acto = this.guion()?.actos.find(a => a.id === actoId);
-    const item = acto?.pasada?.find(p => p.id === itemId);
-    if (item?.imagen) {
-      // Extraer ID de la imagen de la URL (puede ser /api/tops/images/123 o URL completa)
-      const match = item.imagen.match(/\/tops\/images\/(\d+)/);
-      if (match) {
-        const imageId = match[1];
-        // Borrar de la BD
-        this.http.delete(`${environment.apiUrl}/tops/images/${imageId}`).subscribe({
-          next: () => {
-            this.updatePasadaItem(actoId, itemId, 'imagen', '');
-            this.showSuccess('Imagen eliminada');
-          },
-          error: () => this.showError('Error al eliminar imagen')
-        });
-        return;
-      }
+  deletePasadaImageByUrl(actoId: string, itemId: string, imageUrl: string): void {
+    // Extraer ID de la imagen de la URL
+    const match = imageUrl.match(/\/tops\/images\/(\d+)/);
+    if (match) {
+      const imageId = match[1];
+      this.http.delete(`${environment.apiUrl}/tops/images/${imageId}`).subscribe({
+        next: () => {
+          // Quitar imagen del array local
+          const acto = this.guion()?.actos.find(a => a.id === actoId);
+          const item = acto?.pasada?.find(p => p.id === itemId);
+          const newImages = (item?.imagenes || []).filter(img => img !== imageUrl);
+          this.updatePasadaItemImages(actoId, itemId, newImages);
+          this.showSuccess('Imagen eliminada');
+        },
+        error: () => this.showError('Error al eliminar imagen')
+      });
     }
-    // Si no hay imagen o no se puede extraer ID, solo limpiar referencia
-    this.updatePasadaItem(actoId, itemId, 'imagen', '');
+  }
+
+  private updatePasadaItemImages(actoId: string, itemId: string, imagenes: string[]): void {
+    const guion = this.guion();
+    if (!guion) return;
+
+    const actoIndex = guion.actos.findIndex(a => a.id === actoId);
+    if (actoIndex === -1) return;
+
+    const itemIndex = guion.actos[actoIndex].pasada?.findIndex(p => p.id === itemId) ?? -1;
+    if (itemIndex === -1) return;
+
+    // Actualizar el modelo local
+    guion.actos[actoIndex].pasada![itemIndex].imagenes = imagenes;
+    this.guionService.guionActual.set({ ...guion });
   }
 
   // ==================== Imágenes de Elementos ====================
 
   onElementoImageUploaded(escenaId: string, elemId: string, image: GuionImage): void {
     const imageUrl = `${environment.apiUrl}/tops/images/${image.id}`;
-    this.updateElemento(escenaId, elemId, 'imagen', imageUrl);
+    const acto = this.guion()?.actos.find(a => a.escenas.some(e => e.id === escenaId));
+    const escena = acto?.escenas.find(e => e.id === escenaId);
+    const elem = escena?.elementos.find(e => e.id === elemId);
+    const currentImages = elem?.imagenes || [];
+    this.updateElementoImages(escenaId, elemId, [...currentImages, imageUrl]);
     this.showImageUpload = null;
   }
 
   onElementoImageRemoved(escenaId: string, elemId: string): void {
-    this.updateElemento(escenaId, elemId, 'imagen', '');
     this.showImageUpload = null;
   }
 
-  deleteElementoImage(escenaId: string, elemId: string): void {
-    // Buscar la escena y elemento
-    const acto = this.guion()?.actos.find(a =>
-      a.escenas.some(e => e.id === escenaId)
-    );
-    const escena = acto?.escenas.find(e => e.id === escenaId);
-    const elem = escena?.elementos.find(e => e.id === elemId);
-    if (elem?.imagen) {
-      // Extraer ID de la imagen de la URL (puede ser /api/tops/images/123 o URL completa)
-      const match = elem.imagen.match(/\/tops\/images\/(\d+)/);
-      if (match) {
-        const imageId = match[1];
-        this.http.delete(`${environment.apiUrl}/tops/images/${imageId}`).subscribe({
-          next: () => {
-            this.updateElemento(escenaId, elemId, 'imagen', '');
-            this.showSuccess('Imagen eliminada');
-          },
-          error: () => this.showError('Error al eliminar imagen')
-        });
-        return;
+  deleteElementoImageByUrl(escenaId: string, elemId: string, imageUrl: string): void {
+    const match = imageUrl.match(/\/tops\/images\/(\d+)/);
+    if (match) {
+      const imageId = match[1];
+      this.http.delete(`${environment.apiUrl}/tops/images/${imageId}`).subscribe({
+        next: () => {
+          const acto = this.guion()?.actos.find(a => a.escenas.some(e => e.id === escenaId));
+          const escena = acto?.escenas.find(e => e.id === escenaId);
+          const elem = escena?.elementos.find(e => e.id === elemId);
+          const newImages = (elem?.imagenes || []).filter(img => img !== imageUrl);
+          this.updateElementoImages(escenaId, elemId, newImages);
+          this.showSuccess('Imagen eliminada');
+        },
+        error: () => this.showError('Error al eliminar imagen')
+      });
+    }
+  }
+
+  private updateElementoImages(escenaId: string, elemId: string, imagenes: string[]): void {
+    const guion = this.guion();
+    if (!guion) return;
+
+    for (const acto of guion.actos) {
+      const escenaIndex = acto.escenas.findIndex(e => e.id === escenaId);
+      if (escenaIndex !== -1) {
+        const elemIndex = acto.escenas[escenaIndex].elementos.findIndex(e => e.id === elemId);
+        if (elemIndex !== -1) {
+          acto.escenas[escenaIndex].elementos[elemIndex].imagenes = imagenes;
+          this.guionService.guionActual.set({ ...guion });
+          return;
+        }
       }
     }
-    this.updateElemento(escenaId, elemId, 'imagen', '');
   }
 
 }

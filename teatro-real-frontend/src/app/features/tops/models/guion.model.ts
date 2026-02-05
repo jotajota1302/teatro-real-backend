@@ -88,7 +88,7 @@ export interface PasadaItem {
   departamento?: string;
   lugar?: string;
   descripcion?: string;
-  imagen?: string;
+  imagenes?: string[];
   orden: number;
 }
 
@@ -117,7 +117,7 @@ export interface ElementoGuion {
   departamento?: string;
   descripcion?: string;
   observaciones?: string;
-  imagen?: string;
+  imagenes?: string[];
   colorHex?: string;
   orden: number;
 }
@@ -147,7 +147,6 @@ export interface PasadaItemFormData {
   departamento?: string;
   lugar?: string;
   descripcion?: string;
-  imagen?: string;
   orden?: number;
 }
 
@@ -176,7 +175,6 @@ export interface ElementoGuionFormData {
   departamento?: string;
   descripcion?: string;
   observaciones?: string;
-  imagen?: string;
   colorHex?: string;
   orden?: number;
 }
@@ -193,7 +191,6 @@ export interface ElementoGuionBackendRequest {
   departamento?: string;
   encabezado?: string;
   contenido?: string;
-  imagen?: string;
   orden?: number;
 }
 
@@ -210,7 +207,6 @@ export function toBackendRequest(data: ElementoGuionFormData): ElementoGuionBack
     departamento: data.departamento,
     encabezado: data.descripcion,
     contenido: data.observaciones,
-    imagen: data.imagen,
     orden: data.orden
   };
 }
