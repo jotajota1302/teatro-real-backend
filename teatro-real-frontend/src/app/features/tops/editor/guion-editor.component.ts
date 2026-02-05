@@ -865,18 +865,7 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
   }
 
   private updatePasadaItemImages(actoId: string, itemId: string, imagenes: string[]): void {
-    const guion = this.guion();
-    if (!guion) return;
-
-    const actoIndex = guion.actos.findIndex(a => a.id === actoId);
-    if (actoIndex === -1) return;
-
-    const itemIndex = guion.actos[actoIndex].pasada?.findIndex(p => p.id === itemId) ?? -1;
-    if (itemIndex === -1) return;
-
-    // Actualizar el modelo local
-    guion.actos[actoIndex].pasada![itemIndex].imagenes = imagenes;
-    this.guionService.guionActual.set({ ...guion });
+    this.guionService.updatePasadaItemImages(actoId, itemId, imagenes);
   }
 
   // ==================== Imágenes de Elementos ====================
@@ -914,20 +903,7 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
   }
 
   private updateElementoImages(escenaId: string, elemId: string, imagenes: string[]): void {
-    const guion = this.guion();
-    if (!guion) return;
-
-    for (const acto of guion.actos) {
-      const escenaIndex = acto.escenas.findIndex(e => e.id === escenaId);
-      if (escenaIndex !== -1) {
-        const elemIndex = acto.escenas[escenaIndex].elementos.findIndex(e => e.id === elemId);
-        if (elemIndex !== -1) {
-          acto.escenas[escenaIndex].elementos[elemIndex].imagenes = imagenes;
-          this.guionService.guionActual.set({ ...guion });
-          return;
-        }
-      }
-    }
+    this.guionService.updateElementoImages(escenaId, elemId, imagenes);
   }
 
 }

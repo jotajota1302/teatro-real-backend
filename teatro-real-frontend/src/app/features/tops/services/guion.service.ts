@@ -420,7 +420,6 @@ export class GuionService {
     if (data.departamento !== undefined) backendData['departamento'] = data.departamento;
     if (data.descripcion !== undefined) backendData['encabezado'] = data.descripcion;
     if (data.observaciones !== undefined) backendData['contenido'] = data.observaciones;
-    if (data.imagen !== undefined) backendData['imagen'] = data.imagen;
     if (data.orden !== undefined) backendData['orden'] = data.orden;
 
     return this.api.put<ElementoGuion>(`/api/tops/elementos/${id}`, backendData).pipe(
@@ -490,6 +489,53 @@ export class GuionService {
               ? { ...escena, elementos: updater(escena.elementos) }
               : escena
           )
+        }))
+      };
+    });
+  }
+
+  // ==================== Imágenes (actualización local) ====================
+
+  /**
+   * Actualiza las imágenes de un item de pasada (solo en memoria local)
+   */
+  updatePasadaItemImages(actoId: string, itemId: string, imagenes: string[]): void {
+    this.guionActualSignal.update(guion => {
+      if (!guion) return null;
+      return {
+        ...guion,
+        actos: guion.actos.map(acto => {
+          if (acto.id !== actoId) return acto;
+          return {
+            ...acto,
+            pasada: acto.pasada.map(item =>
+              item.id === itemId ? { ...item, imagenes } : item
+            )
+          };
+        })
+      };
+    });
+  }
+
+  /**
+   * Actualiza las imágenes de un elemento (solo en memoria local)
+   */
+  updateElementoImages(escenaId: string, elemId: string, imagenes: string[]): void {
+    this.guionActualSignal.update(guion => {
+      if (!guion) return null;
+      return {
+        ...guion,
+        actos: guion.actos.map(acto => ({
+          ...acto,
+          escenas: acto.escenas.map(escena => {
+            if (escena.id !== escenaId) return escena;
+            return {
+              ...escena,
+              elementos: escena.elementos.map(elem =>
+                elem.id === elemId ? { ...elem, imagenes } : elem
+              )
+            };
+          })
         }))
       };
     });
