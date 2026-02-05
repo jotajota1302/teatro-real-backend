@@ -8,15 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Servicio para gestionar imágenes de guiones
- * Según reglas-tops1.md: Upload y almacenamiento de imágenes
+ * Almacena imágenes directamente en la base de datos (BLOB)
  */
 @Service
 @Transactional
@@ -24,10 +20,7 @@ public class GuionImageService {
 
     private final GuionImageRepository guionImageRepository;
 
-    @Value("${app.upload.dir:./uploads/guiones}")
-    private String uploadDir;
-
-    @Value("${app.upload.max-size:5242880}")  // 5MB por defecto
+    @Value("${app.upload.max-size:10485760}")  // 10MB por defecto
     private long maxFileSize;
 
     // MIME types permitidos
@@ -43,7 +36,7 @@ public class GuionImageService {
     }
 
     /**
-     * Sube una imagen y la asocia a una entidad de guion
+     * Sube una imagen y la almacena en la base de datos
      *
      * @param file Archivo de imagen
      * @param guionId ID del guion
@@ -51,31 +44,20 @@ public class GuionImageService {
      * @param entityId ID de la entidad
      * @param uploadedBy ID del usuario que sube la imagen
      * @return GuionImage creada
-     * @throws IOException Si hay error al guardar el archivo
+     * @throws IOException Si hay error al leer el archivo
      * @throws IllegalArgumentException Si el archivo es inválido
      */
     public GuionImage uploadImage(
             MultipartFile file,
-            Long guionId,
+            String guionId,
             String entityType,
-            Long entityId,
+            String entityId,
             Long uploadedBy
     ) throws IOException {
         // Validar archivo
         validarArchivo(file);
 
-        // Crear directorio si no existe
-        Path uploadPath = Paths.get(uploadDir);
-        Files.createDirectories(uploadPath);
-
-        // Generar nombre único
-        String nombreUnico = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        Path rutaArchivo = uploadPath.resolve(nombreUnico);
-
-        // Guardar archivo
-        Files.write(rutaArchivo, file.getBytes());
-
-        // Crear y guardar registro en BD
+        // Crear y guardar registro en BD con los bytes de la imagen
         GuionImage imagen = new GuionImage(
                 guionId,
                 entityType,
@@ -83,7 +65,7 @@ public class GuionImageService {
                 file.getOriginalFilename(),
                 file.getContentType(),
                 file.getSize(),
-                rutaArchivo.toString(),
+                file.getBytes(),  // Guardar bytes directamente
                 uploadedBy
         );
 
@@ -93,14 +75,14 @@ public class GuionImageService {
     /**
      * Obtiene todas las imágenes de una entidad
      */
-    public List<GuionImage> obtenerImagenesPorEntidad(String entityType, Long entityId) {
+    public List<GuionImage> obtenerImagenesPorEntidad(String entityType, String entityId) {
         return guionImageRepository.findByEntityTypeAndEntityId(entityType, entityId);
     }
 
     /**
      * Obtiene todas las imágenes de un guion
      */
-    public List<GuionImage> obtenerImagenesPorGuion(Long guionId) {
+    public List<GuionImage> obtenerImagenesPorGuion(String guionId) {
         return guionImageRepository.findByGuionId(guionId);
     }
 
@@ -116,54 +98,23 @@ public class GuionImageService {
      * Elimina una imagen
      */
     public void eliminarImagen(Long imagenId) {
-        GuionImage imagen = obtenerImagen(imagenId);
-
-        // Eliminar archivo del sistema de archivos
-        try {
-            Path rutaArchivo = Paths.get(imagen.getStoragePath());
-            Files.deleteIfExists(rutaArchivo);
-        } catch (IOException e) {
-            // Log pero no fallar
-            System.err.println("Error al eliminar archivo: " + imagen.getStoragePath());
+        if (!guionImageRepository.existsById(imagenId)) {
+            throw new IllegalArgumentException("Imagen no encontrada: " + imagenId);
         }
-
-        // Eliminar registro de BD
         guionImageRepository.deleteById(imagenId);
     }
 
     /**
      * Elimina todas las imágenes de una entidad
      */
-    public void eliminarImagenesPorEntidad(String entityType, Long entityId) {
-        List<GuionImage> imagenes = guionImageRepository.findByEntityTypeAndEntityId(entityType, entityId);
-        
-        imagenes.forEach(imagen -> {
-            try {
-                Path rutaArchivo = Paths.get(imagen.getStoragePath());
-                Files.deleteIfExists(rutaArchivo);
-            } catch (IOException e) {
-                System.err.println("Error al eliminar archivo: " + imagen.getStoragePath());
-            }
-        });
-
+    public void eliminarImagenesPorEntidad(String entityType, String entityId) {
         guionImageRepository.deleteByEntityTypeAndEntityId(entityType, entityId);
     }
 
     /**
      * Elimina todas las imágenes de un guion
      */
-    public void eliminarImagenesPorGuion(Long guionId) {
-        List<GuionImage> imagenes = guionImageRepository.findByGuionId(guionId);
-
-        imagenes.forEach(imagen -> {
-            try {
-                Path rutaArchivo = Paths.get(imagen.getStoragePath());
-                Files.deleteIfExists(rutaArchivo);
-            } catch (IOException e) {
-                System.err.println("Error al eliminar archivo: " + imagen.getStoragePath());
-            }
-        });
-
+    public void eliminarImagenesPorGuion(String guionId) {
         guionImageRepository.deleteByGuionId(guionId);
     }
 
@@ -197,11 +148,4 @@ public class GuionImageService {
         }
     }
 
-    /**
-     * Obtiene la ruta del archivo para servir
-     */
-    public Path obtenerRutaArchivo(Long imagenId) {
-        GuionImage imagen = obtenerImagen(imagenId);
-        return Paths.get(imagen.getStoragePath());
-    }
 }

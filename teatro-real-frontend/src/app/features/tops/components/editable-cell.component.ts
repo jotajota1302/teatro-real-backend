@@ -25,17 +25,6 @@ import { FormsModule } from '@angular/forms';
       (mouseenter)="hovered = true"
       (mouseleave)="hovered = false"
     >
-      <!-- Imagen si existe -->
-      @if (imagen) {
-        <div class="mb-2">
-          <img
-            [src]="imagen"
-            alt="Imagen"
-            class="max-w-full max-h-48 border border-gray-300 rounded"
-          />
-        </div>
-      }
-
       <!-- Modo edición -->
       @if (editing) {
         @if (multiline) {
@@ -69,6 +58,24 @@ import { FormsModule } from '@angular/forms';
           {{ localValue || placeholder || '\u00A0' }}
         </span>
       }
+
+      <!-- Imagen al final (si existe) -->
+      @if (imagen) {
+        <div class="mt-2 relative inline-block group">
+          <img
+            [src]="imagen"
+            alt="Imagen"
+            class="max-w-full max-h-32 border border-gray-300 rounded"
+          />
+          <!-- Botón borrar imagen -->
+          <button
+            class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-bold"
+            (click)="onDeleteImage($event)"
+            title="Eliminar imagen">
+            ✕
+          </button>
+        </div>
+      }
     </td>
   `,
   styles: [`
@@ -96,6 +103,7 @@ export class EditableCellComponent implements OnChanges {
   @Input() color: string | null = null;
 
   @Output() valueChange = new EventEmitter<string>();
+  @Output() imagenDelete = new EventEmitter<void>();
 
   @ViewChild('inputRef') inputRef!: ElementRef<HTMLInputElement | HTMLTextAreaElement>;
 
@@ -136,5 +144,11 @@ export class EditableCellComponent implements OnChanges {
       this.localValue = this.value || '';
       this.editing = false;
     }
+  }
+
+  onDeleteImage(event: Event): void {
+    event.stopPropagation();
+    event.preventDefault();
+    this.imagenDelete.emit();
   }
 }

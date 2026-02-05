@@ -2,6 +2,7 @@
 
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,6 +17,7 @@ import { GuionService } from '../services/guion.service';
 import { EditableCellComponent } from '../components/editable-cell.component';
 import { EditableTextComponent } from '../components/editable-text.component';
 import { AuditLogPanelComponent } from '../components/audit-log-panel.component';
+import { ImageUploadComponent, GuionImage } from '../components/image-upload.component';
 import {
   GuionCompleto,
   Acto,
@@ -35,6 +37,7 @@ import { AuthService } from '../../../core/auth/auth.service';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
@@ -43,7 +46,8 @@ import { AuthService } from '../../../core/auth/auth.service';
     DragDropModule,
     EditableCellComponent,
     EditableTextComponent,
-    AuditLogPanelComponent
+    AuditLogPanelComponent,
+    ImageUploadComponent
   ],
   template: `
     <!-- Viewport tipo Word (fondo gris) -->
@@ -76,13 +80,15 @@ import { AuthService } from '../../../core/auth/auth.service';
         <!-- Botón Lock/Unlock -->
         @if (!isLocked()) {
           <button class="inline-flex items-center gap-1 px-4 py-2 text-sm font-semibold border-2 border-red-600 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors"
-                  (click)="lockGuion()">
+                  (click)="lockGuion()"
+                  matTooltip="Bloquear guion para edición exclusiva">
             <mat-icon class="!text-lg">lock_open</mat-icon>
             Editar
           </button>
         } @else if (isLockedByMe()) {
           <button class="inline-flex items-center gap-1 px-4 py-2 text-sm font-semibold border-2 border-orange-500 text-orange-600 rounded hover:bg-orange-500 hover:text-white transition-colors"
-                  (click)="unlockGuion()">
+                  (click)="unlockGuion()"
+                  matTooltip="Liberar guion para que otros puedan editarlo">
             <mat-icon class="!text-lg">lock</mat-icon>
             Liberar
           </button>
@@ -100,32 +106,7 @@ import { AuthService } from '../../../core/auth/auth.service';
           Exportar Word
         </button>
 
-        <button class="inline-flex items-center gap-1 px-3 py-2 text-sm border border-gray-300 text-gray-600 rounded hover:bg-gray-100 transition-colors"
-                (click)="toggleHistorial()"
-                matTooltip="Ver historial de cambios">
-          <mat-icon class="!text-lg">history</mat-icon>
-        </button>
       </div>
-
-      <!-- Panel de historial (sidebar) -->
-      @if (showHistorial()) {
-        <!-- Backdrop para cerrar al hacer clic fuera -->
-        <div class="fixed inset-0 bg-black/30 z-40" (click)="toggleHistorial()"></div>
-        <!-- Panel -->
-        <div class="fixed right-0 top-0 h-full w-80 bg-white shadow-lg z-50 overflow-y-auto">
-          <div class="p-4 border-b flex items-center justify-between sticky top-0 bg-white">
-            <h3 class="font-semibold">Historial</h3>
-            <button type="button"
-                    class="p-1 rounded hover:bg-gray-100 transition-colors"
-                    (click)="toggleHistorial(); $event.stopPropagation()">
-              <mat-icon>close</mat-icon>
-            </button>
-          </div>
-          <div class="p-4">
-            <app-audit-log-panel [guionId]="guionId || ''"></app-audit-log-panel>
-          </div>
-        </div>
-      }
 
       <!-- Loading -->
       @if (guionService.loading()) {
@@ -261,12 +242,21 @@ import { AuthService } from '../../../core/auth/auth.service';
                       <app-editable-cell
                         [value]="item.descripcion || ''"
                         (valueChange)="updatePasadaItem(acto.id, item.id, 'descripcion', $event)"
+                        (imagenDelete)="deletePasadaImage(acto.id, item.id)"
                         placeholder="Descripción del setup..."
                         [multiline]="true"
                         [imagen]="item.imagen || null"
                       />
-                      <td class="border border-black p-1 text-center whitespace-nowrap">
+                      <td class="border border-black p-1 text-center whitespace-nowrap relative">
                         @if (canEdit()) {
+                          <!-- Botón imagen -->
+                          <button class="w-6 h-6 inline-flex items-center justify-center rounded hover:bg-purple-100 opacity-40 hover:opacity-100 transition-opacity"
+                                  (click)="toggleImageUpload('pasada-' + item.id); $event.stopPropagation()"
+                                  [title]="item.imagen ? 'Cambiar imagen' : 'Añadir imagen'">
+                            <mat-icon class="!text-base" [class.text-purple-600]="!item.imagen" [class.text-green-600]="item.imagen">
+                              {{ item.imagen ? 'image' : 'add_photo_alternate' }}
+                            </mat-icon>
+                          </button>
                           <button class="w-6 h-6 inline-flex items-center justify-center rounded hover:bg-blue-100 opacity-40 hover:opacity-100 transition-opacity"
                                   (click)="insertPasadaItem(acto.id, item.orden); $event.stopPropagation()"
                                   title="Insertar fila">
@@ -277,6 +267,25 @@ import { AuthService } from '../../../core/auth/auth.service';
                                   title="Eliminar fila">
                             <mat-icon class="!text-base text-red-600">delete</mat-icon>
                           </button>
+                        }
+                        <!-- Panel de upload (se muestra al hacer clic en el botón) -->
+                        @if (showImageUpload === 'pasada-' + item.id && canEdit()) {
+                          <div class="absolute right-0 top-full mt-1 p-2 bg-white border rounded shadow-lg z-50 w-48"
+                               (click)="$event.stopPropagation()">
+                            <div class="text-xs text-gray-600 mb-1 font-medium">Imagen</div>
+                            <app-image-upload
+                              [guionId]="guionId || ''"
+                              entityType="PASADA_ITEM"
+                              [entityId]="item.id"
+                              [currentImageUrl]="item.imagen || null"
+                              (imageUploaded)="onPasadaImageUploaded(acto.id, item.id, $event)"
+                              (imageRemoved)="onPasadaImageRemoved(acto.id, item.id)"
+                            />
+                            <button class="mt-2 text-xs text-gray-400 hover:text-gray-600 w-full text-center"
+                                    (click)="showImageUpload = null">
+                              Cerrar
+                            </button>
+                          </div>
                         }
                       </td>
                     </tr>
@@ -367,10 +376,20 @@ import { AuthService } from '../../../core/auth/auth.service';
                           <app-editable-cell
                             [value]="elem.observaciones || ''"
                             (valueChange)="updateElemento(escena.id, elem.id, 'observaciones', $event)"
+                            (imagenDelete)="deleteElementoImage(escena.id, elem.id)"
                             placeholder=""
+                            [imagen]="elem.imagen || null"
                           />
-                          <td class="border border-black p-1 text-center whitespace-nowrap">
+                          <td class="border border-black p-1 text-center whitespace-nowrap relative">
                             @if (canEdit()) {
+                              <!-- Botón imagen -->
+                              <button class="w-5 h-5 inline-flex items-center justify-center rounded hover:bg-purple-100 opacity-40 hover:opacity-100 transition-opacity"
+                                      (click)="toggleImageUpload('elem-' + elem.id); $event.stopPropagation()"
+                                      [title]="elem.imagen ? 'Cambiar imagen' : 'Añadir imagen'">
+                                <mat-icon class="!text-sm" [class.text-purple-600]="!elem.imagen" [class.text-green-600]="elem.imagen">
+                                  {{ elem.imagen ? 'image' : 'add_photo_alternate' }}
+                                </mat-icon>
+                              </button>
                               <button class="w-5 h-5 inline-flex items-center justify-center rounded hover:bg-blue-100 opacity-40 hover:opacity-100 transition-opacity"
                                       (click)="insertElemento(escena.id, elem.orden); $event.stopPropagation()"
                                       title="Insertar fila">
@@ -381,6 +400,25 @@ import { AuthService } from '../../../core/auth/auth.service';
                                       title="Eliminar fila">
                                 <mat-icon class="!text-sm text-red-600">delete</mat-icon>
                               </button>
+                            }
+                            <!-- Panel de upload para elemento -->
+                            @if (showImageUpload === 'elem-' + elem.id && canEdit()) {
+                              <div class="absolute right-0 top-full mt-1 p-2 bg-white border rounded shadow-lg z-50 w-48"
+                                   (click)="$event.stopPropagation()">
+                                <div class="text-xs text-gray-600 mb-1 font-medium">Imagen</div>
+                                <app-image-upload
+                                  [guionId]="guionId || ''"
+                                  entityType="TOP"
+                                  [entityId]="elem.id"
+                                  [currentImageUrl]="elem.imagen || null"
+                                  (imageUploaded)="onElementoImageUploaded(escena.id, elem.id, $event)"
+                                  (imageRemoved)="onElementoImageRemoved(escena.id, elem.id)"
+                                />
+                                <button class="mt-2 text-xs text-gray-400 hover:text-gray-600 w-full text-center"
+                                        (click)="showImageUpload = null">
+                                  Cerrar
+                                </button>
+                              </div>
                             }
                           </td>
                         </tr>
@@ -442,6 +480,9 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
   guion = this.guionService.guionActual;
   exporting = signal(false);
   showHistorial = signal(false);
+
+  // Para mostrar panel de upload de imagen
+  showImageUpload: string | null = null;
 
   estadoLabel = computed(() => {
     const estado = this.guion()?.estado;
@@ -527,9 +568,12 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
   }
 
   updateActo(actoId: string, field: string, value: string): void {
-    if (!this.canEdit()) return;
-    // TODO: Implementar cuando tengamos ActoService
-    console.log('updateActo', actoId, field, value);
+    if (!this.canEdit() || !this.guionId) return;
+    const data: any = {};
+    data[field] = value;
+    this.guionService.updateActo(this.guionId, actoId, data).subscribe({
+      error: () => this.showError('Error al actualizar acto')
+    });
   }
 
   addPasadaItem(actoId: string): void {
@@ -601,7 +645,7 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
   addElemento(escenaId: string): void {
     if (!this.canEdit()) return;
     this.guionService.createElemento(escenaId, {
-      tipoElemento: 'TOP',
+      tipoElemento: 'ANOTACION_LIBRE',
       numero: '',
       descripcion: ''
     }).subscribe({
@@ -611,8 +655,29 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
 
   insertElemento(escenaId: string, afterOrden: number): void {
     if (!this.canEdit()) return;
-    // TODO: Implementar inserción en posición
-    this.addElemento(escenaId);
+    // Crear elemento y luego reordenar para insertarlo en la posición correcta
+    this.guionService.createElemento(escenaId, {
+      tipoElemento: 'ANOTACION_LIBRE',
+      numero: '',
+      descripcion: '',
+      orden: afterOrden + 1
+    }).subscribe({
+      next: (newElem) => {
+        // Obtener la escena y reordenar
+        const acto = this.guion()?.actos.find(a =>
+          a.escenas.some(e => e.id === escenaId)
+        );
+        const escena = acto?.escenas.find(e => e.id === escenaId);
+        if (escena) {
+          // Construir nuevo orden: elementos antes, nuevo, elementos después
+          const before = escena.elementos.filter(e => e.orden <= afterOrden);
+          const after = escena.elementos.filter(e => e.orden > afterOrden && e.id !== newElem.id);
+          const newOrder = [...before.map(e => e.id), newElem.id, ...after.map(e => e.id)];
+          this.guionService.reorderElementos(escenaId, newOrder).subscribe();
+        }
+      },
+      error: () => this.showError('Error al insertar elemento')
+    });
   }
 
   updateElemento(escenaId: string, elementoId: string, field: string, value: string): void {
@@ -641,10 +706,15 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
   }
 
   addActo(): void {
-    if (!this.canEdit()) return;
-    // TODO: Implementar cuando tengamos endpoint
-    console.log('addActo');
-    this.showError('Crear acto aún no implementado');
+    if (!this.canEdit() || !this.guionId) return;
+    const numActos = this.guion()?.actos?.length || 0;
+    this.guionService.createActo(this.guionId, {
+      nombre: `ACTO ${numActos + 1}`,
+      orden: numActos + 1
+    }).subscribe({
+      next: () => this.showSuccess('Acto creado'),
+      error: () => this.showError('Error al crear acto')
+    });
   }
 
   // ==================== Drag & Drop ====================
@@ -702,4 +772,85 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
   private showError(message: string): void {
     this.snackBar.open(message, 'Cerrar', { duration: 5000, panelClass: 'snackbar-error' });
   }
+
+  // ==================== Imágenes ====================
+
+  toggleImageUpload(itemId: string): void {
+    this.showImageUpload = this.showImageUpload === itemId ? null : itemId;
+  }
+
+  onPasadaImageUploaded(actoId: string, itemId: string, image: GuionImage): void {
+    // Actualizar el item con la URL de la imagen
+    const imageUrl = `/api/tops/images/${image.id}`;
+    this.updatePasadaItem(actoId, itemId, 'imagen', imageUrl);
+    this.showImageUpload = null; // Cerrar panel
+  }
+
+  onPasadaImageRemoved(actoId: string, itemId: string): void {
+    this.updatePasadaItem(actoId, itemId, 'imagen', '');
+    this.showImageUpload = null; // Cerrar panel
+  }
+
+  deletePasadaImage(actoId: string, itemId: string): void {
+    // Obtener la URL de la imagen actual
+    const acto = this.guion()?.actos.find(a => a.id === actoId);
+    const item = acto?.pasada?.find(p => p.id === itemId);
+    if (item?.imagen) {
+      // Extraer ID de la imagen de la URL (/api/tops/images/123)
+      const match = item.imagen.match(/\/api\/tops\/images\/(\d+)/);
+      if (match) {
+        const imageId = match[1];
+        // Borrar de la BD
+        this.http.delete(`/api/tops/images/${imageId}`).subscribe({
+          next: () => {
+            this.updatePasadaItem(actoId, itemId, 'imagen', '');
+            this.showSuccess('Imagen eliminada');
+          },
+          error: () => this.showError('Error al eliminar imagen')
+        });
+        return;
+      }
+    }
+    // Si no hay imagen o no se puede extraer ID, solo limpiar referencia
+    this.updatePasadaItem(actoId, itemId, 'imagen', '');
+  }
+
+  // ==================== Imágenes de Elementos ====================
+
+  onElementoImageUploaded(escenaId: string, elemId: string, image: GuionImage): void {
+    const imageUrl = `/api/tops/images/${image.id}`;
+    this.updateElemento(escenaId, elemId, 'imagen', imageUrl);
+    this.showImageUpload = null;
+  }
+
+  onElementoImageRemoved(escenaId: string, elemId: string): void {
+    this.updateElemento(escenaId, elemId, 'imagen', '');
+    this.showImageUpload = null;
+  }
+
+  deleteElementoImage(escenaId: string, elemId: string): void {
+    // Buscar la escena y elemento
+    const acto = this.guion()?.actos.find(a =>
+      a.escenas.some(e => e.id === escenaId)
+    );
+    const escena = acto?.escenas.find(e => e.id === escenaId);
+    const elem = escena?.elementos.find(e => e.id === elemId);
+    if (elem?.imagen) {
+      // Extraer ID de la imagen de la URL
+      const match = elem.imagen.match(/\/api\/tops\/images\/(\d+)/);
+      if (match) {
+        const imageId = match[1];
+        this.http.delete(`/api/tops/images/${imageId}`).subscribe({
+          next: () => {
+            this.updateElemento(escenaId, elemId, 'imagen', '');
+            this.showSuccess('Imagen eliminada');
+          },
+          error: () => this.showError('Error al eliminar imagen')
+        });
+        return;
+      }
+    }
+    this.updateElemento(escenaId, elemId, 'imagen', '');
+  }
+
 }

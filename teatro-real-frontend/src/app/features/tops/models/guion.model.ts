@@ -9,7 +9,7 @@
 
 export type EstadoGuion = 'BORRADOR' | 'EN_EDICION' | 'VALIDADO' | 'PUBLICADO';
 
-export type TipoElemento = 'TOP' | 'EVENTO' | 'MUSICA' | 'LUZ' | 'SONIDO' | 'VIDEO' | 'MAQUINARIA' | 'UTILERIA' | 'VESTUARIO' | 'OTROS';
+export type TipoElemento = 'TOP' | 'ENTRADA' | 'MUTIS' | 'INTERNO' | 'AVISO' | 'PASADA_ITEM' | 'INSTRUCCION_TECNICA_PASADA' | 'PLANO_ESCENARIO' | 'ANOTACION_LIBRE';
 
 // ==================== Modelos para Lista (GuionResponse) ====================
 
@@ -162,6 +162,10 @@ export interface EscenaFormData {
 
 /**
  * Datos para crear/editar un elemento de guion
+ * NOTA: Los campos se mapean al backend así:
+ * - numero -> numeroTop
+ * - descripcion -> encabezado
+ * - observaciones -> contenido
  */
 export interface ElementoGuionFormData {
   tipoElemento: TipoElemento;
@@ -175,6 +179,40 @@ export interface ElementoGuionFormData {
   imagen?: string;
   colorHex?: string;
   orden?: number;
+}
+
+/**
+ * Request para el backend (nombres de campos del backend)
+ */
+export interface ElementoGuionBackendRequest {
+  tipoElemento: TipoElemento;
+  numeroTop?: string;
+  refPagina?: string;
+  refCompas?: string;
+  refTimecode?: string;
+  departamento?: string;
+  encabezado?: string;
+  contenido?: string;
+  imagen?: string;
+  orden?: number;
+}
+
+/**
+ * Convierte FormData del frontend a Request del backend
+ */
+export function toBackendRequest(data: ElementoGuionFormData): ElementoGuionBackendRequest {
+  return {
+    tipoElemento: data.tipoElemento,
+    numeroTop: data.numero,
+    refPagina: data.refPagina,
+    refCompas: data.refCompas,
+    refTimecode: data.refTimecode,
+    departamento: data.departamento,
+    encabezado: data.descripcion,
+    contenido: data.observaciones,
+    imagen: data.imagen,
+    orden: data.orden
+  };
 }
 
 /**
@@ -208,21 +246,21 @@ export function isLockedByOther(guion: Guion | GuionCompleto, currentUserId: str
 
 /**
  * Obtiene el color por defecto para un tipo de elemento
+ * Basado en colores definidos en reglas-tops1.md
  */
 export function getDefaultColorForTipo(tipo: TipoElemento): string {
   const colors: Record<TipoElemento, string> = {
-    TOP: '#CF102D',      // Carmesí Teatro Real
-    EVENTO: '#1E3A5F',   // Azul oscuro
-    MUSICA: '#6B21A8',   // Púrpura
-    LUZ: '#F59E0B',      // Amarillo/naranja
-    SONIDO: '#3B82F6',   // Azul
-    VIDEO: '#10B981',    // Verde
-    MAQUINARIA: '#6B7280', // Gris
-    UTILERIA: '#92400E', // Marrón
-    VESTUARIO: '#EC4899', // Rosa
-    OTROS: '#6B7280'     // Gris
+    TOP: '#BDD6EE',                    // Azul claro - Instrucciones técnicas
+    ENTRADA: '#FFE599',                 // Amarillo - Indicación Entrada
+    MUTIS: '#FFFFFF',                   // Blanco - Indicación Mutis
+    INTERNO: '#E2EFD9',                 // Verde claro - Indicación Interna
+    INSTRUCCION_TECNICA_PASADA: '#BDD6EE',  // Azul claro
+    PLANO_ESCENARIO: '#BDD6EE',         // Azul claro
+    ANOTACION_LIBRE: '#FFFFFF',         // Blanco
+    AVISO: '#FFC7CE',                    // Rosa claro - Avisos
+    PASADA_ITEM: '#FFFFFF'              // Blanco
   };
-  return colors[tipo] || '#6B7280';
+  return colors[tipo] || '#FFFFFF';
 }
 
 /**
@@ -240,13 +278,12 @@ export const ESTADO_LABELS: Record<EstadoGuion, string> = {
  */
 export const TIPO_ELEMENTO_LABELS: Record<TipoElemento, string> = {
   TOP: 'TOP',
-  EVENTO: 'Evento',
-  MUSICA: 'Música',
-  LUZ: 'Luz',
-  SONIDO: 'Sonido',
-  VIDEO: 'Video',
-  MAQUINARIA: 'Maquinaria',
-  UTILERIA: 'Utilería',
-  VESTUARIO: 'Vestuario',
-  OTROS: 'Otros'
+  ENTRADA: 'Entrada',
+  MUTIS: 'Mutis',
+  INTERNO: 'Interno',
+  AVISO: 'Aviso',
+  PASADA_ITEM: 'Pasada',
+  INSTRUCCION_TECNICA_PASADA: 'Instr. Técnica',
+  PLANO_ESCENARIO: 'Plano',
+  ANOTACION_LIBRE: 'Anotación'
 };

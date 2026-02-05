@@ -19,14 +19,14 @@ public class GuionImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long guionId;
+    @Column(name = "guion_id", nullable = false, length = 36)
+    private String guionId;
 
     @Column(nullable = false, length = 50)
     private String entityType;
 
-    @Column(nullable = false)
-    private Long entityId;
+    @Column(name = "entity_id", nullable = false, length = 36)
+    private String entityId;
 
     @Column(nullable = false, length = 255)
     private String filename;
@@ -37,8 +37,9 @@ public class GuionImage {
     @Column(nullable = false)
     private Long fileSize;
 
-    @Column(nullable = false, length = 500)
-    private String storagePath;
+    @Lob
+    @Column(nullable = false)
+    private byte[] imageData;
 
     @Column(name = "uploaded_by")
     private Long uploadedBy;
@@ -50,15 +51,15 @@ public class GuionImage {
     public GuionImage() {
     }
 
-    public GuionImage(Long guionId, String entityType, Long entityId, String filename,
-                      String mimeType, Long fileSize, String storagePath, Long uploadedBy) {
+    public GuionImage(String guionId, String entityType, String entityId, String filename,
+                      String mimeType, Long fileSize, byte[] imageData, Long uploadedBy) {
         this.guionId = guionId;
         this.entityType = entityType;
         this.entityId = entityId;
         this.filename = filename;
         this.mimeType = mimeType;
         this.fileSize = fileSize;
-        this.storagePath = storagePath;
+        this.imageData = imageData;
         this.uploadedBy = uploadedBy;
         this.uploadedAt = LocalDateTime.now();
     }
@@ -72,11 +73,11 @@ public class GuionImage {
         this.id = id;
     }
 
-    public Long getGuionId() {
+    public String getGuionId() {
         return guionId;
     }
 
-    public void setGuionId(Long guionId) {
+    public void setGuionId(String guionId) {
         this.guionId = guionId;
     }
 
@@ -88,11 +89,11 @@ public class GuionImage {
         this.entityType = entityType;
     }
 
-    public Long getEntityId() {
+    public String getEntityId() {
         return entityId;
     }
 
-    public void setEntityId(Long entityId) {
+    public void setEntityId(String entityId) {
         this.entityId = entityId;
     }
 
@@ -120,12 +121,12 @@ public class GuionImage {
         this.fileSize = fileSize;
     }
 
-    public String getStoragePath() {
-        return storagePath;
+    public byte[] getImageData() {
+        return imageData;
     }
 
-    public void setStoragePath(String storagePath) {
-        this.storagePath = storagePath;
+    public void setImageData(byte[] imageData) {
+        this.imageData = imageData;
     }
 
     public Long getUploadedBy() {
@@ -148,9 +149,9 @@ public class GuionImage {
     public String toString() {
         return "GuionImage{" +
                 "id=" + id +
-                ", guionId=" + guionId +
+                ", guionId='" + guionId + '\'' +
                 ", entityType='" + entityType + '\'' +
-                ", entityId=" + entityId +
+                ", entityId='" + entityId + '\'' +
                 ", filename='" + filename + '\'' +
                 ", mimeType='" + mimeType + '\'' +
                 ", fileSize=" + fileSize +
