@@ -215,8 +215,8 @@ import { AuthService } from '../../../core/auth/auth.service';
                     }
                     <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[10%]">DPTO</th>
                     <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[12%]">LUGAR</th>
-                    <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[50%]">DESCRIPCIÓN</th>
-                    <th class="border border-black p-1.5 text-center font-bold bg-gray-100 w-[18%]">IMAGEN</th>
+                    <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[58%]">DESCRIPCIÓN</th>
+                    <th class="border border-black p-1.5 text-center font-bold bg-gray-100 w-[10%]">IMÁGENES</th>
                     <th class="border border-black p-1.5 text-center font-bold bg-gray-100 w-[8%]"></th>
                   </tr>
                 </thead>
@@ -247,27 +247,42 @@ import { AuthService } from '../../../core/auth/auth.service';
                         [multiline]="true"
                         [enableVoice]="true"
                       />
-                      <!-- Columna IMAGEN -->
-                      <td class="border border-black p-2 text-center align-middle">
+                      <!-- Columna IMÁGENES -->
+                      <td class="border border-black p-1 text-center align-middle relative">
                         @if (item.imagen) {
                           <div class="relative inline-block group">
-                            <img [src]="item.imagen" alt="Imagen" class="max-w-full max-h-20 rounded border border-gray-300 object-contain mx-auto">
+                            <img [src]="item.imagen" alt="Imagen" class="max-w-full max-h-16 rounded border border-gray-300 object-contain mx-auto cursor-pointer"
+                                 (click)="toggleImageUpload('pasada-' + item.id); $event.stopPropagation()">
                             @if (canEdit()) {
-                              <button class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs"
+                              <button class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px]"
                                       (click)="deletePasadaImage(acto.id, item.id); $event.stopPropagation()"
                                       title="Eliminar imagen">✕</button>
                             }
                           </div>
                         } @else if (canEdit()) {
-                          <app-image-upload
-                            [guionId]="guionId || ''"
-                            entityType="PASADA_ITEM"
-                            [entityId]="item.id"
-                            [currentImageUrl]="null"
-                            (imageUploaded)="onPasadaImageUploaded(acto.id, item.id, $event)"
-                          />
+                          <button class="w-6 h-6 inline-flex items-center justify-center rounded hover:bg-purple-100 opacity-50 hover:opacity-100 transition-opacity"
+                                  (click)="toggleImageUpload('pasada-' + item.id); $event.stopPropagation()"
+                                  title="Añadir imagen">
+                            <mat-icon class="!text-base text-purple-600">add_photo_alternate</mat-icon>
+                          </button>
                         } @else {
-                          <span class="text-gray-300 text-xs">-</span>
+                          <span class="text-gray-300">-</span>
+                        }
+                        <!-- Popup de upload -->
+                        @if (showImageUpload === 'pasada-' + item.id && canEdit()) {
+                          <div class="absolute left-1/2 -translate-x-1/2 top-full mt-1 p-2 bg-white border rounded shadow-lg z-50 w-48"
+                               (click)="$event.stopPropagation()">
+                            <app-image-upload
+                              [guionId]="guionId || ''"
+                              entityType="PASADA_ITEM"
+                              [entityId]="item.id"
+                              [currentImageUrl]="item.imagen || null"
+                              (imageUploaded)="onPasadaImageUploaded(acto.id, item.id, $event)"
+                              (imageRemoved)="onPasadaImageRemoved(acto.id, item.id)"
+                            />
+                            <button class="mt-2 text-xs text-gray-400 hover:text-gray-600 w-full text-center"
+                                    (click)="showImageUpload = null">Cerrar</button>
+                          </div>
                         }
                       </td>
                       <!-- Columna Acciones -->
@@ -337,8 +352,8 @@ import { AuthService } from '../../../core/auth/auth.service';
                         <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[6%]">TOP</th>
                         <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[8%]">DPTO</th>
                         <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[24%]">QUIEN/QUE</th>
-                        <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[24%]">OBSERVACIONES</th>
-                        <th class="border border-black p-1.5 text-center font-bold bg-gray-100 w-[18%]">IMAGEN</th>
+                        <th class="border border-black p-1.5 text-left font-bold bg-gray-100 w-[28%]">OBSERVACIONES</th>
+                        <th class="border border-black p-1.5 text-center font-bold bg-gray-100 w-[10%]">IMÁGENES</th>
                         <th class="border border-black p-1.5 text-center font-bold bg-gray-100 w-[8%]"></th>
                       </tr>
                     </thead>
@@ -379,27 +394,42 @@ import { AuthService } from '../../../core/auth/auth.service';
                             [multiline]="true"
                             [enableVoice]="true"
                           />
-                          <!-- Columna IMAGEN -->
-                          <td class="border border-black p-2 text-center align-middle">
+                          <!-- Columna IMÁGENES -->
+                          <td class="border border-black p-1 text-center align-middle relative">
                             @if (elem.imagen) {
                               <div class="relative inline-block group">
-                                <img [src]="elem.imagen" alt="Imagen" class="max-w-full max-h-16 rounded border border-gray-300 object-contain mx-auto">
+                                <img [src]="elem.imagen" alt="Imagen" class="max-w-full max-h-12 rounded border border-gray-300 object-contain mx-auto cursor-pointer"
+                                     (click)="toggleImageUpload('elem-' + elem.id); $event.stopPropagation()">
                                 @if (canEdit()) {
-                                  <button class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs"
+                                  <button class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px]"
                                           (click)="deleteElementoImage(escena.id, elem.id); $event.stopPropagation()"
                                           title="Eliminar imagen">✕</button>
                                 }
                               </div>
                             } @else if (canEdit()) {
-                              <app-image-upload
-                                [guionId]="guionId || ''"
-                                entityType="TOP"
-                                [entityId]="elem.id"
-                                [currentImageUrl]="null"
-                                (imageUploaded)="onElementoImageUploaded(escena.id, elem.id, $event)"
-                              />
+                              <button class="w-5 h-5 inline-flex items-center justify-center rounded hover:bg-purple-100 opacity-50 hover:opacity-100 transition-opacity"
+                                      (click)="toggleImageUpload('elem-' + elem.id); $event.stopPropagation()"
+                                      title="Añadir imagen">
+                                <mat-icon class="!text-sm text-purple-600">add_photo_alternate</mat-icon>
+                              </button>
                             } @else {
-                              <span class="text-gray-300 text-xs">-</span>
+                              <span class="text-gray-300">-</span>
+                            }
+                            <!-- Popup de upload -->
+                            @if (showImageUpload === 'elem-' + elem.id && canEdit()) {
+                              <div class="absolute left-1/2 -translate-x-1/2 top-full mt-1 p-2 bg-white border rounded shadow-lg z-50 w-48"
+                                   (click)="$event.stopPropagation()">
+                                <app-image-upload
+                                  [guionId]="guionId || ''"
+                                  entityType="TOP"
+                                  [entityId]="elem.id"
+                                  [currentImageUrl]="elem.imagen || null"
+                                  (imageUploaded)="onElementoImageUploaded(escena.id, elem.id, $event)"
+                                  (imageRemoved)="onElementoImageRemoved(escena.id, elem.id)"
+                                />
+                                <button class="mt-2 text-xs text-gray-400 hover:text-gray-600 w-full text-center"
+                                        (click)="showImageUpload = null">Cerrar</button>
+                              </div>
                             }
                           </td>
                           <!-- Columna Acciones -->
