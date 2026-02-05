@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ThemeService } from '../../../core/services/theme.service';
 
 // Datos reales extraídos del Excel CALENDARIO_2025-Almacenes.xlsx - Diciembre 2025
@@ -27,24 +27,42 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="excel-page" [class.dark]="isDark()">
-      <div class="header">
-        <h1 class="titulo">📦 CALENDARIO ALMACENES - DICIEMBRE 2025</h1>
-        <div class="header-actions">
-          <a [routerLink]="['/tempo/movimientos/lista']" class="btn-back"><span class="material-icons">list</span> Lista de Movimientos</a>
+    <div class="page-container" [ngClass]="isDark() ? 'page-dark' : 'page-light'">
+      <!-- Fixed Header -->
+      <div class="fixed-header">
+        <!-- Title row - same structure as Espacios/Cartelería -->
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+          <div>
+            <h1 class="text-3xl font-semibold" [class]="isDark() ? 'text-white' : 'text-title-light'">Calendario Almacenes</h1>
+            <p [class]="isDark() ? 'text-gray-400' : 'text-subtitle-light'">Diciembre 2025 - Gestión de movimientos de producciones</p>
+          </div>
+          <div class="flex flex-wrap items-center justify-end gap-2">
+            <a [routerLink]="['/tempo/movimientos/lista']" class="btn-action-secondary">
+              <span class="material-icons">list</span>
+              Lista de Movimientos
+            </a>
+            <button class="btn-action-primary" (click)="openModal()">
+              <span class="material-icons">add</span>
+              Nuevo Movimiento
+            </button>
+          </div>
+        </div>
+
+        <!-- Vista selector -->
+        <div class="vista-selector">
+          <label class="vista-label" [class.text-gray-400]="isDark()">Vista:</label>
+          <select class="vista-select" [class.vista-select-dark]="isDark()" [value]="vistaActual()" (change)="cambiarVista($any($event.target).value)">
+            <option value="RECOGIDAS_TR">🚚 Producciones que recoge el TR</option>
+            <option value="ALQUILERES_DEVOLUCIONES">📤 Producciones que alquilamos, devolvemos o mandamos a coproductores</option>
+          </select>
         </div>
       </div>
 
-      <div class="selector-vista">
-        <label>📋 Vista:</label>
-        <select [value]="vistaActual()" (change)="cambiarVista($any($event.target).value)">
-          <option value="RECOGIDAS_TR">🚚 Producciones que recoge el TR</option>
-          <option value="ALQUILERES_DEVOLUCIONES">📤 Producciones que alquilamos, devolvemos o mandamos a coproductores</option>
-        </select>
-      </div>
+      <!-- Scrollable Content -->
 
-      @if (vistaActual() === 'RECOGIDAS_TR') {
-        <div class="container">
+      <div class="scrollable-content">
+        @if (vistaActual() === 'RECOGIDAS_TR') {
+        <div class="grid-container">
           <div class="grid">
             <div class="grid-header">
               <div class="cell corner">FECHA / HORA</div>
@@ -101,10 +119,10 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
             }
           </div>
         </div>
-      }
+        }
 
-      @if (vistaActual() === 'ALQUILERES_DEVOLUCIONES') {
-        <div class="container">
+        @if (vistaActual() === 'ALQUILERES_DEVOLUCIONES') {
+        <div class="grid-container">
           <div class="grid">
             <div class="grid-header">
               <div class="cell corner">FECHA / HORA</div>
@@ -154,133 +172,182 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
             }
           </div>
         </div>
-      }
+        }
+      </div>
     </div>
   `,
   styles: [`
     :host {
       display: block;
       height: 100%;
-      overflow: hidden;
     }
-    
-    .excel-page {
-      height: 100vh;
+
+    /* Layout - same as Cartelería */
+    .page-container {
       display: flex;
       flex-direction: column;
-      background: #f8f9fa;
-      overflow: hidden;
+      height: 100%;
+      font-family: 'Montserrat', sans-serif;
     }
-    
-    .dark {
-      background: #0d0d0d;
+
+    .page-light {
+      background: #f2f4f7;
+      color: #1f2937;
     }
-    
-    .header {
-      flex-shrink: 0;
-      background: #fff;
-      border-bottom: 3px solid #CF102D;
-      padding: 1.5rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    }
-    
-    .dark .header {
+
+    .page-container.page-dark {
       background: #1a1a1a;
-    }
-    
-    .titulo {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: #1a1a1a;
-      margin: 0;
-      text-transform: uppercase;
-    }
-    
-    .dark .titulo {
+      border-radius: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
       color: #e5e7eb;
     }
-    
-    .header-actions {
-      display: flex;
-      gap: 0.5rem;
+
+    .fixed-header {
+      flex-shrink: 0;
+      padding: 1.5rem 2rem 0 2rem;
     }
-    
-    .btn-back {
+
+    /* Text colors - same as Espacios/Cartelería */
+    .text-title-light { color: #1f2937; }
+    .text-subtitle-light { color: #6b7280; }
+
+    .scrollable-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 2rem 2rem 2rem;
+    }
+
+    .btn-secondary-header {
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.75rem 1.25rem;
+      padding: 0.75rem 1.5rem;
+      background: white;
+      color: #374151;
+      border: 1px solid #d1d5db;
       border-radius: 8px;
       font-weight: 600;
       font-size: 0.875rem;
       cursor: pointer;
-      text-decoration: none;
-      border: none;
       transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-secondary-header .material-icons {
+      font-size: 1.25rem;
+    }
+
+    .btn-secondary-header:hover {
       background: #f3f4f6;
-      color: #374151;
-      border: 2px solid #d1d5db;
+      transform: translateY(-2px);
     }
-    
-    .btn-back:hover {
-      background: #e5e7eb;
-    }
-    
-    .dark .btn-back {
+
+    .btn-secondary-header.btn-secondary-header-dark {
       background: #262626;
       color: #e5e7eb;
       border-color: #374151;
     }
-    
-    .selector-vista {
-      flex-shrink: 0;
-      background: #fff;
-      padding: 1rem 2rem;
-      border-bottom: 2px solid #e5e7eb;
+
+    .btn-secondary-header.btn-secondary-header-dark:hover {
+      background: #333333;
+    }
+
+    .btn-nuevo {
       display: flex;
       align-items: center;
-      gap: 1rem;
-    }
-    
-    .dark .selector-vista {
-      background: #1a1a1a;
-      border-bottom-color: #333;
-    }
-    
-    .selector-vista label {
-      font-size: 0.875rem;
-      font-weight: 700;
-      color: #374151;
-    }
-    
-    .dark .selector-vista label {
-      color: #9ca3af;
-    }
-    
-    .selector-vista select {
-      padding: 0.75rem 1rem;
-      border: 2px solid #d1d5db;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: #CF102D;
+      color: white;
+      border: none;
       border-radius: 8px;
-      background: #fff;
-      color: #1f2937;
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(207, 16, 45, 0.3);
+    }
+
+    .btn-nuevo .material-icons {
+      font-size: 1.25rem;
+    }
+
+    .btn-nuevo:hover {
+      background: #a80d25;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(207, 16, 45, 0.4);
+    }
+
+    /* Vista selector */
+    .vista-selector {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem;
+      background: white;
+      border-radius: 0.75rem;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      margin-bottom: 1rem;
+    }
+
+    .page-dark .vista-selector {
+      background: #1a1a1a;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .vista-label {
       font-size: 0.875rem;
       font-weight: 600;
-      min-width: 450px;
+      color: #6b7280;
+      flex-shrink: 0;
     }
-    
-    .dark .selector-vista select {
+
+    .vista-select {
+      flex: 1;
+      min-width: 200px;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #f9fafb;
+      color: #1f2937;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .vista-select:focus {
+      outline: none;
+      border-color: #CF102D;
+      box-shadow: 0 0 0 2px rgba(207, 16, 45, 0.1);
+    }
+
+    .vista-select.vista-select-dark {
       background: #262626;
       color: #e5e7eb;
       border-color: #374151;
     }
-    
-    .container {
-      flex: 1;
-      overflow: auto;
-      padding: 1.5rem;
+
+    .vista-select.vista-select-dark option {
+      background: #262626;
+      color: #e5e7eb;
+    }
+
+    /* Grid container */
+    .grid-container {
+      background: white;
+      border-radius: 0.75rem;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      margin-top: 1rem;
+    }
+
+    .page-dark .grid-container {
+      background: #1a1a1a;
+      border-color: rgba(255, 255, 255, 0.1);
     }
     
     .grid {
@@ -291,7 +358,7 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
       border-collapse: collapse;
     }
     
-    .dark .grid {
+    .page-dark .grid {
       background: #1a1a1a;
       border-color: #374151;
     }
@@ -304,7 +371,7 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
       background: #f9fafb;
     }
     
-    .dark .grid-header {
+    .page-dark .grid-header {
       background: #262626;
     }
     
@@ -317,7 +384,7 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
       font-size: 0.8rem;
     }
     
-    .dark .cell {
+    .page-dark .cell {
       border-color: #374151;
     }
     
@@ -335,7 +402,7 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
       letter-spacing: 0.5px;
     }
     
-    .dark .corner {
+    .page-dark .corner {
       background: #262626;
       color: #9ca3af;
     }
@@ -352,7 +419,7 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
       letter-spacing: 0.5px;
     }
     
-    .dark .col-header {
+    .page-dark .col-header {
       background: #262626;
       color: #9ca3af;
     }
@@ -365,7 +432,7 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
       background: #fafafa;
     }
     
-    .dark .grid-row.weekend-row {
+    .page-dark .grid-row.weekend-row {
       background: #171717;
     }
     
@@ -384,7 +451,7 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
       padding: 1rem;
     }
     
-    .dark .day-label {
+    .page-dark .day-label {
       background: #1a1a1a;
       border-color: #374151;
       color: #e5e7eb;
@@ -394,7 +461,7 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
       background: #fafafa;
     }
     
-    .dark .day-label.weekend {
+    .page-dark .day-label.weekend {
       background: #171717;
     }
     
@@ -409,7 +476,7 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
       color: #374151;
     }
     
-    .dark .day-name {
+    .page-dark .day-name {
       color: #9ca3af;
     }
     
@@ -422,7 +489,7 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
       background: #fff;
     }
     
-    .dark .day-data {
+    .page-dark .day-data {
       border-color: #374151;
       background: #1a1a1a;
     }
@@ -480,43 +547,43 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
       border-left-color: #ef4444;
     }
     
-    .dark .prod {
+    .page-dark .prod {
       background: #1e3a8a;
       color: #dbeafe;
       border-left-color: #3b82f6;
     }
     
-    .dark .cam {
+    .page-dark .cam {
       background: #064e3b;
       color: #d1fae5;
       border-left-color: #10b981;
     }
     
-    .dark .lug {
+    .page-dark .lug {
       background: #831843;
       color: #fce7f3;
       border-left-color: #ec4899;
     }
     
-    .dark .arr {
+    .page-dark .arr {
       background: #312e81;
       color: #e0e7ff;
       border-left-color: #6366f1;
     }
     
-    .dark .prod-sal {
+    .page-dark .prod-sal {
       background: #7c2d12;
       color: #fed7aa;
       border-left-color: #f97316;
     }
     
-    .dark .cam-sal {
+    .page-dark .cam-sal {
       background: #78350f;
       color: #fef3c7;
       border-left-color: #eab308;
     }
     
-    .dark .lug-sal {
+    .page-dark .lug-sal {
       background: #7f1d1d;
       color: #fecaca;
       border-left-color: #ef4444;
@@ -536,7 +603,7 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
       border-bottom: 2px solid #9ca3af;
     }
     
-    .dark .separator-line {
+    .page-dark .separator-line {
       background: #262626;
       border-top-color: #4b5563;
       border-bottom-color: #4b5563;
@@ -545,9 +612,15 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
 })
 export class LogisticaAlmacenesExcelComponent {
   private themeService = inject(ThemeService);
+  private router = inject(Router);
   isDark = this.themeService.isDark;
 
   vistaActual = signal<TipoVista>('RECOGIDAS_TR');
+
+  openModal(): void {
+    // Navega a la lista con query param para abrir el modal
+    this.router.navigate(['/tempo/movimientos/lista'], { queryParams: { openModal: true } });
+  }
 
   // Días de diciembre 2025
   diasMes: DiaCalendario[] = [

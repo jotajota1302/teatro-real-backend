@@ -502,8 +502,8 @@ interface DashboardStats {
             <h1 class="text-3xl font-semibold" [class]="isDark() ? 'text-title-dark' : 'text-title-light'">Gestión de Espacios</h1>
             <p [class]="isDark() ? 'text-subtitle-dark' : 'text-subtitle-light'">Configuración de salas, almacenes y espacios del Teatro Real</p>
           </div>
-          <button class="btn-nuevo" (click)="openModal()">
-            <span class="material-icons text-lg">add</span>
+          <button class="btn-action-primary" (click)="openModal()">
+            <span class="material-icons">add</span>
             Nuevo Espacio
           </button>
         </div>

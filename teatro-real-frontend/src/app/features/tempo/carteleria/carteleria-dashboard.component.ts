@@ -36,8 +36,8 @@ interface SignageEntry {
               <h1 class="text-3xl font-semibold" [class]="isDark() ? 'text-title-dark' : 'text-title-light'">Cartelería Digital</h1>
               <p [class]="isDark() ? 'text-subtitle-dark' : 'text-subtitle-light'">Pantallas de información para salas</p>
             </div>
-            <a href="/carteleria/global" target="_blank" class="btn-nuevo">
-              <span class="material-icons text-lg">open_in_new</span>
+            <a href="/carteleria/global" target="_blank" class="btn-action-primary">
+              <span class="material-icons">open_in_new</span>
               Abrir Vista Global
             </a>
           </div>

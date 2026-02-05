@@ -22,18 +22,38 @@ import { ThemeService } from '../../core/services/theme.service';
     <!-- Indicador de estado del backend -->
     <app-backend-status-indicator></app-backend-status-indicator>
 
+    <!-- Mobile/Collapsed Menu Overlay - visible en móvil o cuando sidenav no está fijo -->
+    @if (mobileMenuOpen()) {
+      <div
+        class="mobile-overlay fixed inset-0 bg-black/50 z-[60]"
+        [class.lg:hidden]="sidenavFixed()"
+        (click)="closeMobileMenu()">
+      </div>
+    }
+
+    <!-- Mobile/Collapsed Drawer - visible en móvil o cuando sidenav no está fijo -->
+    <div
+      class="mobile-drawer fixed inset-y-0 left-0 z-[70] w-72 transform transition-transform duration-300 ease-in-out"
+      [class.lg:hidden]="sidenavFixed()"
+      [class.translate-x-0]="mobileMenuOpen()"
+      [class.-translate-x-full]="!mobileMenuOpen()">
+      <app-sidebar [isMobile]="true" (linkClicked)="closeMobileMenu()"></app-sidebar>
+    </div>
+
     <!-- Layout principal - altura fija sin scroll -->
     <div
       class="h-screen overflow-hidden font-montserrat transition-colors duration-300"
-      [class]="bgClass()">
+      [ngClass]="bgClass()">
 
-      <!-- Sidebar flotante - oculto en móvil -->
-      <app-sidebar class="hidden md:block"></app-sidebar>
+      <!-- Sidebar flotante - oculto en pantallas pequeñas o cuando no está fijo -->
+      @if (sidenavFixed()) {
+        <app-sidebar class="desktop-sidebar"></app-sidebar>
+      }
 
       <!-- Área de contenido principal - flex column para distribuir altura -->
       <div
         class="h-screen flex flex-col transition-all duration-300"
-        [class]="contentAreaClass()">
+        [ngClass]="contentAreaClass()">
 
         <!-- Header - altura fija -->
         <div class="flex-shrink-0 z-30 px-4 pt-4">
@@ -55,6 +75,21 @@ import { ThemeService } from '../../core/services/theme.service';
       display: block;
     }
 
+    /* Mobile overlay animation */
+    .mobile-overlay {
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Mobile drawer */
+    .mobile-drawer {
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+    }
+
     /* Hacer que el contenido del router-outlet ocupe todo el espacio disponible */
     main {
       display: flex;
@@ -67,6 +102,17 @@ import { ThemeService } from '../../core/services/theme.service';
       display: flex;
       flex-direction: column;
     }
+
+    /* Hide desktop sidebar on small screens */
+    .desktop-sidebar {
+      display: none;
+    }
+
+    @media (min-width: 1024px) {
+      .desktop-sidebar {
+        display: block;
+      }
+    }
   `]
 })
 export class MainLayoutComponent {
@@ -74,6 +120,7 @@ export class MainLayoutComponent {
 
   isDark = this.theme.isDark;
   sidenavFixed = this.theme.sidenavFixed;
+  mobileMenuOpen = this.theme.mobileMenuOpen;
 
   bgClass = computed(() => {
     return this.isDark() ? 'bg-[#1a1a2e]' : 'bg-gray-100';
@@ -84,7 +131,11 @@ export class MainLayoutComponent {
     // El sidebar es w-72 (18rem = 288px) + ml-4 (1rem = 16px) = 304px
     // Añadimos mr-4 para equilibrar
     return this.sidenavFixed()
-      ? 'md:ml-[304px] md:mr-4'
+      ? 'lg:ml-[304px] lg:mr-4'
       : '';
   });
+
+  closeMobileMenu(): void {
+    this.theme.closeMobileMenu();
+  }
 }

@@ -1,4 +1,4 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,8 +12,10 @@ import { AuthService } from '../../core/auth/auth.service';
   template: `
     <!-- Sidebar flotante estilo MVP -->
     <aside
-      class="fixed inset-y-0 left-0 z-50 my-4 ml-4 w-72 rounded-xl border transition-all duration-300 flex flex-col overflow-hidden"
-      [class]="sidenavClasses()">
+      class="sidebar-container transition-all duration-300 flex flex-col overflow-hidden"
+      [ngClass]="sidenavClasses()"
+      [class.sidebar-fixed]="!isMobile()"
+      [class.sidebar-mobile]="isMobile()">
 
       <!-- Logo / Brand -->
       <div class="flex items-center justify-center px-6 py-5">
@@ -28,30 +30,30 @@ import { AuthService } from '../../core/auth/auth.service';
         <!-- TEMPO Section -->
         @if (canAccessTempo()) {
           <div class="mb-4">
-            <p class="mx-3 mt-4 mb-2 text-xs font-bold uppercase tracking-wider" [class]="textMutedClass()">
+            <p class="mx-3 mt-4 mb-2 text-xs font-bold uppercase tracking-wider" [ngClass]="textMutedClass()">
               Tempo
             </p>
             <ul class="flex flex-col gap-1">
               <li>
-                <a routerLink="/tempo/espacios" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
+                <a routerLink="/tempo/espacios" routerLinkActive="active" class="nav-item" [ngClass]="navItemClass()" (click)="onLinkClick()">
                   <mat-icon class="nav-icon">location_city</mat-icon>
                   <span>Espacios</span>
                 </a>
               </li>
               <li>
-                <a routerLink="/tempo/calendario" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
+                <a routerLink="/tempo/calendario" routerLinkActive="active" class="nav-item" [ngClass]="navItemClass()" (click)="onLinkClick()">
                   <mat-icon class="nav-icon">calendar_month</mat-icon>
                   <span>Calendario</span>
                 </a>
               </li>
               <li>
-                <a routerLink="/tempo/movimientos" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
+                <a routerLink="/tempo/movimientos" routerLinkActive="active" class="nav-item" [ngClass]="navItemClass()" (click)="onLinkClick()">
                   <mat-icon class="nav-icon">local_shipping</mat-icon>
                   <span>Logística</span>
                 </a>
               </li>
               <li>
-                <a routerLink="/tempo/carteleria" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
+                <a routerLink="/tempo/carteleria" routerLinkActive="active" class="nav-item" [ngClass]="navItemClass()" (click)="onLinkClick()">
                   <mat-icon class="nav-icon">tv</mat-icon>
                   <span>Cartelería</span>
                 </a>
@@ -63,12 +65,12 @@ import { AuthService } from '../../core/auth/auth.service';
         <!-- TOPS Section -->
         @if (canAccessTops()) {
           <div class="mb-4">
-            <p class="mx-3 mt-4 mb-2 text-xs font-bold uppercase tracking-wider" [class]="textMutedClass()">
+            <p class="mx-3 mt-4 mb-2 text-xs font-bold uppercase tracking-wider" [ngClass]="textMutedClass()">
               Tops
             </p>
             <ul class="flex flex-col gap-1">
               <li>
-                <a routerLink="/tops" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item" [class]="navItemClass()">
+                <a routerLink="/tops" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item" [ngClass]="navItemClass()" (click)="onLinkClick()">
                   <mat-icon class="nav-icon">description</mat-icon>
                   <span>Guiones Técnicos</span>
                 </a>
@@ -82,7 +84,7 @@ import { AuthService } from '../../core/auth/auth.service';
           <div class="mt-6">
             <ul class="flex flex-col gap-1">
               <li>
-                <a routerLink="/admin" routerLinkActive="active" class="nav-item" [class]="navItemClass()">
+                <a routerLink="/admin" routerLinkActive="active" class="nav-item" [ngClass]="navItemClass()" (click)="onLinkClick()">
                   <mat-icon class="nav-icon">admin_panel_settings</mat-icon>
                   <span>Admin</span>
                 </a>
@@ -93,14 +95,37 @@ import { AuthService } from '../../core/auth/auth.service';
       </nav>
 
       <!-- Footer -->
-      <div class="px-6 py-4 border-t" [class]="borderClass()">
-        <p class="text-xs" [class]="textMutedClass()">© Teatro Real Madrid</p>
+      <div class="px-6 py-4 border-t" [ngClass]="borderClass()">
+        <p class="text-xs" [ngClass]="textMutedClass()">© Teatro Real Madrid</p>
       </div>
     </aside>
   `,
   styles: [`
     :host {
       display: block;
+    }
+
+    .sidebar-container {
+      border-radius: 0.75rem;
+      border-width: 1px;
+    }
+
+    .sidebar-fixed {
+      position: fixed;
+      inset-block: 0;
+      left: 0;
+      z-index: 50;
+      margin: 1rem;
+      margin-right: 0;
+      width: 18rem;
+    }
+
+    .sidebar-mobile {
+      height: 100%;
+      width: 100%;
+      border-radius: 0;
+      border: none;
+      margin: 0;
     }
 
     .nav-item {
@@ -150,6 +175,10 @@ export class SidebarComponent {
   private theme = inject(ThemeService);
   private auth = inject(AuthService);
 
+  // Inputs/Outputs para menú móvil
+  isMobile = input<boolean>(false);
+  linkClicked = output<void>();
+
   isDark = this.theme.isDark;
 
   // Permission checks as computed signals
@@ -181,4 +210,10 @@ export class SidebarComponent {
   borderClass = computed(() => {
     return this.isDark() ? 'border-gray-800' : 'border-gray-200';
   });
+
+  onLinkClick(): void {
+    if (this.isMobile()) {
+      this.linkClicked.emit();
+    }
+  }
 }

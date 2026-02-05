@@ -3,7 +3,7 @@
 import { Component, OnInit, inject, DestroyRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   LogisticaService,
@@ -26,99 +26,103 @@ const ESTADO_LABELS: Record<string, string> = {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
-    <div class="page" [class]="isDark() ? 'page-dark' : 'page-light'">
-      <div class="space-y-6">
-        <!-- Header -->
-        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div class="page-container" [ngClass]="isDark() ? 'page-dark' : 'page-light'">
+      <!-- Fixed Header -->
+      <div class="fixed-header">
+        <!-- Title row - same structure as Espacios/Cartelería -->
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
           <div>
-            <h1 class="text-3xl font-semibold" [class]="isDark() ? 'text-white' : 'text-gray-800'">Logística de Almacenes</h1>
-            <p [class]="isDark() ? 'text-gray-400' : 'text-gray-500'">Gestión de recogidas y salidas de producciones</p>
+            <h1 class="text-3xl font-semibold" [class]="isDark() ? 'text-white' : 'text-title-light'">Logística de Almacenes</h1>
+            <p [class]="isDark() ? 'text-gray-400' : 'text-subtitle-light'">Gestión de recogidas y salidas de producciones</p>
           </div>
-          <div class="flex gap-2">
-            <a routerLink="/tempo/movimientos" [class]="isDark() ? 'btn-calendario-dark' : 'btn-calendario'">
-              <span class="material-icons text-lg">warehouse</span>
+          <div class="flex flex-wrap items-center justify-end gap-2">
+            <a routerLink="/tempo/movimientos" class="btn-action-secondary">
+              <span class="material-icons">warehouse</span>
               Calendario Almacenes
             </a>
-            <button class="btn-nuevo" (click)="openModal()">
-              <span class="material-icons text-lg">add</span>
+            <button class="btn-action-primary" (click)="openModal()">
+              <span class="material-icons">add</span>
               Nuevo Movimiento
             </button>
           </div>
         </div>
 
         <!-- Error Banner -->
-        <div *ngIf="backendError" class="error-banner" [class]="isDark() ? 'error-banner-dark' : 'error-banner-light'">
-          <div class="flex items-center gap-3">
-            <span class="material-icons text-2xl">cloud_off</span>
-            <div class="flex-1">
-              <p class="font-semibold">Servidor no disponible</p>
-              <p class="text-sm opacity-80">{{ backendError }}</p>
+        <div *ngIf="backendError" class="error-banner" [class.error-banner-dark]="isDark()">
+          <div class="error-banner-content">
+            <span class="material-icons">cloud_off</span>
+            <div class="error-banner-text">
+              <p class="error-title">Servidor no disponible</p>
+              <p class="error-message">{{ backendError }}</p>
             </div>
             <button (click)="retryConnection()" class="retry-btn">
-              <span class="material-icons text-sm">refresh</span>
+              <span class="material-icons">refresh</span>
               Reintentar
             </button>
           </div>
         </div>
 
         <!-- Stats -->
-        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4" *ngIf="!backendError">
-          <article [class]="isDark() ? 'stat-card-dark' : 'stat-card'" *ngFor="let stat of statCards">
-            <p class="text-sm uppercase tracking-wide" [class]="isDark() ? 'text-gray-400' : 'text-gray-500'">{{ stat.label }}</p>
-            <p class="text-3xl font-semibold mt-1" [class]="isDark() ? 'text-white' : 'text-gray-800'">{{ stat.value }}</p>
+        <div class="stats-grid" *ngIf="!backendError">
+          <article class="stat-card" [class.stat-card-dark]="isDark()" *ngFor="let stat of statCards">
+            <p class="stat-label" [class.text-gray-400]="isDark()">{{ stat.label }}</p>
+            <p class="stat-value" [class.text-white]="isDark()">{{ stat.value }}</p>
           </article>
         </div>
+      </div>
 
+      <!-- Scrollable Content -->
+      <div class="scrollable-content">
         <!-- Filters -->
-        <div [class]="isDark() ? 'card-dark' : 'card'">
-          <div class="flex flex-wrap gap-4 items-end">
-            <div>
-              <label [class]="isDark() ? 'form-label-dark' : 'form-label'">Tipo</label>
-              <select [class]="isDark() ? 'form-select-dark' : 'form-select'" #tipoSelect [value]="selectedTipo" (change)="setTipo(tipoSelect.value)">
+        <div class="filters-card" [class.filters-card-dark]="isDark()">
+          <div class="filters-row">
+            <div class="filter-group">
+              <label class="form-label" [class.form-label-dark]="isDark()">Tipo</label>
+              <select class="form-select" [class.form-select-dark]="isDark()" #tipoSelect [value]="selectedTipo" (change)="setTipo(tipoSelect.value)">
                 <option *ngFor="let option of tipoFiltros">{{ option }}</option>
               </select>
             </div>
-            <div>
-              <label [class]="isDark() ? 'form-label-dark' : 'form-label'">Estado</label>
-              <select [class]="isDark() ? 'form-select-dark' : 'form-select'" #estadoSelect [value]="selectedEstado" (change)="setEstado(estadoSelect.value)">
+            <div class="filter-group">
+              <label class="form-label" [class.form-label-dark]="isDark()">Estado</label>
+              <select class="form-select" [class.form-select-dark]="isDark()" #estadoSelect [value]="selectedEstado" (change)="setEstado(estadoSelect.value)">
                 <option *ngFor="let option of estadoFiltros" [value]="option">
                   {{ option === 'Todos' ? option : getEstadoLabel(option) }}
                 </option>
               </select>
             </div>
-            <button [class]="isDark() ? 'btn-secondary-dark' : 'btn-secondary'" class="ml-auto" (click)="toggleFiltrosAvanzados()">
-              <span class="material-icons text-sm">{{ showFiltrosAvanzados() ? 'expand_less' : 'expand_more' }}</span>
+            <button class="btn-secondary" [class.btn-secondary-dark]="isDark()" (click)="toggleFiltrosAvanzados()">
+              <span class="material-icons">{{ showFiltrosAvanzados() ? 'expand_less' : 'expand_more' }}</span>
               {{ showFiltrosAvanzados() ? 'Menos filtros' : 'Más filtros' }}
             </button>
           </div>
 
           <!-- Filtros avanzados expandibles -->
-          <div *ngIf="showFiltrosAvanzados()" class="mt-4 pt-4" [class]="isDark() ? 'border-t border-gray-700' : 'border-t border-gray-200'">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div>
-                <label [class]="isDark() ? 'form-label-dark' : 'form-label'">Fecha desde</label>
-                <input type="date" [class]="isDark() ? 'form-input-dark' : 'form-input'" [(ngModel)]="filtroFechaDesde">
+          <div *ngIf="showFiltrosAvanzados()" class="advanced-filters" [class.advanced-filters-dark]="isDark()">
+            <div class="advanced-filters-grid">
+              <div class="filter-group">
+                <label class="form-label" [class.form-label-dark]="isDark()">Fecha desde</label>
+                <input type="date" class="form-input" [class.form-input-dark]="isDark()" [(ngModel)]="filtroFechaDesde">
               </div>
-              <div>
-                <label [class]="isDark() ? 'form-label-dark' : 'form-label'">Fecha hasta</label>
-                <input type="date" [class]="isDark() ? 'form-input-dark' : 'form-input'" [(ngModel)]="filtroFechaHasta">
+              <div class="filter-group">
+                <label class="form-label" [class.form-label-dark]="isDark()">Fecha hasta</label>
+                <input type="date" class="form-input" [class.form-input-dark]="isDark()" [(ngModel)]="filtroFechaHasta">
               </div>
-              <div>
-                <label [class]="isDark() ? 'form-label-dark' : 'form-label'">Producción</label>
-                <input type="text" [class]="isDark() ? 'form-input-dark' : 'form-input'" [(ngModel)]="filtroProduccion" placeholder="Buscar producción...">
+              <div class="filter-group">
+                <label class="form-label" [class.form-label-dark]="isDark()">Producción</label>
+                <input type="text" class="form-input" [class.form-input-dark]="isDark()" [(ngModel)]="filtroProduccion" placeholder="Buscar producción...">
               </div>
-              <div>
-                <label [class]="isDark() ? 'form-label-dark' : 'form-label'">Origen/Destino</label>
-                <input type="text" [class]="isDark() ? 'form-input-dark' : 'form-input'" [(ngModel)]="filtroLugar" placeholder="Buscar lugar...">
+              <div class="filter-group">
+                <label class="form-label" [class.form-label-dark]="isDark()">Origen/Destino</label>
+                <input type="text" class="form-input" [class.form-input-dark]="isDark()" [(ngModel)]="filtroLugar" placeholder="Buscar lugar...">
               </div>
             </div>
-            <div class="flex justify-end gap-2 mt-4">
-              <button [class]="isDark() ? 'btn-secondary-dark' : 'btn-secondary'" (click)="limpiarFiltros()">
-                <span class="material-icons text-sm">clear</span>
+            <div class="advanced-filters-actions">
+              <button class="btn-secondary" [class.btn-secondary-dark]="isDark()" (click)="limpiarFiltros()">
+                <span class="material-icons">clear</span>
                 Limpiar
               </button>
-              <button class="btn-nuevo" style="padding: 0.5rem 1rem;" (click)="aplicarFiltros()">
-                <span class="material-icons text-sm">search</span>
+              <button class="btn-nuevo btn-small" (click)="aplicarFiltros()">
+                <span class="material-icons">search</span>
                 Aplicar
               </button>
             </div>
@@ -126,8 +130,7 @@ const ESTADO_LABELS: Record<string, string> = {
         </div>
 
         <!-- Operations List -->
-        <div class="movimientos-scroll-container" [class]="isDark() ? 'scroll-container-dark' : 'scroll-container-light'">
-          <div class="space-y-4">
+        <div class="operations-list">
             <article *ngFor="let operacion of operacionesFiltradas()" [class]="isDark() ? 'card-dark card-hover' : 'card card-hover'">
             <div class="flex gap-4">
               <div class="icon-circle" [style.background]="operacion.estadoColor + '20'">
@@ -299,89 +302,120 @@ const ESTADO_LABELS: Record<string, string> = {
   styles: [`
     :host {
       display: block;
+      height: 100%;
     }
 
-    .page {
-      padding: 1.5rem 2rem;
-      min-height: 100vh;
+    /* Layout - same as Cartelería */
+    .page-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      font-family: 'Montserrat', sans-serif;
     }
 
     .page-light {
       background: #f2f4f7;
+      color: #1f2937;
     }
 
-    .page-dark {
+    .page-container.page-dark {
       background: #1a1a1a;
       border-radius: 1rem;
       border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #e5e7eb;
     }
 
-    .card {
-      background: #ffffff;
-      border-radius: 1rem;
-      border: 1px solid rgba(15, 23, 42, 0.08);
-      padding: 1.4rem;
-      box-shadow: 0 20px 35px rgba(15, 23, 42, 0.1);
+    .fixed-header {
+      flex-shrink: 0;
+      padding: 1.5rem 2rem 0 2rem;
     }
 
-    .card-dark {
-      background: #1a1a1a;
-      border-radius: 1rem;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 1.4rem;
-      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.3);
+    /* Text colors - same as Espacios/Cartelería */
+    .text-title-light { color: #1f2937; }
+    .text-subtitle-light { color: #6b7280; }
+
+    .scrollable-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 2rem 2rem 2rem;
     }
 
-    .card-hover {
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .card-hover:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 25px 45px rgba(15, 23, 42, 0.15);
-    }
-
-    .card-dark.card-hover:hover {
-      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4);
+    /* Stats grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
     }
 
     .stat-card {
-      border-radius: 0.9rem;
+      border-radius: 0.75rem;
       border: 1px solid rgba(15, 23, 42, 0.08);
-      padding: 1.2rem;
+      padding: 1rem;
       background: #ffffff;
-      box-shadow: 0 15px 30px rgba(15, 23, 42, 0.08);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
-    .stat-card-dark {
-      border-radius: 0.9rem;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 1.2rem;
+    .stat-card.stat-card-dark {
       background: #1a1a1a;
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+      border-color: rgba(255, 255, 255, 0.1);
     }
 
+    .stat-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0.25rem 0 0 0;
+    }
+
+    /* Error banner */
     .error-banner {
       padding: 1rem 1.5rem;
       border-radius: 0.75rem;
-      animation: slideIn 0.3s ease;
-    }
-
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .error-banner-light {
+      margin-bottom: 1rem;
       background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
       border: 1px solid #F87171;
       color: #991B1B;
     }
 
-    .error-banner-dark {
+    .error-banner.error-banner-dark {
       background: linear-gradient(135deg, #450A0A 0%, #7F1D1D 100%);
-      border: 1px solid #DC2626;
+      border-color: #DC2626;
       color: #FCA5A5;
+    }
+
+    .error-banner-content {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .error-banner-content > .material-icons {
+      font-size: 1.5rem;
+    }
+
+    .error-banner-text {
+      flex: 1;
+    }
+
+    .error-title {
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .error-message {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      margin: 0;
     }
 
     .retry-btn {
@@ -399,29 +433,112 @@ const ESTADO_LABELS: Record<string, string> = {
       color: inherit;
     }
 
-    .retry-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: scale(1.02);
+    .retry-btn .material-icons {
+      font-size: 1rem;
     }
 
+    .retry-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Filters card */
+    .filters-card {
+      background: #ffffff;
+      border-radius: 0.75rem;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .filters-card.filters-card-dark {
+      background: #1a1a1a;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .filters-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 1rem;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .filters-row > .btn-secondary {
+      margin-left: auto;
+    }
+
+    /* Advanced filters */
+    .advanced-filters {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .advanced-filters.advanced-filters-dark {
+      border-top-color: #374151;
+    }
+
+    .advanced-filters-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    .advanced-filters-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    /* Operations list */
+    .operations-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .card, .card-dark {
+      background: #ffffff;
+      border-radius: 0.75rem;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      padding: 1.25rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card-dark {
+      background: #1a1a1a;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .card-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-dark.card-hover:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Form elements */
     .form-label {
       display: block;
       font-size: 0.75rem;
       font-weight: 600;
       color: #6b7280;
-      margin-bottom: 0.35rem;
       text-transform: uppercase;
       letter-spacing: 0.025em;
     }
 
-    .form-label-dark {
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 600;
+    .form-label.form-label-dark {
       color: #9ca3af;
-      margin-bottom: 0.35rem;
-      text-transform: uppercase;
-      letter-spacing: 0.025em;
     }
 
     .form-select {
@@ -441,28 +558,40 @@ const ESTADO_LABELS: Record<string, string> = {
       box-shadow: 0 0 0 2px rgba(207, 16, 45, 0.1);
     }
 
-    .form-select-dark {
+    .form-select.form-select-dark {
+      background: #262626;
+      border-color: #374151;
+      color: #e5e7eb;
+    }
+
+    .form-select.form-select-dark option {
+      background: #262626;
+      color: #e5e7eb;
+    }
+
+    .form-input {
+      width: 100%;
       padding: 0.5rem 0.75rem;
-      border: 1px solid #374151;
+      border: 1px solid #d1d5db;
       border-radius: 8px;
       font-size: 0.875rem;
-      background: #262626;
-      color: #e5e7eb;
-      cursor: pointer;
-      min-width: 140px;
+      background: white;
+      color: #374151;
     }
 
-    .form-select-dark:focus {
+    .form-input:focus {
       outline: none;
       border-color: #CF102D;
-      box-shadow: 0 0 0 2px rgba(207, 16, 45, 0.2);
+      box-shadow: 0 0 0 2px rgba(207, 16, 45, 0.1);
     }
 
-    .form-select-dark option {
+    .form-input.form-input-dark {
       background: #262626;
+      border-color: #374151;
       color: #e5e7eb;
     }
 
+    /* Buttons */
     .btn-nuevo {
       display: flex;
       align-items: center;
@@ -481,13 +610,21 @@ const ESTADO_LABELS: Record<string, string> = {
       box-shadow: 0 4px 12px rgba(207, 16, 45, 0.3);
     }
 
+    .btn-nuevo .material-icons {
+      font-size: 1.25rem;
+    }
+
     .btn-nuevo:hover {
       background: #a80d25;
       transform: translateY(-2px);
       box-shadow: 0 6px 16px rgba(207, 16, 45, 0.4);
     }
 
-    .btn-calendario {
+    .btn-nuevo.btn-small {
+      padding: 0.5rem 1rem;
+    }
+
+    .btn-secondary-header {
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -503,30 +640,23 @@ const ESTADO_LABELS: Record<string, string> = {
       text-decoration: none;
     }
 
-    .btn-calendario:hover {
+    .btn-secondary-header .material-icons {
+      font-size: 1.25rem;
+    }
+
+    .btn-secondary-header:hover {
       background: #f3f4f6;
       transform: translateY(-2px);
     }
 
-    .btn-calendario-dark {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1.5rem;
+    .btn-secondary-header.btn-secondary-header-dark {
       background: #262626;
       color: #e5e7eb;
-      border: 1px solid #374151;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.875rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-decoration: none;
+      border-color: #374151;
     }
 
-    .btn-calendario-dark:hover {
+    .btn-secondary-header.btn-secondary-header-dark:hover {
       background: #333333;
-      transform: translateY(-2px);
     }
 
     .btn-secondary {
@@ -544,26 +674,21 @@ const ESTADO_LABELS: Record<string, string> = {
       transition: all 0.2s;
     }
 
+    .btn-secondary .material-icons {
+      font-size: 1.125rem;
+    }
+
     .btn-secondary:hover {
       background: #e5e7eb;
     }
 
-    .btn-secondary-dark {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.5rem 1rem;
+    .btn-secondary.btn-secondary-dark {
       background: #262626;
       color: #e5e7eb;
-      border: 1px solid #374151;
-      border-radius: 8px;
-      font-weight: 500;
-      font-size: 0.875rem;
-      cursor: pointer;
-      transition: all 0.2s;
+      border-color: #374151;
     }
 
-    .btn-secondary-dark:hover {
+    .btn-secondary.btn-secondary-dark:hover {
       background: #333333;
     }
 
@@ -575,6 +700,10 @@ const ESTADO_LABELS: Record<string, string> = {
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+    }
+
+    .icon-circle .material-icons {
+      font-size: 1.5rem;
     }
 
     .badge-pill {
@@ -602,39 +731,13 @@ const ESTADO_LABELS: Record<string, string> = {
       background: #f3f4f6;
     }
 
-    .btn-outline-dark {
-      padding: 0.5rem 1rem;
-      background: transparent;
+    .btn-outline.btn-outline-dark {
       color: #e5e7eb;
-      border: 1px solid #374151;
-      border-radius: 8px;
-      font-weight: 500;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
+      border-color: #374151;
     }
 
-    .btn-outline-dark:hover {
+    .btn-outline.btn-outline-dark:hover {
       background: #262626;
-    }
-
-    .btn-action {
-      padding: 0.5rem 1rem;
-      background: #fbbf24;
-      color: #1f2937;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
-    }
-
-    .btn-action:hover {
-      background: #f59e0b;
-      transform: translateY(-1px);
     }
 
     .btn-transito {
@@ -651,6 +754,10 @@ const ESTADO_LABELS: Record<string, string> = {
       cursor: pointer;
       transition: all 0.2s;
       box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-transito .material-icons {
+      font-size: 1rem;
     }
 
     .btn-transito:hover:not(:disabled) {
@@ -679,6 +786,10 @@ const ESTADO_LABELS: Record<string, string> = {
       box-shadow: 0 4px 12px rgba(52, 211, 153, 0.3);
     }
 
+    .btn-completar .material-icons {
+      font-size: 1rem;
+    }
+
     .btn-completar:hover:not(:disabled) {
       background: #10B981;
       transform: translateY(-1px);
@@ -704,6 +815,10 @@ const ESTADO_LABELS: Record<string, string> = {
       transition: all 0.2s;
     }
 
+    .btn-secondary-small .material-icons {
+      font-size: 0.875rem;
+    }
+
     .btn-secondary-small:hover:not(:disabled) {
       background: #e5e7eb;
     }
@@ -713,61 +828,97 @@ const ESTADO_LABELS: Record<string, string> = {
       cursor: not-allowed;
     }
 
-    .btn-secondary-small-dark {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.4rem 0.75rem;
+    .btn-secondary-small.btn-secondary-small-dark {
       background: #262626;
       color: #9ca3af;
-      border: 1px solid #374151;
-      border-radius: 6px;
-      font-weight: 500;
-      font-size: 0.7rem;
-      cursor: pointer;
-      transition: all 0.2s;
+      border-color: #374151;
     }
 
-    .btn-secondary-small-dark:hover:not(:disabled) {
+    .btn-secondary-small.btn-secondary-small-dark:hover:not(:disabled) {
       background: #333333;
     }
 
-    .btn-secondary-small-dark:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    /* Loading and empty states */
+    .loading-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
     }
 
-    /* Form inputs */
-    .form-input {
-      width: 100%;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 0.875rem;
-      background: white;
-      color: #374151;
+    .loading-card {
+      height: 8rem;
+      background: #e5e7eb;
+      border-radius: 0.75rem;
+      animation: pulse 1.5s infinite;
     }
 
-    .form-input:focus {
-      outline: none;
-      border-color: #CF102D;
-      box-shadow: 0 0 0 2px rgba(207, 16, 45, 0.1);
-    }
-
-    .form-input-dark {
-      width: 100%;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid #374151;
-      border-radius: 8px;
-      font-size: 0.875rem;
+    .loading-card.loading-card-dark {
       background: #262626;
-      color: #e5e7eb;
     }
 
-    .form-input-dark:focus {
-      outline: none;
-      border-color: #CF102D;
-      box-shadow: 0 0 0 2px rgba(207, 16, 45, 0.2);
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .empty-state {
+      background: #ffffff;
+      border-radius: 0.75rem;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      padding: 3rem;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .empty-state.empty-state-dark {
+      background: #1a1a1a;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .empty-state .material-icons {
+      font-size: 3rem;
+      color: #d1d5db;
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state-dark .material-icons {
+      color: #4b5563;
+    }
+
+    .empty-state p {
+      color: #6b7280;
+      margin: 0;
+    }
+
+    .empty-state-dark p {
+      color: #9ca3af;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .advanced-filters-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .header-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .header-actions {
+        width: 100%;
+        justify-content: flex-end;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .advanced-filters-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     /* Modal styles */
@@ -929,6 +1080,7 @@ export class LogisticaComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private logisticaService = inject(LogisticaService);
   private themeService = inject(ThemeService);
+  private route = inject(ActivatedRoute);
 
   isDark = this.themeService.isDark;
 
@@ -958,6 +1110,13 @@ export class LogisticaComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadData();
+
+    // Check if openModal query param is set
+    this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      if (params['openModal'] === 'true') {
+        this.openModal();
+      }
+    });
   }
 
   private loadData(): void {

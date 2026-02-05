@@ -14,11 +14,13 @@ export class ThemeService {
   private themeModeSignal = signal<ThemeMode>('light');
   private sidenavFixedSignal = signal<boolean>(true);
   private configuratorOpenSignal = signal<boolean>(false);
+  private mobileMenuOpenSignal = signal<boolean>(false);
 
   // Signals públicas read-only
   themeMode = this.themeModeSignal.asReadonly();
   sidenavFixed = this.sidenavFixedSignal.asReadonly();
   configuratorOpen = this.configuratorOpenSignal.asReadonly();
+  mobileMenuOpen = this.mobileMenuOpenSignal.asReadonly();
 
   // Computed para clases CSS
   isDark = computed(() => this.themeModeSignal() === 'dark');
@@ -67,6 +69,18 @@ export class ThemeService {
 
   toggleConfigurator(): void {
     this.configuratorOpenSignal.update(current => !current);
+  }
+
+  openMobileMenu(): void {
+    this.mobileMenuOpenSignal.set(true);
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpenSignal.set(false);
+  }
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpenSignal.update(current => !current);
   }
 
   private loadFromStorage(): void {

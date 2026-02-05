@@ -11,6 +11,7 @@ import { ActividadDialogComponent } from '../actividad/actividad-dialog/activida
 import { ActividadService } from '../services/actividad.service';
 import { EspacioService } from '../services/espacio.service';
 import { TemporadaService } from '../../../core/services/temporada.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { Actividad, Espacio } from '../models/actividad.model';
 import {
   ActividadCalendario,
@@ -37,40 +38,48 @@ import { es } from 'date-fns/locale';
     ActividadDialogComponent
   ],
   template: `
-    <div class="cal-shell">
-      <!-- Toolbar -->
-      <div class="cal-toolbar">
-        <div class="cal-info">
-          <p class="cal-temporada">{{ temporadaLabel() }}</p>
-          <div class="cal-week-title">
-            <span>Semana nº {{ semana().numeroSemana }}</span>
+    <div class="page-container" [ngClass]="isDark() ? 'page-dark' : 'page-light'">
+      <!-- Fixed Header -->
+      <div class="fixed-header">
+        <!-- Title row - same structure as Espacios/Cartelería -->
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+          <div>
+            <h1 class="text-3xl font-semibold" [class]="isDark() ? 'text-white' : 'text-title-light'">Calendario</h1>
+            <p [class]="isDark() ? 'text-gray-400' : 'text-subtitle-light'">{{ temporadaLabel() }}</p>
           </div>
-          <p class="cal-fechas">{{ fechasLabel() }}</p>
-        </div>
-        <div class="cal-controls">
-          <button class="btn-nav" (click)="irSemanaAnterior()" matTooltip="Semana anterior">
-            <mat-icon>chevron_left</mat-icon>
-          </button>
-          <button class="btn-hoy" (click)="irSemanaActual()">Hoy</button>
-          <button class="btn-nav" (click)="irSemanaSiguiente()" matTooltip="Semana siguiente">
-            <mat-icon>chevron_right</mat-icon>
-          </button>
-          <button class="btn-nueva" (click)="onNuevaActividadClick()">
+          <button class="btn-action-primary" (click)="onNuevaActividadClick()">
             <mat-icon>add</mat-icon>
             Nueva actividad
           </button>
         </div>
+        <!-- Navigation toolbar -->
+        <div class="cal-toolbar" [class.cal-toolbar-dark]="isDark()">
+          <div class="cal-week-nav">
+            <button class="btn-nav" [class.btn-nav-dark]="isDark()" (click)="irSemanaAnterior()" matTooltip="Semana anterior">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <div class="cal-week-label" [class.cal-week-label-dark]="isDark()">Semana {{ semana().numeroSemana }}</div>
+            <button class="btn-nav" [class.btn-nav-dark]="isDark()" (click)="irSemanaSiguiente()" matTooltip="Semana siguiente">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+          <div class="cal-fechas" [class.cal-fechas-dark]="isDark()">{{ fechasLabel() }}</div>
+          <button class="btn-hoy" [class.btn-hoy-dark]="isDark()" (click)="irSemanaActual()">Hoy</button>
+        </div>
       </div>
 
-      <!-- Loading indicator -->
-      <div class="cal-loading" *ngIf="loading()">
-        <mat-spinner diameter="40"></mat-spinner>
-        <span>Cargando actividades...</span>
-      </div>
+      <!-- Scrollable Content -->
+      <div class="scrollable-content">
+        <div class="cal-grid-wrapper">
+          <!-- Loading indicator -->
+          <div class="cal-loading" *ngIf="loading()">
+            <mat-spinner diameter="40"></mat-spinner>
+            <span>Cargando actividades...</span>
+          </div>
 
-      <!-- Grid -->
-      <div class="cal-scroll" *ngIf="!loading()">
-        <div class="cal-grid" [style.grid-template-columns]="gridColumns()">
+          <!-- Grid -->
+          <div class="cal-scroll" *ngIf="!loading()">
+            <div class="cal-grid" [style.grid-template-columns]="gridColumns()">
           <!-- Header row -->
           <div class="col-header fecha-hora">FECHA / HORA</div>
           <div class="col-header" *ngFor="let espacio of espaciosCalendario()">
@@ -117,11 +126,13 @@ import { es } from 'date-fns/locale';
             </ng-container>
           </ng-container>
 
-          <!-- Empty state if no activities -->
-          <div class="empty-state" *ngIf="semana().dias.length === 0 || allDaysEmpty()">
-            <mat-icon>event_busy</mat-icon>
-            <p>No hay actividades para esta semana</p>
+            <!-- Empty state if no activities -->
+            <div class="empty-state" *ngIf="semana().dias.length === 0 || allDaysEmpty()">
+              <mat-icon>event_busy</mat-icon>
+              <p>No hay actividades para esta semana</p>
+            </div>
           </div>
+        </div>
         </div>
       </div>
 
@@ -188,23 +199,54 @@ import { es } from 'date-fns/locale';
   styles: [`
     :host {
       display: block;
-      width: 100%;
-      height: auto;
-      min-height: 100%;
+      height: 100%;
     }
 
-    /* Shell container */
-    .cal-shell {
-      background: #ffffff;
-      border-radius: 0.75rem;
-      padding: 1.5rem;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    /* Layout - same as Cartelería */
+    .page-container {
       display: flex;
       flex-direction: column;
-      gap: 1.25rem;
+      height: 100%;
       font-family: 'Montserrat', sans-serif;
+    }
+
+    .page-light {
+      background: #f2f4f7;
       color: #1f2937;
-      min-height: 400px;
+    }
+
+    .page-container.page-dark {
+      background: #1a1a1a;
+      border-radius: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #e5e7eb;
+    }
+
+    .fixed-header {
+      flex-shrink: 0;
+      padding: 1.5rem 2rem 0 2rem;
+    }
+
+    /* Text colors - same as Espacios/Cartelería */
+    .text-title-light { color: #1f2937; }
+    .text-subtitle-light { color: #6b7280; }
+
+    .scrollable-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 2rem 2rem 2rem;
+    }
+
+    .cal-grid-wrapper {
+      background: #ffffff;
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .page-dark .cal-grid-wrapper {
+      background: #1a1a1a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     /* Toolbar */
@@ -214,58 +256,46 @@ import { es } from 'date-fns/locale';
       align-items: center;
       gap: 1rem;
       flex-shrink: 0;
+      background: #ffffff;
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
-    .cal-info {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
+    .cal-toolbar.cal-toolbar-dark {
+      background: #1a1a1a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .cal-temporada {
-      margin: 0;
-      font-weight: 600;
-      color: #6b7280;
-      letter-spacing: 0.08em;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-    }
-
-    .cal-week-title {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #010101;
-    }
-
-    .badge {
-      font-size: 0.65rem;
-      padding: 0.25rem 0.6rem;
-      border-radius: 999px;
-      background: #d1fae5;
-      color: #065f46;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      font-weight: 600;
-    }
-
-    .badge.provisional {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .cal-fechas {
-      margin: 0;
-      font-size: 0.9rem;
-      color: #6b7280;
-    }
-
-    .cal-controls {
+    .cal-week-nav {
       display: flex;
       align-items: center;
       gap: 0.5rem;
+    }
+
+    .cal-week-label {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1f2937;
+      min-width: 100px;
+      text-align: center;
+    }
+
+    .cal-week-label.cal-week-label-dark {
+      color: #ffffff;
+    }
+
+    .cal-fechas {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #374151;
+      text-align: center;
+      flex: 1;
+    }
+
+    .cal-fechas.cal-fechas-dark {
+      color: #e5e7eb;
     }
 
     .btn-nav {
@@ -286,6 +316,18 @@ import { es } from 'date-fns/locale';
       border-color: #cf102d;
       color: #cf102d;
       background: #fef2f2;
+    }
+
+    .btn-nav.btn-nav-dark {
+      background: #262626;
+      border-color: #374151;
+      color: #e5e7eb;
+    }
+
+    .btn-nav.btn-nav-dark:hover {
+      border-color: #cf102d;
+      color: #cf102d;
+      background: #3f3f3f;
     }
 
     .btn-nav mat-icon {
@@ -311,6 +353,18 @@ import { es } from 'date-fns/locale';
       border-color: #cf102d;
       color: #cf102d;
       background: #fef2f2;
+    }
+
+    .btn-hoy.btn-hoy-dark {
+      background: #262626;
+      border-color: #374151;
+      color: #e5e7eb;
+    }
+
+    .btn-hoy.btn-hoy-dark:hover {
+      border-color: #cf102d;
+      color: #cf102d;
+      background: #3f3f3f;
     }
 
     .btn-nueva {
@@ -372,6 +426,10 @@ import { es } from 'date-fns/locale';
       min-width: fit-content;
     }
 
+    .page-dark .cal-grid {
+      border-color: #374151;
+    }
+
     .col-header {
       background: #f9fafb;
       padding: 0.75rem 0.5rem;
@@ -388,14 +446,20 @@ import { es } from 'date-fns/locale';
       z-index: 10;
     }
 
+    .page-dark .col-header {
+      background: #262626;
+      border-color: #374151;
+      color: #9ca3af;
+    }
+
     .col-header:last-child {
       border-right: none;
     }
 
     .col-header.fecha-hora {
-      text-align: left;
-      padding-left: 1rem;
-      min-width: 120px;
+      text-align: center;
+      min-width: 60px;
+      max-width: 60px;
     }
 
     .dia-separator {
@@ -409,16 +473,32 @@ import { es } from 'date-fns/locale';
       text-transform: capitalize;
     }
 
+    .page-dark .dia-separator {
+      background: #262626;
+      color: #e5e7eb;
+      border-color: #374151;
+    }
+
     .celda-hora {
-      padding: 0.5rem 1rem;
+      padding: 0.5rem 0.5rem;
       border-right: 1px solid #e5e7eb;
       border-bottom: none;
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: #6b7280;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #9ca3af;
       background: #fafafa;
-      min-width: 120px;
+      min-width: 60px;
+      max-width: 60px;
       min-height: 52px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    .page-dark .celda-hora {
+      background: #1f1f1f;
+      border-color: #374151;
+      color: #6b7280;
     }
 
     .celda-espacio {
@@ -430,6 +510,11 @@ import { es } from 'date-fns/locale';
       position: relative;
       overflow: visible;
       background: #ffffff;
+    }
+
+    .page-dark .celda-espacio {
+      background: #1a1a1a;
+      border-color: #374151;
     }
 
     .celda-espacio:last-child {
@@ -721,24 +806,29 @@ import { es } from 'date-fns/locale';
 
     /* Responsive */
     @media (max-width: 1200px) {
-      .col-header.fecha-hora,
-      .celda-hora {
-        min-width: 100px;
-      }
       .celda-espacio {
         min-width: 120px;
       }
     }
 
     @media (max-width: 768px) {
-      .cal-shell {
+      .fixed-header {
         padding: 1rem;
+      }
+
+      .scrollable-content {
+        padding: 0 1rem 1rem 1rem;
       }
 
       .cal-toolbar {
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
+      }
+
+      .cal-fechas-center {
+        width: 100%;
+        justify-content: flex-start;
       }
 
       .cal-controls {
@@ -752,8 +842,8 @@ import { es } from 'date-fns/locale';
 
       .col-header.fecha-hora,
       .celda-hora {
-        min-width: 80px;
-        padding: 0.4rem 0.5rem;
+        min-width: 50px;
+        max-width: 50px;
       }
 
       .celda-espacio {
@@ -771,8 +861,12 @@ export class CalendarioComponent implements OnInit {
   private actividadService = inject(ActividadService);
   private espacioService = inject(EspacioService);
   private temporadaService = inject(TemporadaService);
+  private themeService = inject(ThemeService);
   private destroyRef = inject(DestroyRef);
   private dialog = inject(MatDialog);
+
+  // Theme
+  isDark = this.themeService.isDark;
 
   // Selected activity for dialog
   selectedActividad = signal<ActividadCalendario | null>(null);
@@ -817,7 +911,7 @@ export class CalendarioComponent implements OnInit {
   // Grid columns CSS
   gridColumns = computed(() => {
     const numEspacios = this.espaciosCalendario().length;
-    return `120px repeat(${numEspacios}, minmax(140px, 1fr))`;
+    return `60px repeat(${numEspacios}, minmax(140px, 1fr))`;
   });
 
   // Computed: transform activities to calendar week structure

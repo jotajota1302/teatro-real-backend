@@ -340,6 +340,102 @@ body, html {
   background-color: rgba(207, 16, 45, 0.08) !important;
 }
 
+/* -----------------------------------------------
+   Botones de Acción Consistentes (Header)
+-------------------------------------------------*/
+.btn-action-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  min-width: 180px;
+  height: 42px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-family);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(207, 16, 45, 0.3);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-action-primary .material-icons,
+.btn-action-primary mat-icon {
+  font-size: 1.25rem;
+  width: 20px;
+  height: 20px;
+}
+
+.btn-action-primary:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(207, 16, 45, 0.4);
+}
+
+.btn-action-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  min-width: 180px;
+  height: 42px;
+  background: white;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-family: var(--font-family);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-action-secondary .material-icons,
+.btn-action-secondary mat-icon {
+  font-size: 1.25rem;
+  width: 20px;
+  height: 20px;
+}
+
+.btn-action-secondary:hover {
+  background: #f3f4f6;
+  transform: translateY(-2px);
+}
+
+/* Responsive buttons */
+@media (max-width: 640px) {
+  .btn-action-primary,
+  .btn-action-secondary {
+    min-width: auto;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* Dark mode variants */
+.dark .btn-action-secondary,
+.page-dark .btn-action-secondary {
+  background: #262626;
+  color: #e5e7eb;
+  border-color: #374151;
+}
+
+.dark .btn-action-secondary:hover,
+.page-dark .btn-action-secondary:hover {
+  background: #333333;
+}
+
 /* Menu items - tipografía */
 .mat-mdc-menu-item {
   font-family: var(--font-family) !important;

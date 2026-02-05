@@ -27,6 +27,17 @@ import { ThemeService } from '../../core/services/theme.service';
   template: `
     <nav class="rounded-xl py-3 px-4 bg-transparent w-full">
       <div class="flex items-center justify-between gap-4">
+        <!-- Botón menú móvil/colapsado - visible en móvil o cuando sidenav no está fijo -->
+        <button
+          class="mobile-menu-btn flex items-center justify-center w-10 h-10 rounded-lg transition-colors"
+          [class.lg:hidden]="sidenavFixed()"
+          [class.menu-btn-dark]="isDark()"
+          [class.menu-btn-light]="!isDark()"
+          (click)="toggleMobileMenu()"
+          aria-label="Abrir menú">
+          <mat-icon [ngClass]="textClass()">menu</mat-icon>
+        </button>
+
         <!-- Breadcrumbs y título -->
         <div class="capitalize flex-1 min-w-0">
           <!-- Breadcrumbs -->
@@ -34,16 +45,16 @@ import { ThemeService } from '../../core/services/theme.service';
             <a
               [routerLink]="['/', layout(), 'espacios']"
               class="font-normal opacity-50 transition-all hover:text-teatro-carmesi hover:opacity-100"
-              [class]="textClass()">
+              [ngClass]="textClass()">
               {{ layout() }}
             </a>
-            <span [class]="textMutedClass()">/</span>
-            <span class="font-normal truncate" [class]="textClass()">
+            <span [ngClass]="textMutedClass()">/</span>
+            <span class="font-normal truncate" [ngClass]="textClass()">
               {{ page() }}
             </span>
           </div>
           <!-- Título de página -->
-          <h1 class="text-sm md:text-lg font-semibold truncate mt-1" [class]="textClass()">
+          <h1 class="text-sm md:text-lg font-semibold truncate mt-1" [ngClass]="textClass()">
             {{ pageTitle() }}
           </h1>
         </div>
@@ -58,14 +69,14 @@ import { ThemeService } from '../../core/services/theme.service';
               {{ userInitials() }}
             </div>
             <div class="hidden xl:flex flex-col text-left">
-              <span class="font-semibold text-sm leading-tight" [class]="textClass()">
+              <span class="font-semibold text-sm leading-tight" [ngClass]="textClass()">
                 {{ userName() }}
               </span>
-              <span class="font-normal text-xs leading-tight" [class]="textMutedClass()">
+              <span class="font-normal text-xs leading-tight" [ngClass]="textMutedClass()">
                 {{ userRole() }}
               </span>
             </div>
-            <mat-icon class="hidden md:block text-base" [class]="textMutedClass()">expand_more</mat-icon>
+            <mat-icon class="hidden md:block text-base" [ngClass]="textMutedClass()">expand_more</mat-icon>
           </button>
           <mat-menu #userMenu="matMenu">
             <button mat-menu-item>
@@ -91,7 +102,7 @@ import { ThemeService } from '../../core/services/theme.service';
             mat-icon-button
             (click)="openConfigurator()"
             title="Configuración de tema">
-            <mat-icon [class]="textMutedClass()">settings</mat-icon>
+            <mat-icon [ngClass]="textMutedClass()">settings</mat-icon>
           </button>
         </div>
       </div>
@@ -119,6 +130,15 @@ import { ThemeService } from '../../core/services/theme.service';
     .user-menu-btn:hover {
       background: rgba(0, 0, 0, 0.05);
     }
+
+    /* Mobile menu button hover states */
+    .menu-btn-dark:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .menu-btn-light:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
   `]
 })
 export class HeaderComponent {
@@ -128,6 +148,7 @@ export class HeaderComponent {
 
   // Tema
   isDark = this.theme.isDark;
+  sidenavFixed = this.theme.sidenavFixed;
 
   // Breadcrumbs desde la URL
   private url$ = this.router.events.pipe(
@@ -218,5 +239,9 @@ export class HeaderComponent {
 
   logout(): void {
     this.authService.logout();
+  }
+
+  toggleMobileMenu(): void {
+    this.theme.toggleMobileMenu();
   }
 }
