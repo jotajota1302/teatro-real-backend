@@ -23,12 +23,17 @@ export const TEMPO_ROUTES: Routes = [
   },
   {
     path: 'movimientos',
+    loadComponent: () => import('./logistica/logistica-almacenes-excel.component').then(m => m.LogisticaAlmacenesExcelComponent),
+    title: 'Calendario Almacenes – Teatro Real'
+  },
+  {
+    path: 'movimientos/lista',
     loadComponent: () => import('./logistica/logistica.component').then(m => m.LogisticaComponent),
     title: 'Logística – Teatro Real'
   },
   {
     path: 'movimientos/calendario',
-    loadComponent: () => import('./logistica/logistica-calendario.component').then(m => m.LogisticaCalendarioComponent),
+    loadComponent: () => import('./logistica/logistica-calendario-excel.component').then(m => m.LogisticaCalendarioExcelComponent),
     title: 'Calendario Logística – Teatro Real'
   },
   {

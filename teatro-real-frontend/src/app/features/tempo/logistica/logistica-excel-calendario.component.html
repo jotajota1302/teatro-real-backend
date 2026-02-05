@@ -1,0 +1,162 @@
+<div class="excel-page" [class.excel-dark]="isDark()">
+  <!-- Header con controles de navegación -->
+  <div class="excel-header">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <button class="nav-btn" (click)="mesAnterior()">
+          <span class="material-icons">chevron_left</span>
+        </button>
+        <h1 class="mes-titulo">{{ mesActual() | uppercase }}</h1>
+        <button class="nav-btn" (click)="mesSiguiente()">
+          <span class="material-icons">chevron_right</span>
+        </button>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <button class="btn-export">
+          <span class="material-icons text-sm">file_download</span>
+          Exportar Excel
+        </button>
+        <a routerLink="/tempo/movimientos" class="btn-list">
+          <span class="material-icons text-sm">view_list</span>
+          Vista Lista
+        </a>
+      </div>
+    </div>
+
+    <!-- Leyenda de colores -->
+    <div class="leyenda">
+      <div class="leyenda-item" *ngFor="let tipo of tiposMovimiento()">
+        <div class="leyenda-color" [style.background]="tipo.color"></div>
+        <span>{{ tipo.label }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid tipo Excel -->
+  <div class="excel-container">
+    @if (loading()) {
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando calendario...</p>
+      </div>
+    } @else if (backendError()) {
+      <div class="error-state">
+        <span class="material-icons">cloud_off</span>
+        <p>{{ backendError() }}</p>
+        <button class="btn-retry" (click)="retryLoad()">Reintentar</button>
+      </div>
+    } @else {
+      <div class="excel-grid">
+        <!-- Cabecera: días del mes -->
+        <div class="grid-header">
+          <div class="header-cell header-corner">ESPACIO / DÍA</div>
+          @for (dia of diasDelMes(); track dia) {
+            <div class="header-cell header-day" 
+                 [class.header-weekend]="esFinDeSemana(dia)"
+                 [class.header-today]="esHoy(dia)">
+              <div class="day-number">{{ dia }}</div>
+              <div class="day-name">{{ nombreDia(dia) }}</div>
+            </div>
+          }
+        </div>
+
+        <!-- Filas: espacios con operaciones -->
+        @for (espacio of espaciosConOperaciones(); track espacio.nombre) {
+          <div class="grid-row">
+            <!-- Celda de espacio (fila header) -->
+            <div class="space-cell" [title]="espacio.nombre">
+              <div class="space-name">{{ espacio.nombre }}</div>
+              <div class="space-count">{{ espacio.operaciones.length }} ops</div>
+            </div>
+
+            <!-- Celdas de días -->
+            @for (dia of diasDelMes(); track dia) {
+              <div class="day-cell"
+                   [class.cell-weekend]="esFinDeSemana(dia)"
+                   [class.cell-today]="esHoy(dia)"
+                   (click)="abrirDia(espacio.nombre, dia)">
+                
+                @for (op of operacionesEnDia(espacio.operaciones, dia); track op.id) {
+                  <div class="operacion-bloque"
+                       [style.background]="op.tipoColor"
+                       [title]="op.nombre + ' - ' + op.hora"
+                       (click)="verDetalle(op, $event)">
+                    <div class="bloque-titulo">{{ op.nombre }}</div>
+                    <div class="bloque-info">
+                      <span class="bloque-hora">{{ op.hora }}</span>
+                      @if (op.camiones > 0) {
+                        <span class="bloque-camiones">🚚{{ op.camiones }}</span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Modal de detalle -->
+  @if (operacionSeleccionada()) {
+    <div class="modal-overlay" (click)="cerrarDetalle()">
+      <div class="modal-excel" [class.modal-dark]="isDark()" (click)="$event.stopPropagation()">
+        <div class="modal-header-excel">
+          <h3>{{ operacionSeleccionada()!.nombre }}</h3>
+          <button class="btn-close-excel" (click)="cerrarDetalle()">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+        
+        <div class="modal-body-excel">
+          <div class="detalle-grid">
+            <div class="detalle-item">
+              <span class="detalle-label">Tipo</span>
+              <span class="detalle-value">{{ operacionSeleccionada()!.tipo }}</span>
+            </div>
+            <div class="detalle-item">
+              <span class="detalle-label">Fecha</span>
+              <span class="detalle-value">{{ operacionSeleccionada()!.fecha }}</span>
+            </div>
+            <div class="detalle-item">
+              <span class="detalle-label">Horario</span>
+              <span class="detalle-value">{{ operacionSeleccionada()!.hora }} - {{ operacionSeleccionada()!.horaFin }}</span>
+            </div>
+            <div class="detalle-item">
+              <span class="detalle-label">Origen</span>
+              <span class="detalle-value">{{ operacionSeleccionada()!.desde }}</span>
+            </div>
+            <div class="detalle-item">
+              <span class="detalle-label">Destino</span>
+              <span class="detalle-value">{{ operacionSeleccionada()!.hacia }}</span>
+            </div>
+            <div class="detalle-item">
+              <span class="detalle-label">Camiones</span>
+              <span class="detalle-value">{{ operacionSeleccionada()!.camiones }}</span>
+            </div>
+            <div class="detalle-item">
+              <span class="detalle-label">Estado</span>
+              <span class="detalle-badge" [style.background]="operacionSeleccionada()!.estadoColor">
+                {{ operacionSeleccionada()!.estadoLabel }}
+              </span>
+            </div>
+          </div>
+          
+          @if (operacionSeleccionada()!.detalle) {
+            <div class="detalle-descripcion">
+              <span class="detalle-label">Notas</span>
+              <p>{{ operacionSeleccionada()!.detalle }}</p>
+            </div>
+          }
+        </div>
+        
+        <div class="modal-footer-excel">
+          <button class="btn-secondary-excel" (click)="cerrarDetalle()">Cerrar</button>
+          <button class="btn-primary-excel">Editar</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

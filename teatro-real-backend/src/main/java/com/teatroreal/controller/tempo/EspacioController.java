@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+@RestController("espacioTempoController")
 @RequestMapping("/api/espacios")
 @RequiredArgsConstructor
 @Tag(name = "Espacios TEMPO", description = "Endpoints de gestión de espacios para TEMPO")

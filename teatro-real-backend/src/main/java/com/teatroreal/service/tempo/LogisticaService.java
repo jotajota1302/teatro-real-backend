@@ -275,7 +275,6 @@ public class LogisticaService {
         return ActividadResponse.builder()
                 .id(a.getId())
                 .titulo(a.getTitulo())
-                .temporada(a.getTemporada() != null ? a.getTemporada().getId().toString() : null)
                 .descripcion(a.getDescripcion())
                 .estado(a.getEstado() != null ? a.getEstado().name() : null)
                 .fecha(a.getFecha() != null ? a.getFecha().toString() : null)

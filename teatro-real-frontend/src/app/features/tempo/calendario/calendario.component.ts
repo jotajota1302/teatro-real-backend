@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
+import { ActividadDialogComponent } from '../actividad/actividad-dialog/actividad-dialog.component';
 import { ActividadService } from '../services/actividad.service';
 import { EspacioService } from '../services/espacio.service';
 import { TemporadaService } from '../../../core/services/temporada.service';
@@ -32,7 +33,8 @@ import { es } from 'date-fns/locale';
     MatIconModule,
     MatButtonModule,
     MatTooltipModule,
-    MatDialogModule
+    MatDialogModule,
+    ActividadDialogComponent
   ],
   template: `
     <div class="cal-shell">
@@ -52,6 +54,10 @@ import { es } from 'date-fns/locale';
           <button class="btn-hoy" (click)="irSemanaActual()">Hoy</button>
           <button class="btn-nav" (click)="irSemanaSiguiente()" matTooltip="Semana siguiente">
             <mat-icon>chevron_right</mat-icon>
+          </button>
+          <button class="btn-nueva" (click)="onNuevaActividadClick()">
+            <mat-icon>add</mat-icon>
+            Nueva actividad
           </button>
         </div>
       </div>
@@ -287,6 +293,35 @@ import { es } from 'date-fns/locale';
       border-color: #cf102d;
       color: #cf102d;
       background: #fef2f2;
+    }
+
+    .btn-nueva {
+      margin-left: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.375rem;
+      border: none;
+      cursor: pointer;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #ffffff;
+      background: #cf102d;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+      transition: all 0.15s ease;
+    }
+
+    .btn-nueva mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    .btn-nueva:hover {
+      background: #a30d23;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
     }
 
     /* Loading */
@@ -804,6 +839,29 @@ export class CalendarioComponent implements OnInit {
   irSemanaSiguiente(): void {
     this.currentWeekStart.update(d => addDays(d, 7));
     this.loadActividades();
+  }
+
+  onNuevaActividadClick(): void {
+    const weekStart = this.currentWeekStart();
+    const today = new Date();
+    const weekEnd = addDays(weekStart, 6);
+
+    const defaultDate =
+      today >= weekStart && today <= weekEnd ? today : weekStart;
+
+    const dialogRef = this.dialog.open(ActividadDialogComponent, {
+      width: '720px',
+      data: {
+        mode: 'create',
+        defaultDate: format(defaultDate, 'yyyy-MM-dd')
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadActividades();
+      }
+    });
   }
 
   // Activity colors

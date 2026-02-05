@@ -63,3 +63,4 @@ export interface EspacioCalendario {
   nombre: string;
   codigo: string;
 }
+

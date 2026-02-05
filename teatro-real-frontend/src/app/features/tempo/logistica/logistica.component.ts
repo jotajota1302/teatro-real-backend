@@ -35,9 +35,9 @@ const ESTADO_LABELS: Record<string, string> = {
             <p [class]="isDark() ? 'text-gray-400' : 'text-gray-500'">Gestión de recogidas y salidas de producciones</p>
           </div>
           <div class="flex gap-2">
-            <a routerLink="/tempo/movimientos/calendario" [class]="isDark() ? 'btn-calendario-dark' : 'btn-calendario'">
-              <span class="material-icons text-lg">calendar_month</span>
-              Ver Calendario
+            <a routerLink="/tempo/movimientos" [class]="isDark() ? 'btn-calendario-dark' : 'btn-calendario'">
+              <span class="material-icons text-lg">warehouse</span>
+              Calendario Almacenes
             </a>
             <button class="btn-nuevo" (click)="openModal()">
               <span class="material-icons text-lg">add</span>
@@ -62,10 +62,10 @@ const ESTADO_LABELS: Record<string, string> = {
         </div>
 
         <!-- Stats -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4" *ngIf="!backendError">
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4" *ngIf="!backendError">
           <article [class]="isDark() ? 'stat-card-dark' : 'stat-card'" *ngFor="let stat of statCards">
-            <p class="stat-label" [class]="isDark() ? 'text-gray-400' : 'text-gray-500'">{{ stat.label }}</p>
-            <p class="stat-value" [class]="isDark() ? 'text-white' : 'text-gray-800'">{{ stat.value }}</p>
+            <p class="text-sm uppercase tracking-wide" [class]="isDark() ? 'text-gray-400' : 'text-gray-500'">{{ stat.label }}</p>
+            <p class="text-3xl font-semibold mt-1" [class]="isDark() ? 'text-white' : 'text-gray-800'">{{ stat.value }}</p>
           </article>
         </div>
 
@@ -126,60 +126,60 @@ const ESTADO_LABELS: Record<string, string> = {
         </div>
 
         <!-- Operations List -->
-        <div class="space-y-4">
-          <article *ngFor="let operacion of operacionesFiltradas()" [class]="isDark() ? 'card-dark card-hover' : 'card card-hover'" class="operation-card">
-            <div class="operation-layout">
-              <div class="icon-circle hidden sm:flex" [style.background]="operacion.estadoColor + '20'">
+        <div class="movimientos-scroll-container" [class]="isDark() ? 'scroll-container-dark' : 'scroll-container-light'">
+          <div class="space-y-4">
+            <article *ngFor="let operacion of operacionesFiltradas()" [class]="isDark() ? 'card-dark card-hover' : 'card card-hover'">
+            <div class="flex gap-4">
+              <div class="icon-circle" [style.background]="operacion.estadoColor + '20'">
                 <span class="material-icons text-2xl" [style.color]="operacion.estadoColor">{{ operacion.icon }}</span>
               </div>
-              <div class="operation-content">
-                <div class="operation-header">
-                  <h2 class="operation-title" [class]="isDark() ? 'text-white' : 'text-gray-900'">{{ operacion.nombre }}</h2>
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-1">
+                  <h2 class="text-lg font-semibold" [class]="isDark() ? 'text-white' : 'text-gray-900'">{{ operacion.nombre }}</h2>
                   <span class="badge-pill" [style.background]="operacion.estadoColor + '22'" [style.color]="operacion.estadoColor">
                     {{ operacion.estadoLabel || getEstadoLabel(operacion.estado) }}
                   </span>
                 </div>
-                <p class="operation-route" [class]="isDark() ? 'text-gray-300' : 'text-gray-600'">
+                <p class="mb-2" [class]="isDark() ? 'text-gray-300' : 'text-gray-600'">
                   {{ operacion.desde }} <span [class]="isDark() ? 'text-gray-500' : 'text-gray-400'">→</span> {{ operacion.hacia }}
                 </p>
-                <div class="operation-meta" [class]="isDark() ? 'text-gray-400' : 'text-gray-500'">
-                  <span class="meta-item">
-                    <span class="material-icons">calendar_month</span>
+                <div class="flex flex-wrap gap-4 text-sm" [class]="isDark() ? 'text-gray-400' : 'text-gray-500'">
+                  <span class="flex items-center gap-1">
+                    <span class="material-icons text-base">calendar_month</span>
                     {{ operacion.fecha }} · {{ operacion.hora }}
                   </span>
-                  <span class="meta-item">
-                    <span class="material-icons">local_shipping</span>
-                    {{ operacion.camiones }} cam.
+                  <span class="flex items-center gap-1">
+                    <span class="material-icons text-base">local_shipping</span>
+                    {{ operacion.camiones }} camiones
                   </span>
                 </div>
-                <p class="operation-detail" [class]="isDark() ? 'text-gray-400' : 'text-gray-500'" *ngIf="operacion.detalle">{{ operacion.detalle }}</p>
+                <p class="text-sm mt-2" [class]="isDark() ? 'text-gray-400' : 'text-gray-500'">{{ operacion.detalle }}</p>
               </div>
-              <div class="operation-actions">
-                <button [class]="isDark() ? 'btn-outline-dark' : 'btn-outline'" (click)="verDetalle(operacion); $event.stopPropagation()">
-                  <span class="hidden sm:inline">Ver detalle</span>
-                  <span class="sm:hidden">Ver</span>
-                </button>
+              <div class="flex flex-col gap-2">
+                <button [class]="isDark() ? 'btn-outline-dark' : 'btn-outline'" (click)="verDetalle(operacion)">Ver detalle</button>
                 <button
                   *ngIf="operacion.estado === 'PENDIENTE'"
                   class="btn-transito"
-                  (click)="iniciarTransito(operacion); $event.stopPropagation()"
+                  (click)="iniciarTransito(operacion)"
                   [disabled]="procesando">
                   <span class="material-icons text-sm">play_arrow</span>
-                  <span class="hidden sm:inline">Iniciar</span>
+                  Iniciar Tránsito
                 </button>
                 <button
                   *ngIf="operacion.estado === 'EN_TRANSITO'"
                   class="btn-completar"
-                  (click)="completarOperacion(operacion); $event.stopPropagation()"
+                  (click)="completarOperacion(operacion)"
                   [disabled]="procesando">
                   <span class="material-icons text-sm">check</span>
+                  Completar
                 </button>
                 <button
                   *ngIf="operacion.estado === 'COMPLETADO'"
                   [class]="isDark() ? 'btn-secondary-small-dark' : 'btn-secondary-small'"
-                  (click)="reiniciarOperacion(operacion); $event.stopPropagation()"
+                  (click)="reiniciarOperacion(operacion)"
                   [disabled]="procesando">
                   <span class="material-icons text-sm">replay</span>
+                  Reiniciar
                 </button>
               </div>
             </div>
@@ -304,7 +304,6 @@ const ESTADO_LABELS: Record<string, string> = {
     .page {
       padding: 1.5rem 2rem;
       min-height: 100vh;
-      overflow-x: hidden;
     }
 
     .page-light {
@@ -323,7 +322,6 @@ const ESTADO_LABELS: Record<string, string> = {
       border: 1px solid rgba(15, 23, 42, 0.08);
       padding: 1.4rem;
       box-shadow: 0 20px 35px rgba(15, 23, 42, 0.1);
-      overflow: hidden;
     }
 
     .card-dark {
@@ -332,7 +330,6 @@ const ESTADO_LABELS: Record<string, string> = {
       border: 1px solid rgba(255, 255, 255, 0.1);
       padding: 1.4rem;
       box-shadow: 0 20px 35px rgba(0, 0, 0, 0.3);
-      overflow: hidden;
     }
 
     .card-hover {
@@ -351,49 +348,17 @@ const ESTADO_LABELS: Record<string, string> = {
     .stat-card {
       border-radius: 0.9rem;
       border: 1px solid rgba(15, 23, 42, 0.08);
-      padding: 0.875rem;
+      padding: 1.2rem;
       background: #ffffff;
       box-shadow: 0 15px 30px rgba(15, 23, 42, 0.08);
-      overflow: hidden;
-      min-width: 0;
     }
 
     .stat-card-dark {
       border-radius: 0.9rem;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 0.875rem;
+      padding: 1.2rem;
       background: #1a1a1a;
       box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-      overflow: hidden;
-      min-width: 0;
-    }
-
-    .stat-label {
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      font-weight: 500;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .stat-value {
-      font-size: 1.75rem;
-      font-weight: 600;
-      margin-top: 0.25rem;
-    }
-
-    @media (min-width: 640px) {
-      .stat-card, .stat-card-dark {
-        padding: 1.2rem;
-      }
-      .stat-label {
-        font-size: 0.75rem;
-      }
-      .stat-value {
-        font-size: 1.875rem;
-      }
     }
 
     .error-banner {
@@ -957,132 +922,6 @@ const ESTADO_LABELS: Record<string, string> = {
     .tipo-btn-dark:hover {
       border-color: #CF102D;
       color: #CF102D;
-    }
-
-    /* Operation card responsive layout */
-    .operation-card {
-      overflow: hidden;
-    }
-
-    .operation-layout {
-      display: flex;
-      gap: 1rem;
-      align-items: flex-start;
-    }
-
-    .operation-content {
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-    }
-
-    .operation-header {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.25rem;
-      flex-wrap: wrap;
-    }
-
-    .operation-title {
-      font-size: 1rem;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
-    }
-
-    .operation-route {
-      font-size: 0.875rem;
-      margin-bottom: 0.5rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .operation-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      font-size: 0.75rem;
-    }
-
-    .meta-item {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      white-space: nowrap;
-    }
-
-    .meta-item .material-icons {
-      font-size: 1rem;
-    }
-
-    .operation-detail {
-      font-size: 0.75rem;
-      margin-top: 0.5rem;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .operation-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      flex-shrink: 0;
-    }
-
-    .operation-actions button {
-      white-space: nowrap;
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 640px) {
-      .page {
-        padding: 0.75rem;
-      }
-
-      .card, .card-dark {
-        padding: 0.875rem;
-      }
-
-      .operation-layout {
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-
-      .operation-content {
-        width: 100%;
-      }
-
-      .operation-title {
-        font-size: 0.9rem;
-      }
-
-      .operation-route {
-        font-size: 0.8rem;
-      }
-
-      .operation-actions {
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 0.375rem;
-        width: 100%;
-        margin-top: 0.5rem;
-        padding-top: 0.5rem;
-        border-top: 1px solid rgba(128, 128, 128, 0.2);
-      }
-
-      .operation-actions button {
-        flex: 1;
-        min-width: 60px;
-        justify-content: center;
-        padding: 0.375rem 0.5rem !important;
-        font-size: 0.7rem !important;
-      }
     }
   `]
 })

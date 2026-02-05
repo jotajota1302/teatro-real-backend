@@ -78,6 +78,7 @@ export interface ActividadFormData {
   departamentoId?: number;
   notas?: string;
   // NUEVO v2:
+  temporada?: string; // Formato: "2025-2026"
   temporadaId?: number;
   descripcion?: string;
   // Opcionales de almacén:
