@@ -252,8 +252,9 @@ import { environment } from '../../../../environments/environment';
                       <td class="border border-black p-1 text-center align-middle relative">
                         @if (item.imagen) {
                           <div class="relative inline-block group">
-                            <img [src]="item.imagen" alt="Imagen" class="max-w-full max-h-16 rounded border border-gray-300 object-contain mx-auto cursor-pointer"
-                                 (click)="toggleImageUpload('pasada-' + item.id); $event.stopPropagation()">
+                            <img [src]="item.imagen" alt="Imagen" class="max-w-full max-h-16 rounded border border-gray-300 object-contain mx-auto cursor-pointer hover:opacity-80 transition-opacity"
+                                 (click)="lightboxImage.set(item.imagen); $event.stopPropagation()"
+                                 title="Clic para ampliar">
                             @if (canEdit()) {
                               <button class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px]"
                                       (click)="deletePasadaImage(acto.id, item.id); $event.stopPropagation()"
@@ -402,8 +403,9 @@ import { environment } from '../../../../environments/environment';
                           <td class="border border-black p-1 text-center align-middle relative">
                             @if (elem.imagen) {
                               <div class="relative inline-block group">
-                                <img [src]="elem.imagen" alt="Imagen" class="max-w-full max-h-16 rounded border border-gray-300 object-contain mx-auto cursor-pointer"
-                                     (click)="toggleImageUpload('elem-' + elem.id); $event.stopPropagation()">
+                                <img [src]="elem.imagen" alt="Imagen" class="max-w-full max-h-16 rounded border border-gray-300 object-contain mx-auto cursor-pointer hover:opacity-80 transition-opacity"
+                                     (click)="lightboxImage.set(elem.imagen); $event.stopPropagation()"
+                                     title="Clic para ampliar">
                                 @if (canEdit()) {
                                   <button class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[10px]"
                                           (click)="deleteElementoImage(escena.id, elem.id); $event.stopPropagation()"
@@ -442,15 +444,15 @@ import { environment } from '../../../../environments/environment';
                           <!-- Columna Acciones -->
                           <td class="border border-black p-1 text-center whitespace-nowrap">
                             @if (canEdit()) {
-                              <button class="w-5 h-5 inline-flex items-center justify-center rounded hover:bg-blue-100 opacity-40 hover:opacity-100 transition-opacity"
+                              <button class="w-6 h-6 inline-flex items-center justify-center rounded hover:bg-blue-100 opacity-40 hover:opacity-100 transition-opacity"
                                       (click)="insertElemento(escena.id, elem.orden); $event.stopPropagation()"
                                       title="Insertar fila">
-                                <mat-icon class="!text-sm text-blue-600">add</mat-icon>
+                                <mat-icon class="!text-base text-blue-600">add</mat-icon>
                               </button>
-                              <button class="w-5 h-5 inline-flex items-center justify-center rounded hover:bg-red-100 opacity-40 hover:opacity-100 transition-opacity"
+                              <button class="w-6 h-6 inline-flex items-center justify-center rounded hover:bg-red-100 opacity-40 hover:opacity-100 transition-opacity"
                                       (click)="deleteElemento(escena.id, elem.id); $event.stopPropagation()"
                                       title="Eliminar fila">
-                                <mat-icon class="!text-sm text-red-600">delete</mat-icon>
+                                <mat-icon class="!text-base text-red-600">delete</mat-icon>
                               </button>
                             }
                           </td>
@@ -493,6 +495,22 @@ import { environment } from '../../../../environments/environment';
 
         </div>
       }
+
+      <!-- Lightbox para ver imagen en grande -->
+      @if (lightboxImage()) {
+        <div class="fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center p-4"
+             (click)="lightboxImage.set(null)">
+          <button class="absolute top-4 right-4 w-10 h-10 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white text-2xl transition-colors"
+                  (click)="lightboxImage.set(null)"
+                  title="Cerrar">
+            ✕
+          </button>
+          <img [src]="lightboxImage()"
+               alt="Imagen ampliada"
+               class="max-w-[90vw] max-h-[90vh] object-contain rounded shadow-2xl"
+               (click)="$event.stopPropagation()">
+        </div>
+      }
     </div>
   `,
   styles: [`
@@ -516,6 +534,9 @@ export class GuionEditorComponent implements OnInit, OnDestroy {
 
   // Para mostrar panel de upload de imagen
   showImageUpload: string | null = null;
+
+  // Para lightbox de imagen
+  lightboxImage = signal<string | null>(null);
 
   estadoLabel = computed(() => {
     const estado = this.guion()?.estado;
