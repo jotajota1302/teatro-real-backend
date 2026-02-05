@@ -34,7 +34,7 @@ public class Actividad implements Serializable {
     private String titulo;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "temporada_id", nullable = false)
+    @JoinColumn(name = "temporada_id", nullable = true)
     private Temporada temporada;
 
     @Column(columnDefinition = "TEXT")

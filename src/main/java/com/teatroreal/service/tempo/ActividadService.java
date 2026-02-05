@@ -96,12 +96,8 @@ public class ActividadService {
                 .orElseThrow(() -> new EntityNotFoundException("Departamento no encontrado"));
         }
 
-        Temporada temporada = temporadaRepository.findById(Long.valueOf(req.getTemporada()))
-            .orElseThrow(() -> new EntityNotFoundException("Temporada no encontrada"));
-
         Actividad actividad = new Actividad();
         actividad.setTitulo(req.getTitulo());
-        actividad.setTemporada(temporada);
         actividad.setDescripcion(req.getDescripcion());
         actividad.setTipoActividad(tipo);
         actividad.setEspacio(espacio);
@@ -109,20 +105,6 @@ public class ActividadService {
         actividad.setHoraInicio(LocalTime.parse(req.getHoraInicio()));
         actividad.setHoraFin(LocalTime.parse(req.getHoraFin()));
         actividad.setDepartamento(departamento);
-        actividad.setNotas(req.getNotas());
-
-        if (req.getTipoMovimiento() != null) {
-            actividad.setTipoMovimiento(Actividad.TipoMovimiento.valueOf(req.getTipoMovimiento()));
-        }
-        actividad.setNumCamiones(req.getNumCamiones());
-        actividad.setLugarOrigen(req.getLugarOrigen());
-        actividad.setLugarDestino(req.getLugarDestino());
-        actividad.setProduccionNombre(req.getProduccionNombre());
-        if (req.getEstado() != null) {
-            actividad.setEstado(Actividad.EstadoActividad.valueOf(req.getEstado()));
-        } else {
-            actividad.setEstado(Actividad.EstadoActividad.PENDIENTE);
-        }
 
         actividad = actividadRepository.save(actividad);
         return toResponse(actividad);
@@ -142,11 +124,7 @@ public class ActividadService {
                 .orElseThrow(() -> new EntityNotFoundException("Departamento no encontrado"));
         }
 
-        Temporada temporada = temporadaRepository.findById(Long.valueOf(req.getTemporada()))
-            .orElseThrow(() -> new EntityNotFoundException("Temporada no encontrada"));
-
         actividad.setTitulo(req.getTitulo());
-        actividad.setTemporada(temporada);
         actividad.setDescripcion(req.getDescripcion());
         actividad.setTipoActividad(tipo);
         actividad.setEspacio(espacio);
@@ -154,21 +132,6 @@ public class ActividadService {
         actividad.setHoraInicio(LocalTime.parse(req.getHoraInicio()));
         actividad.setHoraFin(LocalTime.parse(req.getHoraFin()));
         actividad.setDepartamento(departamento);
-        actividad.setNotas(req.getNotas());
-
-        if (req.getTipoMovimiento() != null) {
-            actividad.setTipoMovimiento(Actividad.TipoMovimiento.valueOf(req.getTipoMovimiento()));
-        } else {
-            actividad.setTipoMovimiento(null);
-        }
-
-        actividad.setNumCamiones(req.getNumCamiones());
-        actividad.setLugarOrigen(req.getLugarOrigen());
-        actividad.setLugarDestino(req.getLugarDestino());
-        actividad.setProduccionNombre(req.getProduccionNombre());
-        if (req.getEstado() != null) {
-            actividad.setEstado(Actividad.EstadoActividad.valueOf(req.getEstado()));
-        }
 
         actividad = actividadRepository.save(actividad);
         return toResponse(actividad);
@@ -236,13 +199,10 @@ public class ActividadService {
         return ActividadResponse.builder()
             .id(a.getId())
             .titulo(a.getTitulo())
-            .temporada(a.getTemporada() != null ? a.getTemporada().getId().toString() : null)
             .descripcion(a.getDescripcion())
-            .estado(a.getEstado() != null ? a.getEstado().name() : null)
             .fecha(a.getFecha() != null ? a.getFecha().toString() : null)
             .horaInicio(a.getHoraInicio() != null ? a.getHoraInicio().toString() : null)
             .horaFin(a.getHoraFin() != null ? a.getHoraFin().toString() : null)
-            .notas(a.getNotas())
             .tipoActividad(a.getTipoActividad() != null
                 ? ActividadResponse.TipoActividadInfo.builder()
                     .id(a.getTipoActividad().getId())
@@ -260,15 +220,6 @@ public class ActividadService {
                     .nombre(a.getDepartamento().getNombre())
                     .build()
                 : null)
-            .createdAt(a.getCreatedAt() != null ? a.getCreatedAt().toString() : null)
-            .updatedAt(a.getUpdatedAt() != null ? a.getUpdatedAt().toString() : null)
-            .tipoMovimiento(a.getTipoMovimiento() != null ? a.getTipoMovimiento().name() : null)
-            .numCamiones(a.getNumCamiones())
-            .lugarOrigen(a.getLugarOrigen())
-            .lugarDestino(a.getLugarDestino())
-            .produccionNombre(a.getProduccionNombre())
-            .googleEventId(a.getGoogleEventId())
-            .ultimaSincronizacion(a.getUltimaSincronizacion() != null ? a.getUltimaSincronizacion().toString() : null)
             .build();
     }
 }
