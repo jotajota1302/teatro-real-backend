@@ -1,15 +1,8 @@
 // Dialogo standalone para crear/editar actividad - Diseño Teatro Real
 import { Component, inject, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
 import { ActividadFormData, TipoActividad, Espacio, Departamento, Temporada } from '../../models/actividad.model';
 import { ActividadService } from '../../services/actividad.service';
 import { EspacioService } from '../../services/espacio.service';
@@ -22,398 +15,360 @@ import { DepartamentoService } from '../../../../core/services/departamento.serv
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatButtonModule,
-    MatIconModule
+    FormsModule,
+    MatDialogModule
   ],
   template: `
-    <div class="tr-dialog">
-      <header class="tr-dialog__header">
-        <h1 class="tr-dialog__title">
-          {{ isEditMode ? 'Editar Actividad' : 'Nueva Actividad' }}
-        </h1>
-      </header>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">{{ isEditMode ? 'Editar Actividad' : 'Nueva Actividad' }}</h2>
+        <button class="btn-close" (click)="onCancel()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
 
-      <form [formGroup]="form" (ngSubmit)="submit()" class="tr-dialog__body">
-        <!-- TÍTULO -->
-        <div class="tr-field tr-field--full">
-          <div class="tr-field__label">Título de la Actividad</div>
-          <mat-form-field appearance="outline" class="tr-field__control">
-            <input
-              matInput
-              formControlName="titulo"
-              placeholder="Título de la Actividad"
-              maxlength="100"
-            />
-            <mat-error *ngIf="form.get('titulo')?.hasError('required')">
-              El título es obligatorio
-            </mat-error>
-          </mat-form-field>
+      <form (ngSubmit)="submit()">
+        <!-- Título -->
+        <div class="form-group">
+          <label class="form-label">Título *</label>
+          <input type="text" class="form-input" [(ngModel)]="formData.titulo" name="titulo" required placeholder="Ej: Ensayo general La Traviata">
         </div>
 
-        <!-- TIPO DE ACTIVIDAD / ESPACIO -->
-        <div class="tr-field-row">
-          <div class="tr-field">
-            <div class="tr-field__label">Tipo de Actividad</div>
-            <mat-form-field appearance="outline" class="tr-field__control">
-              <mat-select formControlName="tipoActividadId" placeholder="Selecciona un tipo">
-                <mat-option *ngFor="let tipo of tiposActividad" [value]="tipo.id">
-                  {{ tipo.nombre }}
-                </mat-option>
-              </mat-select>
-              <mat-error *ngIf="form.get('tipoActividadId')?.hasError('required')">
-                Selecciona un tipo
-              </mat-error>
-            </mat-form-field>
+        <!-- Tipo y Espacio -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Tipo *</label>
+            <select class="form-select" [(ngModel)]="formData.tipoActividadId" name="tipoActividadId" required>
+              <option [ngValue]="null">Seleccionar...</option>
+              <option *ngFor="let tipo of tiposActividad" [ngValue]="tipo.id">{{ tipo.nombre }}</option>
+            </select>
           </div>
-
-          <div class="tr-field">
-            <div class="tr-field__label">Espacio</div>
-            <mat-form-field appearance="outline" class="tr-field__control">
-              <mat-select formControlName="espacioId" placeholder="Selecciona un espacio">
-                <mat-option *ngFor="let espacio of espaciosFiltrados" [value]="espacio.id">
-                  {{ espacio.nombre }}
-                </mat-option>
-              </mat-select>
-              <mat-error *ngIf="form.get('espacioId')?.hasError('required')">
-                Selecciona un espacio
-              </mat-error>
-            </mat-form-field>
+          <div class="form-group">
+            <label class="form-label">Espacio *</label>
+            <select class="form-select" [(ngModel)]="formData.espacioId" name="espacioId" required>
+              <option [ngValue]="null">Seleccionar...</option>
+              <option *ngFor="let espacio of espaciosFiltrados" [ngValue]="espacio.id">{{ espacio.nombre }}</option>
+            </select>
           </div>
         </div>
 
-        <!-- DEPARTAMENTO -->
-        <div class="tr-field tr-field--full">
-          <div class="tr-field__label">Departamento</div>
-          <mat-form-field appearance="outline" class="tr-field__control">
-            <mat-select formControlName="departamentoId" placeholder="Selecciona un departamento">
-              <mat-option [value]="null">- Sin departamento -</mat-option>
-              <mat-option *ngFor="let dep of departamentos" [value]="dep.id">
-                {{ dep.nombre }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-
-        <!-- FECHA -->
-        <div class="tr-field tr-field--full">
-          <div class="tr-field__label">Fecha</div>
-          <mat-form-field appearance="outline" class="tr-field__control">
-            <input
-              matInput
-              [matDatepicker]="picker"
-              formControlName="fecha"
-              placeholder="06/02/2026"
-            />
-            <mat-datepicker-toggle matIconSuffix [for]="picker">
-              <mat-icon matDatepickerToggleIcon>calendar_today</mat-icon>
-            </mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-            <mat-error *ngIf="form.get('fecha')?.hasError('required')">
-              La fecha es obligatoria
-            </mat-error>
-          </mat-form-field>
-        </div>
-
-        <!-- HORAS -->
-        <div class="tr-field-row">
-          <div class="tr-field">
-            <div class="tr-field__label">Hora Inicio</div>
-            <mat-form-field appearance="outline" class="tr-field__control">
-              <input
-                matInput
-                type="time"
-                formControlName="horaInicio"
-                placeholder="09:00"
-              />
-              <mat-icon matIconSuffix class="time-icon">schedule</mat-icon>
-              <mat-error *ngIf="form.get('horaInicio')?.hasError('required')">
-                Hora obligatoria
-              </mat-error>
-            </mat-form-field>
+        <!-- Fecha, Hora inicio, Hora fin -->
+        <div class="form-row form-row--three">
+          <div class="form-group">
+            <label class="form-label">Fecha *</label>
+            <input type="date" class="form-input" [(ngModel)]="formData.fecha" name="fecha" required>
           </div>
-
-          <div class="tr-field">
-            <div class="tr-field__label">Hora Fin</div>
-            <mat-form-field appearance="outline" class="tr-field__control">
-              <input
-                matInput
-                type="time"
-                formControlName="horaFin"
-                placeholder="13:00"
-              />
-              <mat-icon matIconSuffix class="time-icon">schedule</mat-icon>
-              <mat-error *ngIf="form.get('horaFin')?.hasError('required')">
-                Hora obligatoria
-              </mat-error>
-            </mat-form-field>
+          <div class="form-group">
+            <label class="form-label">Inicio *</label>
+            <select class="form-select" [(ngModel)]="formData.horaInicio" name="horaInicio" required>
+              <option value="">--:--</option>
+              <option *ngFor="let hora of horasDisponibles" [value]="hora">{{ hora }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fin *</label>
+            <select class="form-select" [(ngModel)]="formData.horaFin" name="horaFin" required>
+              <option value="">--:--</option>
+              <option *ngFor="let hora of horasDisponibles" [value]="hora">{{ hora }}</option>
+            </select>
           </div>
         </div>
 
-        <!-- DESCRIPCIÓN -->
-        <div class="tr-field tr-field--full">
-          <div class="tr-field__label">Descripción</div>
-          <mat-form-field appearance="outline" class="tr-field__control tr-field__control--textarea">
-            <textarea
-              matInput
-              formControlName="descripcion"
-              rows="3"
-              placeholder="Añade una descripción..."
-            ></textarea>
-          </mat-form-field>
+        <!-- Departamento -->
+        <div class="form-group">
+          <label class="form-label">Departamento</label>
+          <select class="form-select" [(ngModel)]="formData.departamentoId" name="departamentoId">
+            <option [ngValue]="null">Sin asignar</option>
+            <option *ngFor="let dep of departamentos" [ngValue]="dep.id">{{ dep.nombre }}</option>
+          </select>
         </div>
 
-        <!-- BOTONES -->
-        <footer class="tr-dialog__footer">
-          <button
-            type="button"
-            mat-stroked-button
-            (click)="onCancel()"
-            class="btn btn--secondary"
-          >
-            CANCELAR
+        <!-- Notas -->
+        <div class="form-group">
+          <label class="form-label">Notas</label>
+          <textarea class="form-input form-textarea" [(ngModel)]="formData.descripcion" name="descripcion" placeholder="Añadir notas..." rows="2"></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button *ngIf="isEditMode && !confirmingDelete" type="button" class="btn-delete" (click)="confirmDelete()">
+            <span class="material-icons">delete</span>
+            Eliminar
           </button>
-
-          <button
-            type="submit"
-            mat-raised-button
-            [disabled]="form.invalid || isSubmitting"
-            class="btn btn--primary"
-          >
-            {{ isSubmitting ? 'GUARDANDO...' : (isEditMode ? 'GUARDAR CAMBIOS' : 'CREAR ACTIVIDAD') }}
+          <div *ngIf="confirmingDelete" class="delete-confirm">
+            <span class="delete-confirm-text">¿Eliminar?</span>
+            <button type="button" class="btn-confirm-delete" (click)="deleteActividad()">Sí</button>
+            <button type="button" class="btn-cancel-delete" (click)="cancelDelete()">No</button>
+          </div>
+          <div class="spacer"></div>
+          <button type="button" class="btn-cancel" (click)="onCancel()">Cancelar</button>
+          <button type="submit" class="btn-save" [disabled]="isSubmitting || !isFormValid()">
+            {{ isSubmitting ? 'Guardando...' : (isEditMode ? 'Guardar' : 'Crear') }}
           </button>
-        </footer>
+        </div>
       </form>
     </div>
   `,
   styles: [`
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
-
     :host {
-      font-family: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      display: block;
     }
 
-    .tr-dialog {
-      width: 100%;
-      max-width: 960px;
-      background: #ffffff;
-      border-radius: 12px;
-      padding: 16px 32px 16px;
+    :host ::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+      border-radius: 16px !important;
+      overflow: visible !important;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 1.5rem;
+      width: calc(100% - 2rem);
+      max-width: 560px;
+    }
+
+    .modal-header {
       display: flex;
-      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid #e5e7eb;
     }
 
-    .tr-dialog__header {
-      margin-bottom: 6px;
-    }
-
-    .tr-dialog__title {
-      margin: 0;
-      font-size: 26px;
-      font-weight: 700;
-      color: #111827;
-    }
-
-    .tr-dialog__body {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .tr-field-row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .tr-field {
-      width: 100%;
-    }
-
-    .tr-field--full {
-      width: 100%;
-    }
-
-    .tr-field__label {
-      font-size: 12px;
+    .modal-title {
+      font-size: 1.125rem;
       font-weight: 600;
-      letter-spacing: 0.02em;
+      color: #1f2937;
+      margin: 0;
+    }
+
+    .btn-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+      background: #f3f4f6;
       color: #374151;
-      margin-bottom: 4px;
+      transition: all 0.2s;
     }
 
-    .tr-field__control {
-      width: 100%;
+    .btn-close:hover {
+      background: #e5e7eb;
     }
 
-    .tr-field__control--textarea ::ng-deep textarea.mat-mdc-input-element {
-      min-height: 90px;
-      resize: vertical;
-    }
-
-    /* Ajustes generales de mat-form-field dentro del diálogo */
-    .tr-dialog ::ng-deep .mat-mdc-form-field {
-      width: 100%;
-      font-family: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    }
-
-    .tr-dialog ::ng-deep .mat-mdc-text-field-wrapper {
-      background-color: #ffffff !important;
-      border-radius: 8px !important;
-    }
-
-    .tr-dialog ::ng-deep .mdc-text-field--outlined .mdc-notched-outline__leading,
-    .tr-dialog ::ng-deep .mdc-text-field--outlined .mdc-notched-outline__notch,
-    .tr-dialog ::ng-deep .mdc-text-field--outlined .mdc-notched-outline__trailing {
-      border-color: #d1d5db !important;
-      border-width: 1px !important;
-    }
-
-    .tr-dialog ::ng-deep .mdc-text-field--outlined:hover:not(.mdc-text-field--focused) .mdc-notched-outline__leading,
-    .tr-dialog ::ng-deep .mdc-text-field--outlined:hover:not(.mdc-text-field--focused) .mdc-notched-outline__notch,
-    .tr-dialog ::ng-deep .mdc-text-field--outlined:hover:not(.mdc-text-field--focused) .mdc-notched-outline__trailing {
-      border-color: #9ca3af !important;
-    }
-
-    .tr-dialog ::ng-deep .mdc-text-field--focused .mdc-notched-outline__leading,
-    .tr-dialog ::ng-deep .mdc-text-field--focused .mdc-notched-outline__notch,
-    .tr-dialog ::ng-deep .mdc-text-field--focused .mdc-notched-outline__trailing {
-      border-color: #cf102d !important;
-      border-width: 2px !important;
-    }
-
-    .tr-dialog ::ng-deep .mat-mdc-floating-label {
-      color: #6b7280 !important;
-      font-weight: 500 !important;
-    }
-
-    .tr-dialog ::ng-deep .mdc-text-field--focused .mat-mdc-floating-label {
-      color: #cf102d !important;
-    }
-
-    .tr-dialog ::ng-deep .mat-mdc-input-element,
-    .tr-dialog ::ng-deep .mat-mdc-select-value {
-      font-family: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-      color: #111827 !important;
-      font-size: 14px;
-    }
-
-    .tr-dialog ::ng-deep .mat-mdc-input-element::placeholder {
-      color: #9ca3af !important;
-    }
-
-    .tr-dialog ::ng-deep .mat-mdc-select-arrow {
-      color: #9ca3af !important;
-    }
-
-    .tr-dialog ::ng-deep .mdc-text-field--focused .mat-mdc-select-arrow {
-      color: #cf102d !important;
-    }
-
-    .time-icon {
-      color: #6b7280;
+    .btn-close .material-icons {
       font-size: 20px;
-      width: 20px;
-      height: 20px;
     }
 
-    /* Botones */
-    .tr-dialog__footer {
+    .form-group {
+      margin-bottom: 0.75rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .form-row--three {
+      grid-template-columns: 1.3fr 0.85fr 0.85fr;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+      color: #6b7280;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+      background: white;
+      border: 1px solid #d1d5db;
+      color: #1f2937;
+      font-family: inherit;
+    }
+
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: #CF102D;
+      box-shadow: 0 0 0 2px rgba(207, 16, 45, 0.15);
+    }
+
+    .form-input::placeholder {
+      color: #9ca3af;
+    }
+
+    .form-select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+      background-position: right 0.5rem center;
+      background-repeat: no-repeat;
+      background-size: 1.25rem;
+      padding-right: 2rem;
+    }
+
+    .form-textarea {
+      resize: none;
+      min-height: 60px;
+    }
+
+    .modal-actions {
       display: flex;
       justify-content: flex-end;
-      gap: 16px;
-      margin-top: 8px;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e5e7eb;
     }
 
-    .btn {
-      min-width: 140px;
-      height: 44px;
-      padding: 0 20px;
+    .btn-cancel {
+      padding: 0.5rem 1rem;
       border-radius: 6px;
-      border: none;
-      font-family: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      font-weight: 500;
+      font-size: 0.875rem;
       cursor: pointer;
-      transition: background-color 0.15s ease, color 0.15s ease,
-                  box-shadow 0.15s ease, transform 0.05s ease;
+      transition: all 0.2s;
+      background: white;
+      border: 1px solid #d1d5db;
+      color: #374151;
     }
 
-    .btn--secondary {
-      background: #ffffff;
-      color: #111827;
-      border: 2px solid #111827;
+    .btn-cancel:hover {
+      background: #f3f4f6;
+      border-color: #9ca3af;
     }
 
-    .btn--secondary:hover {
-      background: #111827;
-      color: #ffffff;
+    .btn-save {
+      padding: 0.5rem 1.25rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #CF102D;
+      color: white;
+      border: none;
     }
 
-    .btn--primary {
-      background: #cf102d;
-      color: #ffffff;
-      box-shadow: 0 4px 14px rgba(207, 16, 45, 0.35);
+    .btn-save:hover:not(:disabled) {
+      background: #a80d25;
     }
 
-    .btn--primary:hover:not(:disabled) {
-      background: #a00d24;
-      box-shadow: 0 6px 18px rgba(207, 16, 45, 0.45);
-      transform: translateY(-1px);
-    }
-
-    .btn--primary:disabled {
-      background: #d1d5db !important;
-      color: #9ca3af !important;
-      box-shadow: none !important;
+    .btn-save:disabled {
+      background: #e5e7eb;
+      color: #9ca3af;
       cursor: not-allowed;
     }
 
-    /* Responsive */
-    @media (max-width: 768px) {
-      .tr-dialog {
-        padding: 20px 16px;
-        border-radius: 0;
-        max-width: 100%;
-      }
+    .spacer {
+      flex: 1;
+    }
 
-      .tr-dialog__title {
-        font-size: 22px;
-      }
+    .btn-delete {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: white;
+      border: 1px solid #fca5a5;
+      color: #dc2626;
+    }
 
-      .tr-field-row {
-        grid-template-columns: 1fr;
-      }
+    .btn-delete:hover {
+      background: #fef2f2;
+      border-color: #f87171;
+    }
 
-      .tr-dialog__footer {
-        flex-direction: column-reverse;
-      }
+    .btn-delete .material-icons {
+      font-size: 18px;
+    }
 
-      .btn {
-        width: 100%;
-      }
+    .delete-confirm {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .delete-confirm-text {
+      font-size: 0.875rem;
+      color: #dc2626;
+      font-weight: 500;
+    }
+
+    .btn-confirm-delete {
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      background: #dc2626;
+      color: white;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-confirm-delete:hover {
+      background: #b91c1c;
+    }
+
+    .btn-cancel-delete {
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      font-weight: 500;
+      font-size: 0.8rem;
+      cursor: pointer;
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #d1d5db;
+      transition: all 0.2s;
+    }
+
+    .btn-cancel-delete:hover {
+      background: #e5e7eb;
     }
   `]
 })
 export class ActividadDialogComponent implements OnInit {
-  form: FormGroup;
   isEditMode = false;
   isSubmitting = false;
+  confirmingDelete = false;
   tiposActividad: TipoActividad[] = [];
   espacios: Espacio[] = [];
   espaciosFiltrados: Espacio[] = [];
   temporadas: Temporada[] = [];
   departamentos: Departamento[] = [];
+  horasDisponibles: string[] = this.generarHoras();
 
-  private fb = inject(FormBuilder);
+  formData = {
+    titulo: '',
+    tipoActividadId: null as number | null,
+    espacioId: null as number | null,
+    fecha: '',
+    horaInicio: '',
+    horaFin: '',
+    departamentoId: null as number | null,
+    descripcion: ''
+  };
+
   private dialogRef = inject(MatDialogRef<ActividadDialogComponent>);
   private actividadService = inject(ActividadService);
   private espacioService = inject(EspacioService);
@@ -421,29 +376,16 @@ export class ActividadDialogComponent implements OnInit {
   private temporadaService = inject(TemporadaService);
   private departamentoService = inject(DepartamentoService);
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: any) {
-    this.form = this.fb.group({
-      titulo: ['', [Validators.required, Validators.maxLength(100)]],
-      tipoActividadId: [null, Validators.required],
-      espacioId: [null, Validators.required],
-      departamentoId: [null],
-      fecha: [null, Validators.required],
-      horaInicio: ['', Validators.required],
-      horaFin: ['', Validators.required],
-      descripcion: ['']
-    });
-  }
+  constructor(@Inject(MAT_DIALOG_DATA) public data: any) {}
 
   ngOnInit(): void {
     this.loadFormData();
 
     if (this.data && this.data.mode === 'edit' && this.data.actividad) {
       this.isEditMode = true;
-      this.form.patchValue(this.data.actividad);
+      Object.assign(this.formData, this.data.actividad);
     } else if (this.data && this.data.defaultDate) {
-      this.form.patchValue({
-        fecha: new Date(this.data.defaultDate)
-      });
+      this.formData.fecha = this.data.defaultDate;
     }
   }
 
@@ -451,7 +393,6 @@ export class ActividadDialogComponent implements OnInit {
     this.tipoActividadService.loadTiposActividad().subscribe({
       next: () => {
         this.tiposActividad = this.tipoActividadService.tipos();
-        console.log('Tipos de actividad cargados:', this.tiposActividad);
       },
       error: (err) => console.error('Error cargando tipos de actividad:', err)
     });
@@ -462,11 +403,11 @@ export class ActividadDialogComponent implements OnInit {
         this.espaciosFiltrados = this.espacios.filter(
           espacio => !espacio.nombre.toLowerCase().includes('almacen')
         );
-        console.log('Espacios cargados:', this.espaciosFiltrados);
       },
       error: (err) => console.error('Error cargando espacios:', err)
     });
 
+    this.temporadaService.ensureLoaded();
     if (typeof this.temporadaService.temporadas === 'function') {
       this.temporadas = this.temporadaService.temporadas();
     }
@@ -474,38 +415,46 @@ export class ActividadDialogComponent implements OnInit {
     this.departamentoService.loadDepartamentos().subscribe({
       next: () => {
         this.departamentos = this.departamentoService.departamentos();
-        console.log('Departamentos cargados:', this.departamentos);
       },
       error: (err) => console.error('Error cargando departamentos:', err)
     });
   }
 
+  isFormValid(): boolean {
+    return !!(
+      this.formData.titulo &&
+      this.formData.tipoActividadId &&
+      this.formData.espacioId &&
+      this.formData.fecha &&
+      this.formData.horaInicio &&
+      this.formData.horaFin
+    );
+  }
+
   submit(): void {
-    if (this.form.invalid || this.isSubmitting) return;
-    
+    if (!this.isFormValid() || this.isSubmitting) return;
+
     this.isSubmitting = true;
-    const formValue = this.form.value;
-    
-    // Formatear fecha a ISO string (yyyy-MM-dd)
-    const fechaISO = formValue.fecha instanceof Date 
-      ? formValue.fecha.toISOString().split('T')[0]
-      : formValue.fecha;
-    
-    // Construir el objeto de datos para enviar al backend
+
+    const temporadaActual = this.temporadaService.selectedTemporada()
+      || this.temporadaService.temporadaActiva?.()
+      || this.temporadas[0];
+    const temporadaNombre = temporadaActual?.nombre || '2024/2025';
+
     const actividadData: ActividadFormData = {
-      titulo: formValue.titulo,
-      tipoActividadId: formValue.tipoActividadId,
-      espacioId: formValue.espacioId,
-      fecha: fechaISO,
-      horaInicio: formValue.horaInicio,
-      horaFin: formValue.horaFin,
-      departamentoId: formValue.departamentoId || undefined,
-      descripcion: formValue.descripcion || undefined
+      titulo: this.formData.titulo,
+      tipoActividadId: this.formData.tipoActividadId!,
+      espacioId: this.formData.espacioId!,
+      fecha: this.formData.fecha,
+      horaInicio: this.formData.horaInicio,
+      horaFin: this.formData.horaFin,
+      temporada: temporadaNombre,
+      departamentoId: this.formData.departamentoId || undefined,
+      descripcion: this.formData.descripcion || undefined
     };
-    
-    if (this.isEditMode && (this.data?.actividadId || formValue.id)) {
-      const id = this.data.actividadId || formValue.id;
-      this.actividadService.update(id, actividadData).subscribe({
+
+    if (this.isEditMode && this.data?.actividadId) {
+      this.actividadService.update(this.data.actividadId, actividadData).subscribe({
         next: () => {
           this.isSubmitting = false;
           this.dialogRef.close(true);
@@ -531,5 +480,40 @@ export class ActividadDialogComponent implements OnInit {
 
   onCancel(): void {
     this.dialogRef.close(false);
+  }
+
+  confirmDelete(): void {
+    this.confirmingDelete = true;
+  }
+
+  cancelDelete(): void {
+    this.confirmingDelete = false;
+  }
+
+  deleteActividad(): void {
+    if (!this.data?.actividadId) return;
+
+    this.isSubmitting = true;
+    this.actividadService.delete(this.data.actividadId).subscribe({
+      next: () => {
+        this.isSubmitting = false;
+        this.dialogRef.close({ deleted: true });
+      },
+      error: (err) => {
+        console.error('Error eliminando actividad:', err);
+        this.isSubmitting = false;
+        this.confirmingDelete = false;
+      }
+    });
+  }
+
+  private generarHoras(): string[] {
+    const horas: string[] = [];
+    for (let h = 7; h <= 23; h++) {
+      for (let m = 0; m < 60; m += 30) {
+        horas.push(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`);
+      }
+    }
+    return horas;
   }
 }

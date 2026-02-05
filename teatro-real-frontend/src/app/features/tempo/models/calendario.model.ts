@@ -15,7 +15,7 @@ export type TipoActividadCalendario =
 export type EstadoActividadCalendario = 'PROVISIONAL' | 'CONFIRMADA' | 'CANCELADA';
 
 export interface ActividadCalendario {
-  id: number;
+  id: string;
   fecha: string;
   horaInicio: string;
   horaFin: string;

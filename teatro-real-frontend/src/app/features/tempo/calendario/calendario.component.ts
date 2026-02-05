@@ -87,7 +87,7 @@ import { es } from 'date-fns/locale';
             <!-- Time slots for this day -->
             <ng-container *ngFor="let franja of dia.franjas; trackBy: trackByFranja">
               <div class="celda-hora">
-                {{ franja.horaInicio }} – {{ franja.horaFin }}
+                {{ franja.horaInicio.split(':')[0] }}
               </div>
               <div
                 class="celda-espacio"
@@ -99,6 +99,8 @@ import { es } from 'date-fns/locale';
                     class="actividad"
                     [style.background-color]="getActividadBgColor(actividad)"
                     [style.border-color]="getActividadBorderColor(actividad)"
+                    [style.height.px]="getActividadHeight(actividad)"
+                    [style.top.px]="getActividadTop(actividad)"
                     [class.estado-provisional]="actividad.estado === 'PROVISIONAL'"
                     [class.estado-confirmada]="actividad.estado === 'CONFIRMADA'"
                     [class.estado-cancelada]="actividad.estado === 'CANCELADA'"
@@ -162,6 +164,22 @@ import { es } from 'date-fns/locale';
                 <p>{{ selectedActividad()?.detalle }}</p>
               </div>
             </div>
+          </div>
+          <div class="dialog-actions">
+            <button class="btn-dialog-delete" *ngIf="!confirmingDelete()" (click)="confirmDeleteActividad()">
+              <mat-icon>delete</mat-icon>
+              Eliminar
+            </button>
+            <div class="delete-confirm-inline" *ngIf="confirmingDelete()">
+              <span>¿Eliminar?</span>
+              <button class="btn-confirm-yes" (click)="deleteActividad()">Sí</button>
+              <button class="btn-confirm-no" (click)="cancelDeleteActividad()">No</button>
+            </div>
+            <div class="dialog-actions-spacer"></div>
+            <button class="btn-dialog-edit" (click)="editActividad()">
+              <mat-icon>edit</mat-icon>
+              Editar
+            </button>
           </div>
         </div>
       </div>
@@ -297,31 +315,34 @@ import { es } from 'date-fns/locale';
 
     .btn-nueva {
       margin-left: 0.75rem;
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 0.25rem;
-      padding: 0.45rem 0.9rem;
-      border-radius: 0.375rem;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
       border: none;
       cursor: pointer;
       font-family: 'Montserrat', sans-serif;
-      font-size: 0.8rem;
+      font-size: 0.875rem;
       font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
       color: #ffffff;
       background: #cf102d;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
-      transition: all 0.15s ease;
+      box-shadow: 0 4px 12px rgba(207, 16, 45, 0.3);
+      transition: all 0.2s ease;
     }
 
     .btn-nueva mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
     }
 
     .btn-nueva:hover {
-      background: #a30d23;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+      background: #a80d25;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(207, 16, 45, 0.4);
     }
 
     /* Loading */
@@ -391,20 +412,24 @@ import { es } from 'date-fns/locale';
     .celda-hora {
       padding: 0.5rem 1rem;
       border-right: 1px solid #e5e7eb;
-      border-bottom: 1px solid #f3f4f6;
+      border-bottom: none;
       font-size: 0.75rem;
       font-weight: 500;
       color: #6b7280;
       background: #fafafa;
       min-width: 120px;
+      min-height: 52px;
     }
 
     .celda-espacio {
       border-right: 1px solid #e5e7eb;
-      border-bottom: 1px solid #f3f4f6;
+      border-bottom: 1px solid #e5e7eb;
       min-height: 52px;
-      padding: 0.35rem;
+      padding: 0;
       min-width: 140px;
+      position: relative;
+      overflow: visible;
+      background: #ffffff;
     }
 
     .celda-espacio:last-child {
@@ -415,22 +440,24 @@ import { es } from 'date-fns/locale';
     .actividad {
       border-radius: 0.375rem;
       padding: 0.4rem 0.5rem;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0;
       font-size: 0.75rem;
       line-height: 1.3;
       color: #1f2937;
       border-left: 3px solid;
       cursor: pointer;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
+      position: absolute;
+      left: 4px;
+      right: 4px;
+      z-index: 1;
+      box-shadow: 0 0 0 3px #ffffff;
     }
 
     .actividad:hover {
       transform: translateY(-1px);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-    }
-
-    .actividad:last-child {
-      margin-bottom: 0;
+      z-index: 5;
     }
 
     .actividad-titulo {
@@ -594,6 +621,104 @@ import { es } from 'date-fns/locale';
       color: #1f2937;
     }
 
+    .dialog-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+
+    .dialog-actions-spacer {
+      flex: 1;
+    }
+
+    .btn-dialog-edit,
+    .btn-dialog-delete {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-dialog-edit {
+      background: #CF102D;
+      color: white;
+      border: none;
+    }
+
+    .btn-dialog-edit:hover {
+      background: #a80d25;
+    }
+
+    .btn-dialog-edit mat-icon,
+    .btn-dialog-delete mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    .btn-dialog-delete {
+      background: white;
+      color: #dc2626;
+      border: 1px solid #fca5a5;
+    }
+
+    .btn-dialog-delete:hover {
+      background: #fef2f2;
+      border-color: #f87171;
+    }
+
+    .delete-confirm-inline {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .delete-confirm-inline span {
+      font-size: 0.85rem;
+      color: #dc2626;
+      font-weight: 500;
+    }
+
+    .btn-confirm-yes,
+    .btn-confirm-no {
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-confirm-yes {
+      background: #dc2626;
+      color: white;
+      border: none;
+    }
+
+    .btn-confirm-yes:hover {
+      background: #b91c1c;
+    }
+
+    .btn-confirm-no {
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #d1d5db;
+    }
+
+    .btn-confirm-no:hover {
+      background: #e5e7eb;
+    }
+
     /* Responsive */
     @media (max-width: 1200px) {
       .col-header.fecha-hora,
@@ -651,6 +776,7 @@ export class CalendarioComponent implements OnInit {
 
   // Selected activity for dialog
   selectedActividad = signal<ActividadCalendario | null>(null);
+  confirmingDelete = signal(false);
 
   // Current week start (Monday)
   private currentWeekStart = signal<Date>(startOfWeek(new Date(), { weekStartsOn: 1 }));
@@ -703,6 +829,15 @@ export class CalendarioComponent implements OnInit {
     const dias: DiaCalendario[] = [];
     const diasNombres: NombreDia[] = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
+    // Fixed time slots (07:00 to 23:00, one hour per slot)
+    const franjasFijas: Array<{horaInicio: string, horaFin: string}> = [];
+    for (let h = 7; h < 24; h++) {
+      franjasFijas.push({
+        horaInicio: `${h.toString().padStart(2, '0')}:00`,
+        horaFin: `${((h + 1) % 24).toString().padStart(2, '0')}:00`
+      });
+    }
+
     for (let i = 0; i < 7; i++) {
       const fecha = addDays(weekStart, i);
       const fechaStr = format(fecha, 'yyyy-MM-dd');
@@ -710,35 +845,47 @@ export class CalendarioComponent implements OnInit {
       // Filter activities for this day
       const actividadesDia = actividades.filter(a => a.fecha === fechaStr);
 
-      // Group by unique time slots
-      const franjasMap = new Map<string, FranjaCalendario>();
+      // Create fixed hour slots
+      const franjas: FranjaCalendario[] = franjasFijas.map(franja => {
+        const franjaObj: FranjaCalendario = {
+          horaInicio: franja.horaInicio,
+          horaFin: franja.horaFin,
+          actividadesPorEspacio: {}
+        };
 
-      actividadesDia.forEach(act => {
-        const key = `${act.horaInicio}-${act.horaFin}`;
-        if (!franjasMap.has(key)) {
-          franjasMap.set(key, {
-            horaInicio: act.horaInicio,
-            horaFin: act.horaFin,
-            actividadesPorEspacio: {}
-          });
-        }
+        // Find activities that START in this hour slot
+        const hora = parseInt(franja.horaInicio.split(':')[0]);
 
-        const franja = franjasMap.get(key)!;
-        const originalEspacioId = act.espacio?.id || 0;
-        // Map the space ID to the calendar column ID
-        const columnaId = this.espacioToColumnaMap[originalEspacioId] || 15; // Default to "Otras Salas"
+        actividadesDia.forEach(act => {
+          const actHoraInicio = parseInt(act.horaInicio.split(':')[0]);
 
-        if (!franja.actividadesPorEspacio[columnaId]) {
-          franja.actividadesPorEspacio[columnaId] = [];
-        }
+          // Only add activities that start in this hour
+          if (actHoraInicio === hora) {
+            const originalEspacioId = act.espacio?.id || 0;
+            const columnaId = this.espacioToColumnaMap[originalEspacioId] || 15;
 
-        franja.actividadesPorEspacio[columnaId].push(this.mapToCalendarioActividad(act, columnaId));
+            if (!franjaObj.actividadesPorEspacio[columnaId]) {
+              franjaObj.actividadesPorEspacio[columnaId] = [];
+            }
+
+            const actividadConEstilo = this.mapToCalendarioActividad(act, columnaId);
+            // Calculate position and height based on duration
+            const [ih, im] = act.horaInicio.split(':').map(Number);
+            const [fh, fm] = act.horaFin.split(':').map(Number);
+            const duracionMin = (fh * 60 + fm) - (ih * 60 + im);
+            const heightPx = (duracionMin / 60) * 52; // 52px per hour
+            const offsetMin = im; // minutes offset from hour start
+            const topPx = (offsetMin / 60) * 52;
+
+            (actividadConEstilo as any).heightPx = heightPx;
+            (actividadConEstilo as any).topPx = topPx;
+
+            franjaObj.actividadesPorEspacio[columnaId].push(actividadConEstilo);
+          }
+        });
+
+        return franjaObj;
       });
-
-      // Sort franjas by hora inicio
-      const franjas = Array.from(franjasMap.values()).sort((a, b) =>
-        a.horaInicio.localeCompare(b.horaInicio)
-      );
 
       dias.push({
         nombre: diasNombres[i],
@@ -812,7 +959,7 @@ export class CalendarioComponent implements OnInit {
     const tipoNombre = act.tipoActividad?.nombre?.toUpperCase().replace(/\s+/g, '_') || 'OTRO';
 
     return {
-      id: parseInt(act.id) || 0,
+      id: act.id,
       fecha: act.fecha,
       horaInicio: act.horaInicio,
       horaFin: act.horaFin,
@@ -850,7 +997,10 @@ export class CalendarioComponent implements OnInit {
       today >= weekStart && today <= weekEnd ? today : weekStart;
 
     const dialogRef = this.dialog.open(ActividadDialogComponent, {
-      width: '720px',
+      width: 'auto',
+      maxWidth: '600px',
+      panelClass: 'actividad-dialog-panel',
+      backdropClass: 'actividad-dialog-backdrop',
       data: {
         mode: 'create',
         defaultDate: format(defaultDate, 'yyyy-MM-dd')
@@ -864,25 +1014,39 @@ export class CalendarioComponent implements OnInit {
     });
   }
 
-  // Activity colors
+  // Activity colors - solid opaque to cover grid lines
   getActividadBgColor(actividad: ActividadCalendario): string {
     if (actividad.colorHex) {
-      return actividad.colorHex + '20'; // 20 = ~12% opacity
+      return this.lightenColor(actividad.colorHex, 0.85);
     }
-    // Default colors by type
+    // Default SOLID OPAQUE colors by type
     const colorMap: Record<string, string> = {
-      'FUNCION': '#1E3A5F20',
-      'ENSAYO': '#2E7D3220',
-      'ENSAYO_PIANO': '#C8E6C940',
-      'ENSAYO_MUSICAL': '#FFCDD240',
+      'FUNCION': '#FEF3C7',
+      'ENSAYO': '#DBEAFE',
+      'ENSAYO_PIANO': '#C8E6C9',
+      'ENSAYO_MUSICAL': '#FFCDD2',
       'MONTAJE': '#FFE0B2',
+      'MONTAJE_ESCENOGRAFIA': '#FFE0B2',
       'DESMONTAJE': '#EEEEEE',
-      'EVENTO': '#AD145720',
+      'EVENTO': '#F3E5F5',
       'EVENTO_EXTERNO': '#BBDEFB',
+      'EVENTO_PRIVADO': '#F8BBD0',
       'RESERVA': '#C8E6C9',
+      'RESERVA_TECNICA': '#C8E6C9',
       'PAUSA_TECNICA': '#E0E0E0'
     };
-    return colorMap[actividad.tipo] || '#F3F4F6';
+    return colorMap[actividad.tipo] || '#F5F5F5';
+  }
+
+  private lightenColor(hex: string, amount: number): string {
+    hex = hex.replace('#', '');
+    const r = parseInt(hex.substring(0, 2), 16);
+    const g = parseInt(hex.substring(2, 4), 16);
+    const b = parseInt(hex.substring(4, 6), 16);
+    const newR = Math.round(r + (255 - r) * amount);
+    const newG = Math.round(g + (255 - g) * amount);
+    const newB = Math.round(b + (255 - b) * amount);
+    return '#' + [newR, newG, newB].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
   }
 
   getActividadBorderColor(actividad: ActividadCalendario): string {
@@ -890,18 +1054,29 @@ export class CalendarioComponent implements OnInit {
       return actividad.colorHex;
     }
     const colorMap: Record<string, string> = {
-      'FUNCION': '#1E3A5F',
-      'ENSAYO': '#2E7D32',
-      'ENSAYO_PIANO': '#4CAF50',
-      'ENSAYO_MUSICAL': '#E91E63',
-      'MONTAJE': '#FF9800',
-      'DESMONTAJE': '#9E9E9E',
-      'EVENTO': '#AD1457',
-      'EVENTO_EXTERNO': '#2196F3',
-      'RESERVA': '#4CAF50',
-      'PAUSA_TECNICA': '#757575'
+      'FUNCION': '#f59e0b',
+      'ENSAYO': '#3b82f6',
+      'ENSAYO_PIANO': '#3b82f6',
+      'ENSAYO_MUSICAL': '#ef4444',
+      'MONTAJE': '#f97316',
+      'MONTAJE_ESCENOGRAFIA': '#f97316',
+      'DESMONTAJE': '#6b7280',
+      'EVENTO': '#a855f7',
+      'EVENTO_EXTERNO': '#6366f1',
+      'EVENTO_PRIVADO': '#ec4899',
+      'RESERVA': '#10b981',
+      'RESERVA_TECNICA': '#10b981',
+      'PAUSA_TECNICA': '#6b7280'
     };
-    return colorMap[actividad.tipo] || '#9CA3AF';
+    return colorMap[actividad.tipo] || '#9ca3af';
+  }
+
+  getActividadHeight(actividad: any): number {
+    return actividad.heightPx || 52;
+  }
+
+  getActividadTop(actividad: any): number {
+    return actividad.topPx || 0;
   }
 
   getActividadTooltip(actividad: ActividadCalendario): string {
@@ -919,6 +1094,64 @@ export class CalendarioComponent implements OnInit {
 
   closeDialog(): void {
     this.selectedActividad.set(null);
+    this.confirmingDelete.set(false);
+  }
+
+  editActividad(): void {
+    const actividad = this.selectedActividad();
+    if (!actividad) return;
+
+    this.closeDialog();
+
+    const dialogRef = this.dialog.open(ActividadDialogComponent, {
+      width: 'auto',
+      maxWidth: '600px',
+      panelClass: 'actividad-dialog-panel',
+      backdropClass: 'actividad-dialog-backdrop',
+      data: {
+        mode: 'edit',
+        actividadId: String(actividad.id),
+        actividad: {
+          titulo: actividad.titulo,
+          tipoActividadId: null,
+          espacioId: actividad.espacioId,
+          fecha: actividad.fecha,
+          horaInicio: actividad.horaInicio,
+          horaFin: actividad.horaFin,
+          descripcion: actividad.detalle || ''
+        }
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadActividades();
+      }
+    });
+  }
+
+  confirmDeleteActividad(): void {
+    this.confirmingDelete.set(true);
+  }
+
+  cancelDeleteActividad(): void {
+    this.confirmingDelete.set(false);
+  }
+
+  deleteActividad(): void {
+    const actividad = this.selectedActividad();
+    if (!actividad) return;
+
+    this.actividadService.delete(String(actividad.id)).subscribe({
+      next: () => {
+        this.closeDialog();
+        this.loadActividades();
+      },
+      error: (err) => {
+        console.error('Error eliminando actividad:', err);
+        this.confirmingDelete.set(false);
+      }
+    });
   }
 
   getEspacioNombre(espacioId: number | undefined): string {
@@ -944,7 +1177,7 @@ export class CalendarioComponent implements OnInit {
     return espacio.id;
   }
 
-  trackByActividad(index: number, actividad: ActividadCalendario): number {
+  trackByActividad(index: number, actividad: ActividadCalendario): string {
     return actividad.id;
   }
 }
