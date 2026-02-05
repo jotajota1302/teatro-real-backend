@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface TemporadaRepository extends JpaRepository<Temporada, Long> {
 
     Optional<Temporada> findByActivaTrue();
+
+    Optional<Temporada> findByNombre(String nombre);
 }

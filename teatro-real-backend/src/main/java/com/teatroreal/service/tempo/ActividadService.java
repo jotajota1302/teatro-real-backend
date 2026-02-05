@@ -96,6 +96,17 @@ public class ActividadService {
                 .orElseThrow(() -> new EntityNotFoundException("Departamento no encontrado"));
         }
 
+        // Buscar temporada por nombre o usar la activa
+        Temporada temporada = null;
+        if (req.getTemporada() != null && !req.getTemporada().isEmpty()) {
+            temporada = temporadaRepository.findByNombre(req.getTemporada())
+                .orElseGet(() -> temporadaRepository.findByActivaTrue()
+                    .orElseThrow(() -> new EntityNotFoundException("No hay temporada activa")));
+        } else {
+            temporada = temporadaRepository.findByActivaTrue()
+                .orElseThrow(() -> new EntityNotFoundException("No hay temporada activa"));
+        }
+
         Actividad actividad = new Actividad();
         actividad.setTitulo(req.getTitulo());
         actividad.setDescripcion(req.getDescripcion());
@@ -105,6 +116,7 @@ public class ActividadService {
         actividad.setHoraInicio(LocalTime.parse(req.getHoraInicio()));
         actividad.setHoraFin(LocalTime.parse(req.getHoraFin()));
         actividad.setDepartamento(departamento);
+        actividad.setTemporada(temporada);
 
         actividad = actividadRepository.save(actividad);
         return toResponse(actividad);
