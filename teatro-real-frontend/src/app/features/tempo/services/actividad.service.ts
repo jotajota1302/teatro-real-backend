@@ -1,7 +1,7 @@
 // teatro-real-frontend/src/app/features/tempo/services/actividad.service.ts
 
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { Observable, tap, of, catchError } from 'rxjs';
+import { Observable, tap, of, catchError, map } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';
 import { BackendStatusService } from '../../../core/services/backend-status.service';
 import { Actividad, ActividadFormData, CalendarioFilter } from '../models/actividad.model';
@@ -146,5 +146,44 @@ export class ActividadService {
    */
   exportCalendario(filter: CalendarioFilter): Observable<Blob> {
     return this.api.downloadBlob('/api/actividades/export', filter);
+  }
+
+  /**
+   * Busca actividades que tengan conflicto de horario con los parámetros dados.
+   * Retorna actividades en el mismo espacio, fecha y con horario solapado.
+   */
+  checkConflicts(espacioId: number, fecha: string, horaInicio: string, horaFin: string, excludeId?: string): Observable<Actividad[]> {
+    return this.api.get<Actividad[]>('/api/actividades/search', {
+      espacioId: String(espacioId),
+      fechaInicio: fecha,
+      fechaFin: fecha
+    }).pipe(
+      catchError(() => of([])),
+      map((actividades: Actividad[]) => {
+        return actividades.filter(a => {
+          // Excluir la actividad que estamos editando
+          if (excludeId && a.id === excludeId) return false;
+          // Verificar solapamiento de horarios
+          return this.horariosSeSuperponen(horaInicio, horaFin, a.horaInicio, a.horaFin);
+        });
+      })
+    );
+  }
+
+  /**
+   * Verifica si dos rangos de horarios se superponen.
+   */
+  private horariosSeSuperponen(inicio1: string, fin1: string, inicio2: string, fin2: string): boolean {
+    const toMinutes = (hora: string): number => {
+      const [h, m] = hora.split(':').map(Number);
+      return h * 60 + m;
+    };
+    const start1 = toMinutes(inicio1);
+    const end1 = toMinutes(fin1);
+    const start2 = toMinutes(inicio2);
+    const end2 = toMinutes(fin2);
+
+    // Hay solapamiento si uno empieza antes de que el otro termine
+    return start1 < end2 && start2 < end1;
   }
 }

@@ -3,7 +3,7 @@ import { Component, inject, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { ActividadFormData, TipoActividad, Espacio, Departamento, Temporada } from '../../models/actividad.model';
+import { Actividad, ActividadFormData, TipoActividad, Espacio, Departamento, Temporada } from '../../models/actividad.model';
 import { ActividadService } from '../../services/actividad.service';
 import { EspacioService } from '../../services/espacio.service';
 import { TipoActividadService } from '../../services/tipo-actividad.service';
@@ -89,7 +89,28 @@ import { DepartamentoService } from '../../../../core/services/departamento.serv
           <textarea class="form-input form-textarea" [(ngModel)]="formData.descripcion" name="descripcion" placeholder="Añadir notas..." rows="2"></textarea>
         </div>
 
-        <div class="modal-actions">
+        <!-- Conflict Warning -->
+        <div *ngIf="showConflictWarning" class="conflict-warning">
+          <div class="conflict-header">
+            <span class="material-icons conflict-icon">warning</span>
+            <span class="conflict-title">Conflicto de horario detectado</span>
+          </div>
+          <p class="conflict-message">Ya existe(n) actividad(es) en este espacio durante el horario seleccionado:</p>
+          <ul class="conflict-list">
+            <li *ngFor="let act of conflictingActivities">
+              <strong>{{ act.titulo }}</strong> ({{ act.horaInicio }} - {{ act.horaFin }})
+            </li>
+          </ul>
+          <p class="conflict-question">¿Desea crear la actividad de todas formas? Ambas se mostrarán en la sala.</p>
+          <div class="conflict-actions">
+            <button type="button" class="btn-cancel-conflict" (click)="cancelConflict()">Cancelar</button>
+            <button type="button" class="btn-confirm-conflict" (click)="confirmConflict()">
+              Crear de todas formas
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-actions" *ngIf="!showConflictWarning">
           <button *ngIf="isEditMode && !confirmingDelete" type="button" class="btn-delete" (click)="confirmDelete()">
             <span class="material-icons">delete</span>
             Eliminar
@@ -346,6 +367,96 @@ import { DepartamentoService } from '../../../../core/services/departamento.serv
       background: #e5e7eb;
     }
 
+    /* Conflict Warning Styles */
+    .conflict-warning {
+      background: #fffbeb;
+      border: 1px solid #f59e0b;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 0.75rem;
+    }
+
+    .conflict-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .conflict-icon {
+      color: #f59e0b;
+      font-size: 20px;
+    }
+
+    .conflict-title {
+      font-weight: 600;
+      color: #92400e;
+      font-size: 0.9rem;
+    }
+
+    .conflict-message {
+      color: #78350f;
+      font-size: 0.8rem;
+      margin: 0.5rem 0;
+    }
+
+    .conflict-list {
+      margin: 0.5rem 0;
+      padding-left: 1.25rem;
+      color: #78350f;
+      font-size: 0.8rem;
+    }
+
+    .conflict-list li {
+      margin-bottom: 0.25rem;
+    }
+
+    .conflict-question {
+      color: #78350f;
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin: 0.75rem 0 0.5rem;
+    }
+
+    .conflict-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+      margin-top: 0.75rem;
+    }
+
+    .btn-cancel-conflict {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 0.875rem;
+      cursor: pointer;
+      background: white;
+      border: 1px solid #d1d5db;
+      color: #374151;
+      transition: all 0.2s;
+    }
+
+    .btn-cancel-conflict:hover {
+      background: #f3f4f6;
+    }
+
+    .btn-confirm-conflict {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      background: #f59e0b;
+      color: white;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-confirm-conflict:hover {
+      background: #d97706;
+    }
+
     /* ================================================
        RESPONSIVE - Mobile Optimization (iPhone 16)
        ================================================ */
@@ -386,6 +497,33 @@ import { DepartamentoService } from '../../../../core/services/departamento.serv
         max-height: calc(100vh - 2rem);
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
+      }
+
+      .conflict-warning {
+        padding: 0.875rem;
+        margin-top: 0.5rem;
+      }
+
+      .conflict-title {
+        font-size: 0.85rem;
+      }
+
+      .conflict-message,
+      .conflict-list,
+      .conflict-question {
+        font-size: 0.75rem;
+      }
+
+      .conflict-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .btn-cancel-conflict,
+      .btn-confirm-conflict {
+        width: 100%;
+        min-height: 44px;
+        justify-content: center;
       }
 
       .modal-header {
@@ -564,6 +702,11 @@ export class ActividadDialogComponent implements OnInit {
   departamentos: Departamento[] = [];
   horasDisponibles: string[] = this.generarHoras();
 
+  // Conflict detection
+  conflictingActivities: Actividad[] = [];
+  showConflictWarning = false;
+  checkingConflicts = false;
+
   formData = {
     titulo: '',
     tipoActividadId: null as number | null,
@@ -638,8 +781,47 @@ export class ActividadDialogComponent implements OnInit {
   }
 
   submit(): void {
-    if (!this.isFormValid() || this.isSubmitting) return;
+    if (!this.isFormValid() || this.isSubmitting || this.checkingConflicts) return;
 
+    // Si ya mostramos el warning y el usuario confirmó, ir directamente a guardar
+    if (this.showConflictWarning) {
+      return;
+    }
+
+    // Primero verificar conflictos
+    this.checkingConflicts = true;
+    const excludeId = this.isEditMode ? this.data?.actividadId : undefined;
+
+    this.actividadService.checkConflicts(
+      this.formData.espacioId!,
+      this.formData.fecha,
+      this.formData.horaInicio,
+      this.formData.horaFin,
+      excludeId
+    ).subscribe({
+      next: (conflicts) => {
+        this.checkingConflicts = false;
+        if (conflicts.length > 0) {
+          // Mostrar warning de conflicto
+          this.conflictingActivities = conflicts;
+          this.showConflictWarning = true;
+        } else {
+          // No hay conflictos, proceder a guardar
+          this.saveActividad();
+        }
+      },
+      error: () => {
+        this.checkingConflicts = false;
+        // En caso de error, proceder a guardar de todos modos
+        this.saveActividad();
+      }
+    });
+  }
+
+  /**
+   * Guarda la actividad (crear o actualizar)
+   */
+  private saveActividad(): void {
     this.isSubmitting = true;
 
     const temporadaActual = this.temporadaService.selectedTemporada()
@@ -682,6 +864,22 @@ export class ActividadDialogComponent implements OnInit {
         }
       });
     }
+  }
+
+  /**
+   * Usuario confirma crear a pesar del conflicto
+   */
+  confirmConflict(): void {
+    this.showConflictWarning = false;
+    this.saveActividad();
+  }
+
+  /**
+   * Usuario cancela la creación debido al conflicto
+   */
+  cancelConflict(): void {
+    this.showConflictWarning = false;
+    this.conflictingActivities = [];
   }
 
   onCancel(): void {
