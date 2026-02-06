@@ -293,19 +293,20 @@ import { es } from 'date-fns/locale';
 
     .scrollable-content {
       flex: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
+      overflow: hidden;
       padding: 0 2rem 2rem 2rem;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
-      touch-action: pan-y;
+      display: flex;
+      flex-direction: column;
     }
 
     .cal-grid-wrapper {
       background: #ffffff;
       border-radius: 0.75rem;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
+      /* Single scroll container for sticky headers */
+      flex: 1;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .page-dark .cal-grid-wrapper {
@@ -474,13 +475,10 @@ import { es } from 'date-fns/locale';
       color: #6b7280;
     }
 
-    /* Scroll container */
+    /* Scroll container - wrapper handles scroll now */
     .cal-scroll {
       flex: 1;
-      overflow-x: auto;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      touch-action: pan-x pan-y;
+      min-width: fit-content;
     }
 
     /* Grid */
@@ -488,7 +486,6 @@ import { es } from 'date-fns/locale';
       display: grid;
       border: 1px solid #e5e7eb;
       border-radius: 0.5rem;
-      overflow: hidden;
       min-width: fit-content;
     }
 
@@ -498,18 +495,18 @@ import { es } from 'date-fns/locale';
 
     .col-header {
       background: #f9fafb;
-      padding: 0.75rem 0.5rem;
+      padding: 0.5rem 0.5rem;
       text-align: center;
       border-right: 1px solid #e5e7eb;
       border-bottom: 1px solid #e5e7eb;
-      font-weight: 600;
-      font-size: 0.7rem;
-      letter-spacing: 0.05em;
+      font-weight: 700;
+      font-size: 0.65rem;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
       color: #374151;
       position: sticky;
       top: 0;
-      z-index: 10;
+      z-index: 20;
     }
 
     .page-dark .col-header {
@@ -526,6 +523,10 @@ import { es } from 'date-fns/locale';
       text-align: center;
       min-width: 60px;
       max-width: 60px;
+      position: sticky;
+      top: 0;
+      left: 0;
+      z-index: 30;
     }
 
     .dia-separator {
@@ -537,6 +538,10 @@ import { es } from 'date-fns/locale';
       color: #1f2937;
       border-bottom: 1px solid #e5e7eb;
       text-transform: capitalize;
+      /* Sticky day separator */
+      position: sticky;
+      top: 44px; /* Height of col-header */
+      z-index: 15;
     }
 
     .page-dark .dia-separator {
@@ -559,6 +564,10 @@ import { es } from 'date-fns/locale';
       display: flex;
       align-items: flex-start;
       justify-content: center;
+      /* Sticky hour column on left */
+      position: sticky;
+      left: 0;
+      z-index: 10;
     }
 
     .page-dark .celda-hora {

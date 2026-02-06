@@ -213,8 +213,10 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
 
     .scrollable-content {
       flex: 1;
-      overflow-y: auto;
+      overflow: hidden;
       padding: 0 2rem 2rem 2rem;
+      display: flex;
+      flex-direction: column;
     }
 
     .btn-secondary-header {
@@ -335,43 +337,50 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
       color: #e5e7eb;
     }
 
-    /* Grid container */
+    /* Grid container - single scroll container */
     .grid-container {
       background: white;
       border-radius: 0.75rem;
       border: 1px solid rgba(15, 23, 42, 0.08);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-      overflow: hidden;
+      overflow: auto;
       margin-top: 1rem;
+      flex: 1;
+      -webkit-overflow-scrolling: touch;
     }
 
     .page-dark .grid-container {
       background: #1a1a1a;
       border-color: rgba(255, 255, 255, 0.1);
     }
-    
+
     .grid {
       display: table;
       width: 100%;
       background: #fff;
       border: 1px solid #d1d5db;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0;
     }
-    
+
     .page-dark .grid {
       background: #1a1a1a;
       border-color: #374151;
     }
-    
+
     .grid-header {
       display: table-row;
+    }
+
+    /* Sticky header cells */
+    .grid-header .cell {
       position: sticky;
       top: 0;
-      z-index: 10;
+      z-index: 20;
       background: #f9fafb;
     }
-    
-    .page-dark .grid-header {
+
+    .page-dark .grid-header .cell {
       background: #262626;
     }
     
@@ -393,7 +402,8 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
       width: 140px;
       position: sticky;
       left: 0;
-      z-index: 11;
+      top: 0;
+      z-index: 30; /* Highest: corner is sticky both horizontally and vertically */
       background: #f9fafb;
       font-size: 0.7rem;
       font-weight: 700;
@@ -401,7 +411,7 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-    
+
     .page-dark .corner {
       background: #262626;
       color: #9ca3af;
@@ -441,7 +451,7 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
       width: 140px;
       position: sticky;
       left: 0;
-      z-index: 5;
+      z-index: 10; /* Above regular cells but below header */
       background: #fff;
       border: 1px solid #d1d5db;
       font-weight: 600;
@@ -450,7 +460,7 @@ type TipoVista = 'RECOGIDAS_TR' | 'ALQUILERES_DEVOLUCIONES';
       text-align: left;
       padding: 1rem;
     }
-    
+
     .page-dark .day-label {
       background: #1a1a1a;
       border-color: #374151;

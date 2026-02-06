@@ -221,9 +221,12 @@ $color-bg-dark: #0d0d0d;
 // ============================================
 .excel-container {
   flex: 1;
-  overflow: auto;
+  overflow: hidden;
   padding: 1.5rem;
-  
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
   // Custom scrollbar
   &::-webkit-scrollbar {
     width: 12px;
@@ -260,18 +263,21 @@ $color-bg-dark: #0d0d0d;
 }
 
 .excel-grid {
-  display: inline-block;
+  flex: 1;
+  display: block;
   min-width: 100%;
   background: white;
   border-radius: 16px;
-  box-shadow: 
+  box-shadow:
     0 10px 30px rgba(0, 0, 0, 0.15),
     0 0 0 1px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
+  /* Single scroll container */
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 
   .excel-dark & {
     background: #1a1a1a;
-    box-shadow: 
+    box-shadow:
       0 10px 30px rgba(0, 0, 0, 0.5),
       0 0 0 1px rgba(255, 255, 255, 0.05);
   }
@@ -284,13 +290,13 @@ $color-bg-dark: #0d0d0d;
   display: flex;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 20;
   background: linear-gradient(135deg, $color-principal 0%, $color-principal-dark 100%);
   color: white;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.75px;
-  box-shadow: 
+  box-shadow:
     0 4px 12px rgba(207, 16, 45, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
@@ -315,7 +321,7 @@ $color-bg-dark: #0d0d0d;
   min-width: 200px;
   position: sticky;
   left: 0;
-  z-index: 11;
+  z-index: 30; /* Highest z-index: corner needs to be above both row and column headers */
   background: linear-gradient(135deg, #8a0b1e 0%, $color-principal 100%);
   font-size: 0.65rem;
   box-shadow: 4px 0 12px rgba(0, 0, 0, 0.2);
@@ -379,7 +385,7 @@ $color-bg-dark: #0d0d0d;
   min-width: 200px;
   position: sticky;
   left: 0;
-  z-index: 5;
+  z-index: 10; /* Above regular cells but below header */
   background: #f9fafb;
   padding: 1rem;
   border-right: 2px solid #e5e7eb;
