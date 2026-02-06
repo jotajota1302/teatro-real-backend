@@ -1,0 +1,12 @@
+package com.teatroreal.dto.request;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class EscenaRequest {
+    private String nombre;
+    private Integer orden;
+    private String duracion;
+}
