@@ -207,6 +207,108 @@ interface MovimientoMock {
       scrollbar-color: #666666 #2d2d2d;
       scrollbar-width: thin;
     }
+
+    /* ================================================
+       RESPONSIVE - Mobile Optimization (iPhone 16)
+       ================================================ */
+
+    @media (max-width: 768px) {
+      .page {
+        padding: 1rem 1.25rem;
+      }
+
+      .page h1 {
+        font-size: 1.5rem !important;
+      }
+
+      .movimientos-scroll-container {
+        max-height: 65vh;
+        padding-right: 0.25rem;
+      }
+
+      .card, .card-dark {
+        padding: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .page {
+        padding: 0.75rem;
+        min-height: auto;
+      }
+
+      .page h1 {
+        font-size: 1.375rem !important;
+      }
+
+      .page p {
+        font-size: 0.875rem;
+      }
+
+      .movimientos-scroll-container {
+        max-height: 70vh;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        padding-right: 0;
+      }
+
+      .card, .card-dark {
+        padding: 0.875rem;
+        border-radius: 0.75rem;
+      }
+
+      .card h2, .card-dark h2 {
+        font-size: 1rem !important;
+      }
+
+      .badge-pill {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.5rem;
+      }
+
+      .flex.gap-4 {
+        gap: 0.75rem;
+      }
+
+      .space-y-4 > * + * {
+        margin-top: 0.75rem;
+      }
+    }
+
+    /* iPhone 16 Pro (390px) */
+    @media (max-width: 390px) {
+      .page {
+        padding: 0.625rem;
+      }
+
+      .page h1 {
+        font-size: 1.25rem !important;
+      }
+
+      .movimientos-scroll-container {
+        max-height: 72vh;
+      }
+
+      .card, .card-dark {
+        padding: 0.75rem;
+      }
+    }
+
+    /* Touch devices */
+    @media (pointer: coarse) {
+      .movimientos-scroll-container {
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
+      }
+
+      .card, .card-dark {
+        touch-action: pan-y;
+      }
+
+      .card-hover:active {
+        transform: scale(0.98);
+      }
+    }
   `]
 })
 export class MovimientosListComponent {

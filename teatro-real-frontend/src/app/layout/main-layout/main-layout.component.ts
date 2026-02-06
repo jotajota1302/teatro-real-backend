@@ -94,6 +94,9 @@ import { ThemeService } from '../../core/services/theme.service';
     main {
       display: flex;
       flex-direction: column;
+      /* Enable smooth touch scrolling on mobile */
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
     }
 
     main ::ng-deep router-outlet + * {
@@ -101,6 +104,13 @@ import { ThemeService } from '../../core/services/theme.service';
       min-height: 0;
       display: flex;
       flex-direction: column;
+    }
+
+    /* Mobile touch scroll improvements */
+    @media (pointer: coarse) {
+      main {
+        touch-action: pan-y;
+      }
     }
 
     /* Hide desktop sidebar on small screens */
@@ -111,6 +121,51 @@ import { ThemeService } from '../../core/services/theme.service';
     @media (min-width: 1024px) {
       .desktop-sidebar {
         display: block;
+      }
+    }
+
+    /* ================================================
+       Safe Area Support for iPhone
+       ================================================ */
+
+    /* Apply safe area padding to main layout container */
+    @supports (padding-top: env(safe-area-inset-top)) {
+      /* Main container respects notch/Dynamic Island */
+      .h-screen {
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        /* Adjust height to account for safe areas */
+        height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        min-height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+      }
+
+      /* Mobile drawer should respect safe areas */
+      .mobile-drawer {
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+    }
+
+    /* Mobile optimizations (480px and below) */
+    @media (max-width: 480px) {
+      main {
+        padding: 0.5rem !important;
+      }
+
+      /* Reduce header padding on mobile */
+      .flex-shrink-0.z-30 {
+        padding: 0.5rem 0.5rem 0 0.5rem;
+      }
+    }
+
+    /* iPhone 16 Pro (390px) */
+    @media (max-width: 390px) {
+      main {
+        padding: 0.375rem !important;
+      }
+
+      .flex-shrink-0.z-30 {
+        padding: 0.375rem 0.375rem 0 0.375rem;
       }
     }
   `]

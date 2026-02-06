@@ -25,6 +25,41 @@
   --radius-lg: 16px;
   --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.10);
   --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.15);
+
+  /* Spacing variables - desktop defaults */
+  --spacing-page: 1.5rem;
+  --spacing-section: 1rem;
+  --spacing-card: 1rem;
+  --spacing-gap: 1rem;
+
+  /* Touch target sizes */
+  --touch-target-min: 44px;
+
+  /* Safe area insets for iPhone */
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+}
+
+/* Mobile spacing overrides (480px and below) */
+@media (max-width: 480px) {
+  :root {
+    --spacing-page: 0.75rem;
+    --spacing-section: 0.625rem;
+    --spacing-card: 0.75rem;
+    --spacing-gap: 0.5rem;
+  }
+}
+
+/* iPhone 16 Pro (390px) - tighter spacing */
+@media (max-width: 390px) {
+  :root {
+    --spacing-page: 0.5rem;
+    --spacing-section: 0.5rem;
+    --spacing-card: 0.625rem;
+    --spacing-gap: 0.375rem;
+  }
 }
 
 /* -----------------------------------------------
@@ -535,5 +570,321 @@ body, html {
 
 .mat-mdc-dialog-container .mdc-dialog__surface {
   border-radius: 16px !important;
+}
+
+/* Dialog responsive for mobile */
+@media (max-width: 480px) {
+  .actividad-dialog-panel {
+    max-width: 100vw !important;
+    width: 100vw !important;
+    margin: 0 !important;
+  }
+
+  .actividad-dialog-panel .mat-mdc-dialog-container {
+    max-width: 100vw !important;
+    padding: 0 !important;
+  }
+
+  .actividad-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+    border-radius: 16px 16px 0 0 !important;
+    max-height: calc(100vh - env(safe-area-inset-top, 0px)) !important;
+  }
+
+  /* Position dialog at bottom for mobile */
+  .cdk-overlay-pane:has(.actividad-dialog-panel) {
+    align-items: flex-end !important;
+  }
+
+  .cdk-global-overlay-wrapper:has(.actividad-dialog-panel) {
+    align-items: flex-end !important;
+  }
+}
+
+/* -----------------------------------------------
+   Mobile Touch Scroll Improvements
+-------------------------------------------------*/
+
+/* Ensure smooth touch scrolling on iOS */
+.scrollable-content,
+.modal-content,
+[style*="overflow-y: auto"],
+[style*="overflow: auto"] {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent scroll chaining and bounce effects */
+@media (pointer: coarse) {
+  .page-container,
+  .scrollable-content {
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+  }
+
+  /* Larger touch targets for buttons on mobile */
+  button, a, .clickable {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Prevent accidental zoom on double-tap */
+  input, select, textarea, button {
+    touch-action: manipulation;
+  }
+}
+
+/* Mobile-specific layout fixes */
+@media (max-width: 768px) {
+  /* Ensure main content area is scrollable */
+  main {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Fix modal scroll on mobile */
+  .modal-content,
+  .mat-mdc-dialog-container {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+}
+
+/* -----------------------------------------------
+   iPhone Safe Areas & Dynamic Island Support
+-------------------------------------------------*/
+
+/* Support for viewport-fit=cover */
+@supports (padding-top: env(safe-area-inset-top)) {
+  /* Fixed headers should respect Dynamic Island */
+  .fixed-header,
+  .app-header,
+  header[class*="fixed"] {
+    padding-top: max(0.5rem, var(--safe-area-top));
+  }
+
+  /* Bottom navigation/actions should respect home indicator */
+  .fixed-bottom,
+  .bottom-actions,
+  .modal-actions,
+  .dialog-actions {
+    padding-bottom: max(0.75rem, var(--safe-area-bottom));
+  }
+
+  /* Full-screen modals on iPhone */
+  .modal-fullscreen,
+  .bottom-sheet {
+    padding-top: var(--safe-area-top);
+    padding-bottom: var(--safe-area-bottom);
+    padding-left: var(--safe-area-left);
+    padding-right: var(--safe-area-right);
+  }
+}
+
+/* -----------------------------------------------
+   Mobile Optimizations (480px - iPhone Plus/Max)
+-------------------------------------------------*/
+@media (max-width: 480px) {
+  /* Base typography - ensure 16px minimum for inputs (prevents iOS zoom) */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+
+  /* Reduce padding on page containers */
+  .page-container,
+  .content-wrapper,
+  .main-content {
+    padding: var(--spacing-page);
+  }
+
+  /* Optimize card spacing */
+  .card,
+  .mat-mdc-card,
+  [class*="-card"] {
+    padding: var(--spacing-card);
+  }
+
+  /* Reduce header padding */
+  .fixed-header,
+  .page-header {
+    padding: 0.5rem var(--spacing-page);
+  }
+
+  /* Stack form rows vertically */
+  .form-row,
+  .form-group-row {
+    flex-direction: column;
+    gap: var(--spacing-gap);
+  }
+
+  /* Full-width buttons */
+  .btn-group,
+  .button-group,
+  .actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-group > button,
+  .button-group > button,
+  .actions > button {
+    width: 100%;
+  }
+
+  /* Smaller headings */
+  h1 { font-size: 1.375rem !important; }
+  h2 { font-size: 1.125rem !important; }
+  h3 { font-size: 1rem !important; }
+
+  /* Reduce shadows for performance */
+  .card,
+  .mat-mdc-card,
+  [class*="shadow"] {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+  }
+}
+
+/* -----------------------------------------------
+   iPhone 16 Pro Specific (390px)
+-------------------------------------------------*/
+@media (max-width: 390px) {
+  /* Even tighter spacing */
+  .page-container,
+  .content-wrapper,
+  .main-content {
+    padding: var(--spacing-page);
+  }
+
+  /* Compact list items */
+  .list-item,
+  .mat-mdc-list-item {
+    padding: 0.5rem var(--spacing-page) !important;
+    min-height: 48px;
+  }
+
+  /* Smaller badges */
+  .badge,
+  .chip,
+  [class*="badge"] {
+    font-size: 0.625rem;
+    padding: 0.125rem 0.375rem;
+  }
+
+  /* Compact tables on mobile */
+  .mat-mdc-table {
+    font-size: 0.75rem;
+  }
+
+  .mat-mdc-header-cell,
+  .mat-mdc-cell {
+    padding: 0.5rem 0.375rem !important;
+  }
+
+  /* Icon sizing */
+  .mat-icon,
+  .material-icons {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Reduce dialog padding */
+  .mat-mdc-dialog-content {
+    padding: 0.75rem !important;
+  }
+
+  .mat-mdc-dialog-actions {
+    padding: 0.5rem 0.75rem !important;
+    gap: 0.5rem;
+  }
+}
+
+/* -----------------------------------------------
+   Touch Device Enhancements
+-------------------------------------------------*/
+@media (pointer: coarse) {
+  /* Enforce minimum touch target sizes */
+  button:not(.mat-mdc-icon-button),
+  a.btn,
+  .clickable,
+  .tappable {
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+  }
+
+  /* Icon buttons need explicit sizing */
+  .mat-mdc-icon-button {
+    width: var(--touch-target-min);
+    height: var(--touch-target-min);
+    padding: 10px;
+  }
+
+  /* Active state feedback */
+  button:active,
+  a:active,
+  .clickable:active {
+    transform: scale(0.97);
+    opacity: 0.9;
+  }
+
+  /* Disable hover effects on touch (they feel laggy) */
+  button:hover,
+  a:hover {
+    transform: none;
+  }
+
+  /* Smooth momentum scrolling */
+  .scroll-container,
+  .scrollable,
+  [class*="scroll"] {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Prevent text selection on interactive elements */
+  button,
+  .btn,
+  .clickable,
+  .tab,
+  .nav-item {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Better select dropdowns */
+  select {
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2rem;
+  }
+}
+
+/* -----------------------------------------------
+   Performance Optimizations for Mobile
+-------------------------------------------------*/
+@media (max-width: 480px) {
+  /* Disable expensive animations on mobile */
+  .reduce-motion,
+  .performance-mode * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* GPU acceleration for scrolling containers */
+  .scroll-container,
+  .scrollable,
+  main {
+    will-change: scroll-position;
+    transform: translateZ(0);
+  }
+
+  /* Contain layout reflows */
+  .card,
+  .list-item,
+  article {
+    contain: layout style;
+  }
 }
 

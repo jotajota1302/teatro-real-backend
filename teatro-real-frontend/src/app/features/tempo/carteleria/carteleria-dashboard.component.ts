@@ -209,6 +209,178 @@ interface SignageEntry {
       transform: translateY(-5px);
       box-shadow: 0 30px 55px rgba(0, 0, 0, 0.4);
     }
+
+    /* ================================================
+       RESPONSIVE - Mobile Optimization (iPhone 16)
+       ================================================ */
+
+    @media (max-width: 768px) {
+      .page-light, .page-dark {
+        border-radius: 0;
+      }
+
+      .fixed-header {
+        padding: 1rem 1.25rem 0 1.25rem;
+      }
+
+      .scrollable-content {
+        padding: 0 1.25rem 1.25rem 1.25rem;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .fixed-header h1 {
+        font-size: 1.5rem !important;
+      }
+
+      .sala-card, .sala-card-dark {
+        min-height: 160px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .fixed-header {
+        padding: 0.75rem var(--spacing-page, 0.75rem) 0;
+      }
+
+      .scrollable-content {
+        padding: 0 var(--spacing-page, 0.75rem) var(--spacing-page, 0.75rem);
+      }
+
+      .fixed-header h1 {
+        font-size: 1.375rem !important;
+      }
+
+      .fixed-header p {
+        font-size: 0.875rem;
+      }
+
+      /* Stack header on mobile */
+      .fixed-header .flex {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 0.75rem;
+      }
+
+      /* Full-width button */
+      .btn-action-primary {
+        width: 100%;
+        justify-content: center;
+        padding: 0.75rem 1rem;
+        min-height: 44px;
+      }
+
+      /* Cards */
+      .sala-card, .sala-card-dark {
+        min-height: 140px;
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      }
+
+      .sala-card:hover, .sala-card-dark:hover {
+        transform: none;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Card content */
+      .sala-card .p-4,
+      .sala-card-dark .p-4 {
+        padding: 0.75rem !important;
+      }
+
+      .sala-card h3,
+      .sala-card-dark h3 {
+        font-size: 0.9375rem;
+      }
+
+      /* Activities list */
+      .max-h-48 {
+        max-height: 120px;
+      }
+
+      /* Footer */
+      .mt-6 {
+        margin-top: 1rem;
+      }
+
+      .mt-6.flex {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+      }
+    }
+
+    /* iPhone 16 Pro (390px) */
+    @media (max-width: 390px) {
+      .fixed-header {
+        padding: 0.625rem var(--spacing-page, 0.5rem) 0;
+      }
+
+      .scrollable-content {
+        padding: 0 var(--spacing-page, 0.5rem) var(--spacing-page, 0.5rem);
+      }
+
+      .fixed-header h1 {
+        font-size: 1.25rem !important;
+      }
+
+      .sala-card, .sala-card-dark {
+        min-height: 120px;
+        border-radius: 0.625rem;
+      }
+
+      .sala-card .p-4,
+      .sala-card-dark .p-4 {
+        padding: 0.625rem !important;
+      }
+
+      .sala-card h3,
+      .sala-card-dark h3 {
+        font-size: 0.875rem;
+      }
+
+      /* Tighter activity items */
+      .flex.items-center.gap-2 {
+        gap: 0.375rem;
+        padding: 0.375rem !important;
+      }
+
+      .flex.items-center.gap-2 p.text-sm {
+        font-size: 0.8125rem;
+      }
+
+      .flex.items-center.gap-2 p.text-xs {
+        font-size: 0.6875rem;
+      }
+
+      /* Smaller AHORA badge */
+      .px-1\\.5 {
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+        font-size: 9px !important;
+      }
+    }
+
+    /* Touch devices */
+    @media (pointer: coarse) {
+      .scrollable-content {
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+      }
+
+      /* Touch feedback on cards */
+      .sala-card:active, .sala-card-dark:active {
+        transform: scale(0.98);
+      }
+
+      /* Larger tap targets for links */
+      .sala-card a, .sala-card-dark a {
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
   `]
 })
 export class CarteleriaDashboardComponent implements OnInit, OnDestroy {

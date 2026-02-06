@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, DestroyRef } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, DestroyRef, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -70,69 +70,129 @@ import { es } from 'date-fns/locale';
 
       <!-- Scrollable Content -->
       <div class="scrollable-content">
-        <div class="cal-grid-wrapper">
-          <!-- Loading indicator -->
-          <div class="cal-loading" *ngIf="loading()">
-            <mat-spinner diameter="40"></mat-spinner>
-            <span>Cargando actividades...</span>
+        <!-- Loading indicator -->
+        <div class="cal-loading" *ngIf="loading()">
+          <mat-spinner diameter="40"></mat-spinner>
+          <span>Cargando actividades...</span>
+        </div>
+
+        <!-- MOBILE VIEW: Day-by-day vertical layout -->
+        <div class="mobile-view" *ngIf="!loading() && isMobile()">
+          <!-- Day tabs -->
+          <div class="mobile-day-tabs" [class.mobile-day-tabs-dark]="isDark()">
+            <button
+              *ngFor="let dia of semana().dias; let i = index"
+              class="mobile-day-tab"
+              [class.mobile-day-tab-active]="selectedDiaIndex() === i"
+              [class.mobile-day-tab-dark]="isDark()"
+              (click)="selectDia(i)">
+              <span class="day-abbr">{{ dia.nombre.substring(0, 3) }}</span>
+              <span class="day-num">{{ dia.fecha | date:'d' }}</span>
+            </button>
           </div>
 
-          <!-- Grid -->
-          <div class="cal-scroll" *ngIf="!loading()">
-            <div class="cal-grid" [style.grid-template-columns]="gridColumns()">
-          <!-- Header row -->
-          <div class="col-header fecha-hora">FECHA / HORA</div>
-          <div class="col-header" *ngFor="let espacio of espaciosCalendario()">
-            {{ espacio.nombre }}
-          </div>
-
-          <!-- Days and time slots -->
-          <ng-container *ngFor="let dia of semana().dias; trackBy: trackByDia">
-            <!-- Day separator -->
-            <div class="dia-separator">
-              {{ dia.nombre }} {{ dia.fecha | date:'d/MM' }}
+          <!-- Current day activities -->
+          <div class="mobile-day-content" *ngIf="semana().dias[selectedDiaIndex()] as currentDia">
+            <div class="mobile-day-header" [class.mobile-day-header-dark]="isDark()">
+              <button class="btn-nav-mobile" [class.btn-nav-mobile-dark]="isDark()" (click)="irDiaAnterior()" [disabled]="selectedDiaIndex() === 0">
+                <mat-icon>chevron_left</mat-icon>
+              </button>
+              <div class="mobile-day-title">
+                <span class="day-name">{{ currentDia.nombre }}</span>
+                <span class="day-date">{{ currentDia.fecha | date:'d MMMM':'':'es' }}</span>
+              </div>
+              <button class="btn-nav-mobile" [class.btn-nav-mobile-dark]="isDark()" (click)="irDiaSiguiente()" [disabled]="selectedDiaIndex() === 6">
+                <mat-icon>chevron_right</mat-icon>
+              </button>
             </div>
 
-            <!-- Time slots for this day -->
-            <ng-container *ngFor="let franja of dia.franjas; trackBy: trackByFranja">
-              <div class="celda-hora">
-                {{ franja.horaInicio.split(':')[0] }}
-              </div>
+            <!-- Activities list -->
+            <div class="mobile-activities-list">
               <div
-                class="celda-espacio"
-                *ngFor="let espacio of espaciosCalendario(); trackBy: trackByEspacio"
-              >
-                <ng-container *ngIf="franja.actividadesPorEspacio[espacio.id] as actividades">
-                  <div
-                    *ngFor="let actividad of actividades; trackBy: trackByActividad"
-                    class="actividad"
-                    [style.background-color]="getActividadBgColor(actividad)"
-                    [style.border-color]="getActividadBorderColor(actividad)"
-                    [style.height.px]="getActividadHeight(actividad)"
-                    [style.top.px]="getActividadTop(actividad)"
-                    [class.estado-provisional]="actividad.estado === 'PROVISIONAL'"
-                    [class.estado-confirmada]="actividad.estado === 'CONFIRMADA'"
-                    [class.estado-cancelada]="actividad.estado === 'CANCELADA'"
-                    [matTooltip]="getActividadTooltip(actividad)"
-                    (click)="onActividadClick(actividad)"
-                  >
-                    <div class="actividad-titulo">{{ actividad.titulo }}</div>
-                    <div class="actividad-detalle" *ngIf="actividad.detalle">
-                      {{ actividad.detalle }}
-                    </div>
-                  </div>
-                </ng-container>
+                *ngFor="let actividad of getActividadesDia(currentDia); trackBy: trackByActividad"
+                class="mobile-activity-card"
+                [class.mobile-activity-card-dark]="isDark()"
+                [style.border-left-color]="getActividadBorderColor(actividad)"
+                (click)="onActividadClick(actividad)">
+                <div class="mobile-activity-time">
+                  {{ actividad.horaInicio }} - {{ actividad.horaFin }}
+                </div>
+                <div class="mobile-activity-title">{{ actividad.titulo }}</div>
+                <div class="mobile-activity-space" *ngIf="getEspacioNombre(actividad.espacioId)">
+                  <mat-icon>place</mat-icon>
+                  {{ getEspacioNombre(actividad.espacioId) }}
+                </div>
+                <div class="mobile-activity-detail" *ngIf="actividad.detalle">
+                  {{ actividad.detalle }}
+                </div>
               </div>
-            </ng-container>
-          </ng-container>
 
-            <!-- Empty state if no activities -->
-            <div class="empty-state" *ngIf="semana().dias.length === 0 || allDaysEmpty()">
-              <mat-icon>event_busy</mat-icon>
-              <p>No hay actividades para esta semana</p>
+              <!-- Empty state for day -->
+              <div class="mobile-empty-day" *ngIf="getActividadesDia(currentDia).length === 0">
+                <mat-icon>event_available</mat-icon>
+                <p>Sin actividades este día</p>
+              </div>
             </div>
           </div>
         </div>
+
+        <!-- DESKTOP VIEW: Grid layout -->
+        <div class="cal-grid-wrapper" *ngIf="!loading() && !isMobile()">
+          <div class="cal-scroll">
+            <div class="cal-grid" [style.grid-template-columns]="gridColumns()">
+              <!-- Header row -->
+              <div class="col-header fecha-hora">FECHA / HORA</div>
+              <div class="col-header" *ngFor="let espacio of espaciosCalendario()">
+                {{ espacio.nombre }}
+              </div>
+
+              <!-- Days and time slots -->
+              <ng-container *ngFor="let dia of semana().dias; trackBy: trackByDia">
+                <!-- Day separator -->
+                <div class="dia-separator">
+                  {{ dia.nombre }} {{ dia.fecha | date:'d/MM' }}
+                </div>
+
+                <!-- Time slots for this day -->
+                <ng-container *ngFor="let franja of dia.franjas; trackBy: trackByFranja">
+                  <div class="celda-hora">
+                    {{ franja.horaInicio.split(':')[0] }}
+                  </div>
+                  <div
+                    class="celda-espacio"
+                    *ngFor="let espacio of espaciosCalendario(); trackBy: trackByEspacio"
+                  >
+                    <ng-container *ngIf="franja.actividadesPorEspacio[espacio.id] as actividades">
+                      <div
+                        *ngFor="let actividad of actividades; trackBy: trackByActividad"
+                        class="actividad"
+                        [style.background-color]="getActividadBgColor(actividad)"
+                        [style.border-color]="getActividadBorderColor(actividad)"
+                        [style.height.px]="getActividadHeight(actividad)"
+                        [style.top.px]="getActividadTop(actividad)"
+                        [class.estado-provisional]="actividad.estado === 'PROVISIONAL'"
+                        [class.estado-confirmada]="actividad.estado === 'CONFIRMADA'"
+                        [class.estado-cancelada]="actividad.estado === 'CANCELADA'"
+                        [matTooltip]="getActividadTooltip(actividad)"
+                        (click)="onActividadClick(actividad)"
+                      >
+                        <div class="actividad-titulo">{{ actividad.titulo }}</div>
+                        <div class="actividad-detalle" *ngIf="actividad.detalle">
+                          {{ actividad.detalle }}
+                        </div>
+                      </div>
+                    </ng-container>
+                  </div>
+                </ng-container>
+              </ng-container>
+
+              <!-- Empty state if no activities -->
+              <div class="empty-state" *ngIf="semana().dias.length === 0 || allDaysEmpty()">
+                <mat-icon>event_busy</mat-icon>
+                <p>No hay actividades para esta semana</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -234,7 +294,11 @@ import { es } from 'date-fns/locale';
     .scrollable-content {
       flex: 1;
       overflow-y: auto;
+      overflow-x: hidden;
       padding: 0 2rem 2rem 2rem;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
     }
 
     .cal-grid-wrapper {
@@ -414,7 +478,9 @@ import { es } from 'date-fns/locale';
     .cal-scroll {
       flex: 1;
       overflow-x: auto;
-      overflow-y: visible;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x pan-y;
     }
 
     /* Grid */
@@ -817,7 +883,28 @@ import { es } from 'date-fns/locale';
       }
 
       .scrollable-content {
-        padding: 0 1rem 1rem 1rem;
+        padding: 0 0.5rem 1rem 0.5rem;
+        /* Asegurar scroll táctil en móvil */
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+      }
+
+      .cal-grid-wrapper {
+        /* Permitir scroll horizontal del grid en móvil */
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-x pan-y;
+      }
+
+      .cal-scroll {
+        /* En móvil, el scroll horizontal va en el wrapper */
+        overflow-x: visible;
+        overflow-y: visible;
+      }
+
+      .cal-grid {
+        /* Asegurar que el grid sea tocable */
+        touch-action: pan-x pan-y;
       }
 
       .cal-toolbar {
@@ -855,6 +942,399 @@ import { es } from 'date-fns/locale';
         padding: 0.3rem 0.4rem;
       }
     }
+
+    /* Touch-specific improvements */
+    @media (pointer: coarse) {
+      .celda-espacio,
+      .celda-hora,
+      .dia-separator {
+        touch-action: pan-x pan-y;
+      }
+
+      .actividad {
+        /* Área táctil más grande en móvil */
+        min-height: 44px;
+        touch-action: manipulation;
+      }
+    }
+
+    /* ================================================
+       MOBILE VIEW STYLES - iPhone 16 Optimized
+       ================================================ */
+    .mobile-view {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    /* Day tabs - horizontal scrollable */
+    .mobile-day-tabs {
+      display: flex;
+      gap: 0.25rem;
+      padding: 0.5rem;
+      background: #ffffff;
+      border-radius: 0.75rem;
+      margin-bottom: 0.75rem;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .mobile-day-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .mobile-day-tabs.mobile-day-tabs-dark {
+      background: #1a1a1a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .mobile-day-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 48px;
+      height: 56px;
+      padding: 0.35rem 0.5rem;
+      border-radius: 0.5rem;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+
+    .mobile-day-tab .day-abbr {
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .mobile-day-tab .day-num {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #374151;
+      margin-top: 2px;
+    }
+
+    .mobile-day-tab.mobile-day-tab-dark .day-abbr {
+      color: #9ca3af;
+    }
+
+    .mobile-day-tab.mobile-day-tab-dark .day-num {
+      color: #e5e7eb;
+    }
+
+    .mobile-day-tab-active {
+      background: #CF102D !important;
+    }
+
+    .mobile-day-tab-active .day-abbr,
+    .mobile-day-tab-active .day-num {
+      color: white !important;
+    }
+
+    /* Day header with navigation */
+    .mobile-day-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem;
+      background: #ffffff;
+      border-radius: 0.75rem 0.75rem 0 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .mobile-day-header.mobile-day-header-dark {
+      background: #1a1a1a;
+      border-color: #374151;
+    }
+
+    .mobile-day-title {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .mobile-day-title .day-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1f2937;
+      text-transform: capitalize;
+    }
+
+    .mobile-day-header-dark .day-name {
+      color: #ffffff;
+    }
+
+    .mobile-day-title .day-date {
+      font-size: 0.8rem;
+      color: #6b7280;
+      text-transform: capitalize;
+    }
+
+    .mobile-day-header-dark .day-date {
+      color: #9ca3af;
+    }
+
+    .btn-nav-mobile {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid #e5e7eb;
+      background: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #374151;
+      transition: all 0.2s ease;
+    }
+
+    .btn-nav-mobile:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .btn-nav-mobile:not(:disabled):hover {
+      border-color: #CF102D;
+      color: #CF102D;
+      background: #fef2f2;
+    }
+
+    .btn-nav-mobile.btn-nav-mobile-dark {
+      background: #262626;
+      border-color: #374151;
+      color: #e5e7eb;
+    }
+
+    .btn-nav-mobile.btn-nav-mobile-dark:not(:disabled):hover {
+      border-color: #CF102D;
+      color: #CF102D;
+    }
+
+    /* Activities list */
+    .mobile-activities-list {
+      flex: 1;
+      background: #ffffff;
+      border-radius: 0 0 0.75rem 0.75rem;
+      padding: 0.75rem;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .page-dark .mobile-activities-list {
+      background: #1a1a1a;
+    }
+
+    .mobile-activity-card {
+      background: #f9fafb;
+      border-radius: 0.5rem;
+      padding: 0.875rem;
+      margin-bottom: 0.625rem;
+      border-left: 4px solid;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      min-height: 60px;
+    }
+
+    .mobile-activity-card:active {
+      transform: scale(0.98);
+    }
+
+    .mobile-activity-card.mobile-activity-card-dark {
+      background: #262626;
+    }
+
+    .mobile-activity-time {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #CF102D;
+      margin-bottom: 0.25rem;
+    }
+
+    .mobile-activity-title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 0.35rem;
+      line-height: 1.3;
+    }
+
+    .mobile-activity-card-dark .mobile-activity-title {
+      color: #ffffff;
+    }
+
+    .mobile-activity-space {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-bottom: 0.25rem;
+    }
+
+    .mobile-activity-space mat-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+    }
+
+    .mobile-activity-card-dark .mobile-activity-space {
+      color: #9ca3af;
+    }
+
+    .mobile-activity-detail {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-top: 0.35rem;
+      line-height: 1.4;
+    }
+
+    .mobile-activity-card-dark .mobile-activity-detail {
+      color: #9ca3af;
+    }
+
+    /* Empty state for day */
+    .mobile-empty-day {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1rem;
+      color: #9ca3af;
+      text-align: center;
+    }
+
+    .mobile-empty-day mat-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 0.75rem;
+      color: #d1d5db;
+    }
+
+    .mobile-empty-day p {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+
+    /* Mobile-specific header adjustments */
+    @media (max-width: 480px) {
+      .fixed-header {
+        padding: 0.75rem 0.75rem 0;
+      }
+
+      .fixed-header h1 {
+        font-size: 1.5rem !important;
+      }
+
+      .fixed-header p {
+        font-size: 0.8rem;
+      }
+
+      .scrollable-content {
+        padding: 0 0.5rem 0.5rem;
+      }
+
+      .cal-toolbar {
+        padding: 0.5rem;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+
+      .cal-week-nav {
+        order: 1;
+      }
+
+      .cal-week-label {
+        font-size: 0.875rem;
+        min-width: 80px;
+      }
+
+      .cal-fechas {
+        order: 3;
+        width: 100%;
+        font-size: 0.8rem;
+        text-align: center;
+        padding-top: 0.5rem;
+        border-top: 1px solid #e5e7eb;
+      }
+
+      .cal-toolbar-dark .cal-fechas {
+        border-top-color: #374151;
+      }
+
+      .btn-hoy {
+        order: 2;
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+      }
+
+      .btn-action-primary {
+        width: 100%;
+        justify-content: center;
+      }
+
+      /* Dialog mobile adjustments */
+      .dialog-content {
+        min-width: auto;
+        width: calc(100vw - 1.5rem);
+        max-width: calc(100vw - 1.5rem);
+        max-height: calc(100vh - 3rem);
+        margin: 0.75rem;
+        border-radius: 1rem;
+      }
+
+      .dialog-header {
+        padding: 1rem;
+      }
+
+      .dialog-title {
+        font-size: 1rem;
+      }
+
+      .dialog-body {
+        padding: 0.75rem 1rem 1rem;
+      }
+
+      .dialog-actions {
+        padding: 0.75rem 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .btn-dialog-edit,
+      .btn-dialog-delete {
+        min-height: 44px;
+        padding: 0.5rem 1rem;
+      }
+    }
+
+    /* iPhone 16 specific (390px) */
+    @media (max-width: 390px) {
+      .fixed-header h1 {
+        font-size: 1.375rem !important;
+      }
+
+      .mobile-day-tab {
+        min-width: 44px;
+        height: 52px;
+      }
+
+      .mobile-day-tab .day-num {
+        font-size: 1rem;
+      }
+
+      .mobile-activity-card {
+        padding: 0.75rem;
+      }
+    }
   `]
 })
 export class CalendarioComponent implements OnInit {
@@ -865,8 +1345,68 @@ export class CalendarioComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private dialog = inject(MatDialog);
 
+  private elementRef = inject(ElementRef);
+
   // Theme
   isDark = this.themeService.isDark;
+
+  // Mobile detection (iPhone 16 = 390px viewport)
+  isMobile = signal(typeof window !== 'undefined' && window.innerWidth < 480);
+  selectedDiaIndex = signal(0); // Para navegación de días en móvil
+
+  // Swipe gesture detection
+  private touchStartX = 0;
+  private touchStartY = 0;
+  private touchEndX = 0;
+  private touchEndY = 0;
+  private readonly SWIPE_THRESHOLD = 50; // Minimum distance for swipe
+  private readonly SWIPE_RESTRAINT = 100; // Maximum perpendicular distance
+
+  @HostListener('window:resize')
+  onResize() {
+    this.isMobile.set(window.innerWidth < 480);
+  }
+
+  @HostListener('touchstart', ['$event'])
+  onTouchStart(event: TouchEvent) {
+    this.touchStartX = event.changedTouches[0].screenX;
+    this.touchStartY = event.changedTouches[0].screenY;
+  }
+
+  @HostListener('touchend', ['$event'])
+  onTouchEnd(event: TouchEvent) {
+    this.touchEndX = event.changedTouches[0].screenX;
+    this.touchEndY = event.changedTouches[0].screenY;
+    this.handleSwipe();
+  }
+
+  private handleSwipe(): void {
+    const diffX = this.touchEndX - this.touchStartX;
+    const diffY = this.touchEndY - this.touchStartY;
+
+    // Check if horizontal swipe (and not too vertical)
+    if (Math.abs(diffX) > this.SWIPE_THRESHOLD && Math.abs(diffY) < this.SWIPE_RESTRAINT) {
+      if (this.isMobile()) {
+        // Mobile: swipe between days
+        if (diffX > 0) {
+          // Swipe right -> previous day
+          this.irDiaAnterior();
+        } else {
+          // Swipe left -> next day
+          this.irDiaSiguiente();
+        }
+      } else {
+        // Desktop: swipe between weeks
+        if (diffX > 0) {
+          // Swipe right -> previous week
+          this.irSemanaAnterior();
+        } else {
+          // Swipe left -> next week
+          this.irSemanaSiguiente();
+        }
+      }
+    }
+  }
 
   // Selected activity for dialog
   selectedActividad = signal<ActividadCalendario | null>(null);
@@ -1256,6 +1796,43 @@ export class CalendarioComponent implements OnInit {
 
   allDaysEmpty(): boolean {
     return this.semana().dias.every(d => d.franjas.length === 0);
+  }
+
+  // Mobile navigation
+  irDiaAnterior(): void {
+    if (this.selectedDiaIndex() === 0) {
+      // At first day, go to previous week's last day
+      this.irSemanaAnterior();
+      this.selectedDiaIndex.set(6);
+    } else {
+      this.selectedDiaIndex.update(i => i - 1);
+    }
+  }
+
+  irDiaSiguiente(): void {
+    if (this.selectedDiaIndex() === 6) {
+      // At last day, go to next week's first day
+      this.irSemanaSiguiente();
+      this.selectedDiaIndex.set(0);
+    } else {
+      this.selectedDiaIndex.update(i => i + 1);
+    }
+  }
+
+  selectDia(index: number): void {
+    this.selectedDiaIndex.set(index);
+  }
+
+  // Get activities for current day (mobile view)
+  getActividadesDia(dia: DiaCalendario): ActividadCalendario[] {
+    const actividades: ActividadCalendario[] = [];
+    dia.franjas.forEach(franja => {
+      Object.values(franja.actividadesPorEspacio).forEach(acts => {
+        actividades.push(...acts);
+      });
+    });
+    // Sort by start time
+    return actividades.sort((a, b) => a.horaInicio.localeCompare(b.horaInicio));
   }
 
   // TrackBy functions for performance

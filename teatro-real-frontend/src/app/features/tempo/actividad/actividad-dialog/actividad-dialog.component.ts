@@ -345,6 +345,212 @@ import { DepartamentoService } from '../../../../core/services/departamento.serv
     .btn-cancel-delete:hover {
       background: #e5e7eb;
     }
+
+    /* ================================================
+       RESPONSIVE - Mobile Optimization (iPhone 16)
+       ================================================ */
+
+    /* Tablet and smaller */
+    @media (max-width: 768px) {
+      .modal-content {
+        max-width: calc(100vw - 2rem);
+        padding: 1.25rem;
+      }
+
+      .form-row--three {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+      }
+
+      .form-row--three .form-group:first-child {
+        grid-column: 1 / -1;
+      }
+    }
+
+    /* Mobile (480px) */
+    @media (max-width: 480px) {
+      :host ::ng-deep .mat-mdc-dialog-container {
+        padding: 0 !important;
+      }
+
+      :host ::ng-deep .mat-mdc-dialog-container .mdc-dialog__surface {
+        border-radius: 16px 16px 0 0 !important;
+        max-height: calc(100vh - 2rem) !important;
+      }
+
+      .modal-content {
+        max-width: 100%;
+        width: 100%;
+        padding: 1rem;
+        border-radius: 16px 16px 0 0;
+        max-height: calc(100vh - 2rem);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .modal-header {
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 10;
+      }
+
+      .modal-title {
+        font-size: 1rem;
+      }
+
+      .btn-close {
+        width: 36px;
+        height: 36px;
+        min-width: 44px;
+        min-height: 44px;
+      }
+
+      /* Stack all form rows to 1 column */
+      .form-row,
+      .form-row--three {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+      }
+
+      .form-row--three .form-group:first-child {
+        grid-column: auto;
+      }
+
+      .form-group {
+        margin-bottom: 0.5rem;
+      }
+
+      .form-label {
+        font-size: 0.65rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .form-input, .form-select {
+        padding: 0.625rem 0.75rem;
+        font-size: 16px; /* Prevents iOS zoom on focus */
+        min-height: 44px;
+      }
+
+      .form-textarea {
+        min-height: 50px;
+      }
+
+      .modal-actions {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+        position: sticky;
+        bottom: 0;
+        background: white;
+        z-index: 10;
+      }
+
+      .btn-cancel,
+      .btn-save {
+        min-height: 44px;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+      }
+
+      .btn-save {
+        flex: 1;
+        order: 1;
+      }
+
+      .btn-cancel {
+        order: 2;
+      }
+
+      .spacer {
+        display: none;
+      }
+
+      .btn-delete {
+        width: 100%;
+        justify-content: center;
+        order: 3;
+        margin-top: 0.25rem;
+        min-height: 44px;
+      }
+
+      .delete-confirm {
+        width: 100%;
+        justify-content: center;
+        order: 3;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .delete-confirm-text {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 0.25rem;
+      }
+
+      .btn-confirm-delete,
+      .btn-cancel-delete {
+        flex: 1;
+        min-height: 44px;
+        padding: 0.5rem 1rem;
+      }
+    }
+
+    /* iPhone 16 Pro specific (390px) */
+    @media (max-width: 390px) {
+      .modal-content {
+        padding: 0.875rem;
+      }
+
+      .modal-title {
+        font-size: 0.9375rem;
+      }
+
+      .form-label {
+        font-size: 0.6rem;
+      }
+
+      .form-input, .form-select {
+        padding: 0.5rem 0.625rem;
+      }
+
+      .btn-cancel,
+      .btn-save {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.75rem;
+      }
+    }
+
+    /* Touch devices */
+    @media (pointer: coarse) {
+      .form-input,
+      .form-select,
+      .btn-cancel,
+      .btn-save,
+      .btn-delete,
+      .btn-close,
+      .btn-confirm-delete,
+      .btn-cancel-delete {
+        min-height: 44px;
+      }
+
+      .modal-content {
+        touch-action: pan-y;
+        -webkit-overflow-scrolling: touch;
+      }
+    }
+
+    /* Safe area support for iPhone */
+    @supports (padding: env(safe-area-inset-bottom)) {
+      @media (max-width: 480px) {
+        .modal-actions {
+          padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+        }
+      }
+    }
   `]
 })
 export class ActividadDialogComponent implements OnInit {

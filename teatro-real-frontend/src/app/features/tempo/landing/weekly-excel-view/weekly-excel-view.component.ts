@@ -257,6 +257,134 @@ export class EstadoToLabelPipe implements PipeTransform {
       .week-range { font-size: 0.7rem; min-width: 38px;}
       .nav-row { padding-left: 4px; padding-right: 4px; }
     }
+
+    /* iPhone 16 and smaller (480px) */
+    @media (max-width: 480px) {
+      .weekly-view {
+        padding: 0;
+      }
+
+      .nav-row {
+        padding: 0.5rem;
+        gap: 0.5rem;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+      }
+
+      .week-range {
+        font-size: 0.75rem;
+        min-width: auto;
+        text-align: center;
+        flex: 1;
+        order: 0;
+      }
+
+      .excel-scroll-wrap {
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
+        padding-bottom: 0.5rem;
+      }
+
+      .excel-table {
+        font-size: 0.6rem;
+      }
+
+      .excel-th, .excel-td {
+        min-width: 42px;
+        max-width: 60px;
+        padding: 0.25rem;
+      }
+
+      .espacio-th, .espacio-td {
+        min-width: 55px;
+        max-width: 70px;
+        font-size: 0.55rem;
+        padding: 0.35rem 0.25rem;
+      }
+
+      .activity-chip {
+        padding: 0.25rem;
+        margin-bottom: 0.25rem;
+        font-size: 0.55rem;
+        min-height: 44px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .badge-row {
+        flex-wrap: wrap;
+        gap: 2px;
+        margin-bottom: 1px;
+      }
+
+      .tipo-badge {
+        font-size: 0.5rem;
+        padding: 1px 4px;
+        margin-right: 2px;
+      }
+
+      .badge-estado {
+        font-size: 0.5rem;
+        padding: 1px 3px;
+        margin-right: 2px;
+      }
+
+      .no-acts-placeholder {
+        font-size: 0.5rem;
+        margin: 4px 0;
+      }
+
+      .empty-week-msg {
+        font-size: 0.85rem;
+        margin: 1rem 0.5rem;
+        padding: 0.75rem;
+        max-width: none;
+      }
+    }
+
+    /* iPhone 16 Pro (390px) */
+    @media (max-width: 390px) {
+      .excel-th, .excel-td {
+        min-width: 38px;
+        max-width: 50px;
+      }
+
+      .espacio-th, .espacio-td {
+        min-width: 50px;
+        max-width: 60px;
+      }
+
+      .week-range {
+        font-size: 0.7rem;
+      }
+
+      .activity-chip {
+        font-size: 0.5rem;
+      }
+
+      .tipo-badge,
+      .badge-estado {
+        display: none; /* Hide badges on very small screens */
+      }
+    }
+
+    /* Touch devices */
+    @media (pointer: coarse) {
+      .excel-scroll-wrap {
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-x pan-y;
+      }
+
+      .activity-chip {
+        min-height: 44px;
+        touch-action: manipulation;
+      }
+
+      .excel-th, .excel-td {
+        touch-action: pan-x pan-y;
+      }
+    }
   `]
 })
 export class WeeklyExcelViewComponent {

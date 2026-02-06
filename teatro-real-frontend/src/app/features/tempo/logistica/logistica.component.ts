@@ -337,7 +337,11 @@ const ESTADO_LABELS: Record<string, string> = {
     .scrollable-content {
       flex: 1;
       overflow-y: auto;
+      overflow-x: hidden;
       padding: 0 2rem 2rem 2rem;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
     }
 
     /* Stats grid */
@@ -905,6 +909,12 @@ const ESTADO_LABELS: Record<string, string> = {
     }
 
     @media (max-width: 640px) {
+      .fixed-header {
+        padding: 1rem;
+      }
+      .scrollable-content {
+        padding: 0 0.75rem 1rem 0.75rem;
+      }
       .header-row {
         flex-direction: column;
         align-items: flex-start;
@@ -918,6 +928,22 @@ const ESTADO_LABELS: Record<string, string> = {
       }
       .advanced-filters-grid {
         grid-template-columns: 1fr;
+      }
+    }
+
+    /* Touch-specific improvements */
+    @media (pointer: coarse) {
+      .scrollable-content {
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+      }
+      .card, .card-dark {
+        touch-action: pan-y;
+      }
+      .btn-outline, .btn-outline-dark,
+      .btn-transito, .btn-completar {
+        min-height: 44px;
+        touch-action: manipulation;
       }
     }
 
@@ -1073,6 +1099,178 @@ const ESTADO_LABELS: Record<string, string> = {
     .tipo-btn-dark:hover {
       border-color: #CF102D;
       color: #CF102D;
+    }
+
+    /* ================================================
+       MODAL RESPONSIVE - Mobile Optimization (iPhone 16)
+       ================================================ */
+
+    @media (max-width: 768px) {
+      .modal-overlay {
+        padding: 0.5rem;
+      }
+
+      .modal-content {
+        max-width: calc(100vw - 1rem);
+        margin: 0.5rem;
+      }
+
+      .modal-header {
+        padding: 0.875rem 1rem;
+      }
+
+      .form-group {
+        padding: 0 1rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .modal-actions {
+        padding: 0.875rem 1rem;
+      }
+
+      /* Stack grid columns */
+      .grid-cols-2,
+      .grid-cols-3 {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0.75rem !important;
+      }
+
+      .col-span-2 {
+        grid-column: auto !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+      }
+
+      .modal-content {
+        max-width: 100%;
+        width: 100%;
+        margin: 0;
+        border-radius: 16px 16px 0 0;
+        max-height: calc(100vh - 2rem);
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .modal-header {
+        padding: 0.75rem 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .modal-header h2 {
+        font-size: 1rem;
+      }
+
+      .btn-close {
+        width: 36px;
+        height: 36px;
+        min-width: 44px;
+        min-height: 44px;
+      }
+
+      .form-group {
+        padding: 0 0.875rem;
+        margin-bottom: 0.625rem;
+      }
+
+      /* Stack tipo buttons vertically */
+      .form-group .flex.gap-2 {
+        flex-direction: column !important;
+      }
+
+      .tipo-btn {
+        width: 100%;
+        min-height: 44px;
+      }
+
+      .form-input,
+      .form-select {
+        font-size: 16px; /* Prevents iOS zoom */
+        min-height: 44px;
+        padding: 0.625rem 0.75rem;
+      }
+
+      .modal-actions {
+        padding: 0.75rem 0.875rem;
+        flex-direction: column;
+        gap: 0.5rem;
+        position: sticky;
+        bottom: 0;
+        z-index: 10;
+      }
+
+      .modal-actions button {
+        width: 100%;
+        min-height: 44px;
+        justify-content: center;
+      }
+
+      .btn-nuevo {
+        order: -1; /* Primary action first */
+      }
+
+      .btn-cancel,
+      .btn-cancel-dark {
+        order: 0;
+      }
+    }
+
+    /* iPhone 16 Pro specific (390px) */
+    @media (max-width: 390px) {
+      .modal-header {
+        padding: 0.625rem 0.75rem;
+      }
+
+      .modal-header h2 {
+        font-size: 0.9375rem;
+      }
+
+      .form-group {
+        padding: 0 0.75rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .form-label,
+      .form-label-dark {
+        font-size: 0.65rem;
+      }
+
+      .modal-actions {
+        padding: 0.625rem 0.75rem;
+      }
+    }
+
+    /* Touch devices modal */
+    @media (pointer: coarse) {
+      .modal-content {
+        touch-action: pan-y;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .tipo-btn,
+      .form-input,
+      .form-select,
+      .btn-cancel,
+      .btn-cancel-dark,
+      .btn-nuevo,
+      .btn-close {
+        min-height: 44px;
+      }
+    }
+
+    /* Safe area support for iPhone */
+    @supports (padding: env(safe-area-inset-bottom)) {
+      @media (max-width: 480px) {
+        .modal-actions {
+          padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+        }
+      }
     }
   `]
 })
