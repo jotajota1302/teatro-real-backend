@@ -1,0 +1,2 @@
+﻿-- V21 neutralizada en entorno local: seed mock opcional
+-- Se deja como no-op para evitar fallo de FK en bases con usuarios distintos.
